@@ -1,0 +1,223 @@
+{
+  "meta": {
+    "title": "복합 처리",
+    "provenance": "golden-reference"
+  },
+  "flows": [
+    {
+      "id": "complex",
+      "title": "복합 처리",
+      "summary": "검증·DB·외부 호출·분기·보상을 함께 사용하는 복잡한 패턴",
+      "category": "Golden Reference",
+      "entryKind": "Generic",
+      "nodes": [
+        {
+          "id": "start",
+          "type": "start",
+          "title": "작업 요청",
+          "row": 0,
+          "column": 0
+        },
+        {
+          "id": "validate",
+          "type": "process",
+          "title": "요청 검증",
+          "row": 1,
+          "column": 0
+        },
+        {
+          "id": "load",
+          "type": "database",
+          "title": "현재 상태 조회",
+          "row": 2,
+          "column": 0
+        },
+        {
+          "id": "allowed",
+          "type": "decision",
+          "title": "처리 가능?",
+          "row": 3,
+          "column": 0
+        },
+        {
+          "id": "prepare",
+          "type": "database",
+          "title": "처리 준비 저장",
+          "row": 4,
+          "column": -1
+        },
+        {
+          "id": "external",
+          "type": "external",
+          "title": "외부 처리 요청",
+          "row": 5,
+          "column": -1
+        },
+        {
+          "id": "external-ok",
+          "type": "decision",
+          "title": "외부 처리 성공?",
+          "row": 6,
+          "column": -1
+        },
+        {
+          "id": "finalize",
+          "type": "database",
+          "title": "최종 상태 저장",
+          "row": 7,
+          "column": -2
+        },
+        {
+          "id": "done",
+          "type": "success",
+          "title": "완료",
+          "row": 8,
+          "column": -2
+        },
+        {
+          "id": "comp",
+          "type": "process",
+          "title": "보상 처리",
+          "row": 7,
+          "column": 0,
+          "description": "외부 작업 실패 시 준비 상태를 정리합니다."
+        },
+        {
+          "id": "extfail",
+          "type": "failure",
+          "title": "외부 처리 실패",
+          "row": 8,
+          "column": 0
+        },
+        {
+          "id": "reject",
+          "type": "failure",
+          "title": "처리 불가",
+          "row": 4,
+          "column": 1
+        }
+      ],
+      "edges": [
+        {
+          "id": "e1",
+          "from": "start",
+          "to": "validate",
+          "kind": "sync"
+        },
+        {
+          "id": "e2",
+          "from": "validate",
+          "to": "load",
+          "kind": "sync"
+        },
+        {
+          "id": "e3",
+          "from": "load",
+          "to": "allowed",
+          "kind": "sync"
+        },
+        {
+          "id": "e4",
+          "from": "allowed",
+          "to": "prepare",
+          "kind": "success",
+          "label": "예"
+        },
+        {
+          "id": "e5",
+          "from": "allowed",
+          "to": "reject",
+          "kind": "failure",
+          "label": "아니오"
+        },
+        {
+          "id": "e6",
+          "from": "prepare",
+          "to": "external",
+          "kind": "sync"
+        },
+        {
+          "id": "e7",
+          "from": "external",
+          "to": "external-ok",
+          "kind": "sync"
+        },
+        {
+          "id": "e8",
+          "from": "external-ok",
+          "to": "finalize",
+          "kind": "success",
+          "label": "예"
+        },
+        {
+          "id": "e9",
+          "from": "external-ok",
+          "to": "comp",
+          "kind": "compensation",
+          "label": "아니오"
+        },
+        {
+          "id": "e10",
+          "from": "finalize",
+          "to": "done",
+          "kind": "sync"
+        },
+        {
+          "id": "e11",
+          "from": "comp",
+          "to": "extfail",
+          "kind": "failure"
+        }
+      ],
+      "scenarios": [
+        {
+          "id": "ok",
+          "label": "성공",
+          "kind": "success",
+          "summary": "검증 후 외부 처리까지 성공해 최종 저장합니다.",
+          "path": [
+            "start",
+            "validate",
+            "load",
+            "allowed",
+            "prepare",
+            "external",
+            "external-ok",
+            "finalize",
+            "done"
+          ]
+        },
+        {
+          "id": "reject",
+          "label": "처리 불가",
+          "kind": "failure",
+          "summary": "현재 상태에서 처리할 수 없어 외부 호출 전에 종료합니다.",
+          "path": [
+            "start",
+            "validate",
+            "load",
+            "allowed",
+            "reject"
+          ]
+        },
+        {
+          "id": "extfail",
+          "label": "외부 실패",
+          "kind": "failure",
+          "summary": "외부 처리 실패 후 보상 처리를 수행합니다.",
+          "path": [
+            "start",
+            "validate",
+            "load",
+            "allowed",
+            "prepare",
+            "external",
+            "external-ok",
+            "comp",
+            "extfail"
+          ]
+        }
+      ]
+    }
+  ]
+}

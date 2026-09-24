@@ -1,0 +1,111 @@
+{
+  "meta": {
+    "title": "비동기 콜백",
+    "provenance": "golden-reference"
+  },
+  "flows": [
+    {
+      "id": "callback",
+      "title": "비동기 콜백",
+      "summary": "초기 요청과 나중의 콜백 재진입을 분리하는 패턴",
+      "category": "Golden Reference",
+      "entryKind": "Generic",
+      "nodes": [
+        {
+          "id": "start",
+          "type": "start",
+          "title": "처리 요청",
+          "row": 0,
+          "column": -1
+        },
+        {
+          "id": "external",
+          "type": "external",
+          "title": "외부 작업 요청",
+          "row": 1,
+          "column": -1
+        },
+        {
+          "id": "accepted",
+          "type": "success",
+          "title": "요청 수락",
+          "row": 2,
+          "column": -1
+        },
+        {
+          "id": "callback",
+          "type": "callback",
+          "title": "결과 콜백",
+          "row": 0,
+          "column": 1,
+          "description": "외부 시스템이 나중에 결과를 다시 전달합니다.",
+          "entry": true
+        },
+        {
+          "id": "save",
+          "type": "database",
+          "title": "결과 저장",
+          "row": 1,
+          "column": 1
+        },
+        {
+          "id": "done",
+          "type": "success",
+          "title": "콜백 완료",
+          "row": 2,
+          "column": 1
+        }
+      ],
+      "edges": [
+        {
+          "id": "e1",
+          "from": "start",
+          "to": "external",
+          "kind": "sync"
+        },
+        {
+          "id": "e2",
+          "from": "external",
+          "to": "accepted",
+          "kind": "sync"
+        },
+        {
+          "id": "e3",
+          "from": "callback",
+          "to": "save",
+          "kind": "callback"
+        },
+        {
+          "id": "e4",
+          "from": "save",
+          "to": "done",
+          "kind": "sync"
+        }
+      ],
+      "scenarios": [
+        {
+          "id": "submit",
+          "label": "초기 요청",
+          "kind": "success",
+          "summary": "외부 작업을 수락시킵니다.",
+          "path": [
+            "start",
+            "external",
+            "accepted"
+          ]
+        },
+        {
+          "id": "callback",
+          "label": "콜백 처리",
+          "kind": "success",
+          "summary": "나중에 들어온 결과를 저장합니다.",
+          "path": [
+            "callback",
+            "save",
+            "done"
+          ]
+        }
+      ]
+    }
+  ]
+}

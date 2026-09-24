@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "adapterVersion": "1.0.0",
+  "harnessSource": {
+    "repository": "https://github.com/oso7865-ship-it/HARNESS",
+    "commit": "0b7dcf9d567eaaa0c883eaee73620aa07cf60019"
+  },
+  "documents": [
+    {
+      "id": "readme",
+      "path": "README.md",
+      "owner": "PRism 유지관리자"
+    },
+    {
+      "id": "architecture",
+      "path": "docs/ARCHITECTURE.md",
+      "owner": "PRism 유지관리자"
+    }
+  ],
+  "routes": [
+    {
+      "task": "foundation",
+      "documents": [
+        "architecture",
+        "readme"
+      ]
+    },
+    {
+      "task": "implementation",
+      "documents": [
+        "architecture",
+        "readme"
+      ]
+    },
+    {
+      "task": "git",
+      "documents": [
+        "architecture",
+        "readme"
+      ]
+    },
+    {
+      "task": "database",
+      "documents": [
+        "architecture",
+        "readme"
+      ]
+    }
+  ],
+  "localChanges": [
+    {
+      "path": "GENERAL_HARNESS/05.WORKING_CONTEXT.md",
+      "reason": "PRism 프로젝트 상태 초기화"
+    },
+    {
+      "path": "GENERAL_HARNESS/reports/_LATEST.md",
+      "reason": "프로젝트 Report 포인터 연결"
+    }
+  ]
+}

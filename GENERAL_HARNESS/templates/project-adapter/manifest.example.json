@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "adapterVersion": "1.0.0",
+  "harnessSource": {
+    "repository": "https://github.com/oso7865-ship-it/HARNESS",
+    "commit": "REPLACE_WITH_FULL_IMPORT_COMMIT"
+  },
+  "documents": [
+    { "id": "requirements", "path": "{requirements-path}.md", "owner": "{requirements-owner}" },
+    { "id": "ui", "path": "{ui-path}.md", "owner": "{ui-owner}" }
+  ],
+  "routes": [{ "task": "ui", "documents": ["requirements", "ui"] }],
+  "localChanges": []
+}

@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "title": "외부 시스템 연동",
+    "provenance": "golden-reference"
+  },
+  "flows": [
+    {
+      "id": "external",
+      "title": "외부 시스템 연동",
+      "summary": "외부 API를 호출하고 결과에 따라 분기하는 패턴",
+      "category": "Golden Reference",
+      "entryKind": "Generic",
+      "nodes": [
+        {
+          "id": "start",
+          "type": "start",
+          "title": "요청",
+          "row": 0,
+          "column": 0
+        },
+        {
+          "id": "call",
+          "type": "external",
+          "title": "외부 요청",
+          "row": 1,
+          "column": 0,
+          "description": "외부 시스템에 요청합니다."
+        },
+        {
+          "id": "okq",
+          "type": "decision",
+          "title": "응답 성공?",
+          "row": 2,
+          "column": 0
+        },
+        {
+          "id": "done",
+          "type": "success",
+          "title": "완료",
+          "row": 3,
+          "column": -1
+        },
+        {
+          "id": "fail",
+          "type": "failure",
+          "title": "연동 실패",
+          "row": 3,
+          "column": 1
+        }
+      ],
+      "edges": [
+        {
+          "id": "e1",
+          "from": "start",
+          "to": "call",
+          "kind": "sync"
+        },
+        {
+          "id": "e2",
+          "from": "call",
+          "to": "okq",
+          "kind": "sync"
+        },
+        {
+          "id": "e3",
+          "from": "okq",
+          "to": "done",
+          "kind": "success",
+          "label": "예"
+        },
+        {
+          "id": "e4",
+          "from": "okq",
+          "to": "fail",
+          "kind": "failure",
+          "label": "아니오"
+        }
+      ],
+      "scenarios": [
+        {
+          "id": "ok",
+          "label": "성공",
+          "kind": "success",
+          "summary": "외부 응답이 성공합니다.",
+          "path": [
+            "start",
+            "call",
+            "okq",
+            "done"
+          ]
+        },
+        {
+          "id": "bad",
+          "label": "외부 실패",
+          "kind": "failure",
+          "summary": "외부 요청이 실패합니다.",
+          "path": [
+            "start",
+            "call",
+            "okq",
+            "fail"
+          ]
+        }
+      ]
+    }
+  ]
+}

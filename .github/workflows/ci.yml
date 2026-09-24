@@ -1,0 +1,40 @@
+name: backend-ci
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: prism_test
+          POSTGRES_USER: prism
+          POSTGRES_PASSWORD: ci_only_password
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U prism -d prism_test"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      DATABASE_URL: postgresql+psycopg://prism:ci_only_password@127.0.0.1:5432/prism_test
+      TEST_DATABASE_URL: postgresql+psycopg://prism:ci_only_password@127.0.0.1:5432/prism_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.12.18'
+      - run: uv sync --locked
+      - run: uv run ruff check app tests migrations
+      - run: uv run ruff format --check app tests migrations
+      - run: uv run mypy app
+      - run: uv run alembic upgrade head
+      - run: uv run alembic downgrade base
+      - run: uv run alembic upgrade head
+      - run: uv run pytest -q
+      - run: node GENERAL_HARNESS/scripts/validate-project-adapter.mjs --project-root . --require-adapter --strict --json
+      - run: node GENERAL_HARNESS/scripts/validate-no-secrets.mjs
+      - run: node GENERAL_HARNESS/scripts/validate-work-records.mjs --project-root . --reports reports --strict --json

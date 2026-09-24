@@ -1,0 +1,96 @@
+{
+  "meta": {
+    "title": "데이터 조회와 저장",
+    "provenance": "golden-reference"
+  },
+  "flows": [
+    {
+      "id": "database",
+      "title": "데이터 조회와 저장",
+      "summary": "영속 상태를 조회하고 변경하는 패턴",
+      "category": "Golden Reference",
+      "entryKind": "Generic",
+      "nodes": [
+        {
+          "id": "start",
+          "type": "start",
+          "title": "요청",
+          "row": 0,
+          "column": 0
+        },
+        {
+          "id": "read",
+          "type": "database",
+          "title": "상태 조회",
+          "row": 1,
+          "column": 0,
+          "description": "영속 상태를 읽습니다."
+        },
+        {
+          "id": "change",
+          "type": "process",
+          "title": "상태 변경",
+          "row": 2,
+          "column": 0,
+          "description": "업무 규칙에 따라 상태를 변경합니다."
+        },
+        {
+          "id": "save",
+          "type": "database",
+          "title": "상태 저장",
+          "row": 3,
+          "column": 0,
+          "description": "변경 결과를 영속화합니다."
+        },
+        {
+          "id": "done",
+          "type": "success",
+          "title": "완료",
+          "row": 4,
+          "column": 0
+        }
+      ],
+      "edges": [
+        {
+          "id": "e1",
+          "from": "start",
+          "to": "read",
+          "kind": "sync"
+        },
+        {
+          "id": "e2",
+          "from": "read",
+          "to": "change",
+          "kind": "sync"
+        },
+        {
+          "id": "e3",
+          "from": "change",
+          "to": "save",
+          "kind": "sync"
+        },
+        {
+          "id": "e4",
+          "from": "save",
+          "to": "done",
+          "kind": "sync"
+        }
+      ],
+      "scenarios": [
+        {
+          "id": "ok",
+          "label": "성공",
+          "kind": "success",
+          "summary": "조회한 상태를 변경해 저장합니다.",
+          "path": [
+            "start",
+            "read",
+            "change",
+            "save",
+            "done"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "meta": {
+    "title": "스트림 연결",
+    "provenance": "golden-reference"
+  },
+  "flows": [
+    {
+      "id": "stream",
+      "title": "스트림 연결",
+      "summary": "연결을 열고 지속적으로 이벤트를 전달하는 패턴",
+      "category": "Golden Reference",
+      "entryKind": "Generic",
+      "nodes": [
+        {
+          "id": "start",
+          "type": "start",
+          "title": "연결 요청",
+          "row": 0,
+          "column": 0
+        },
+        {
+          "id": "auth",
+          "type": "decision",
+          "title": "접근 가능?",
+          "row": 1,
+          "column": 0
+        },
+        {
+          "id": "stream",
+          "type": "stream",
+          "title": "스트림 연결",
+          "row": 2,
+          "column": -1,
+          "description": "연결을 유지하고 이벤트를 전달합니다. 이 문서의 관측 범위는 연결 유지 상태까지이며 연결 종료를 의미하지 않습니다.",
+          "openEnded": true
+        },
+        {
+          "id": "fail",
+          "type": "failure",
+          "title": "연결 거부",
+          "row": 2,
+          "column": 1
+        }
+      ],
+      "edges": [
+        {
+          "id": "e1",
+          "from": "start",
+          "to": "auth",
+          "kind": "sync"
+        },
+        {
+          "id": "e2",
+          "from": "auth",
+          "to": "stream",
+          "kind": "success",
+          "label": "예"
+        },
+        {
+          "id": "e3",
+          "from": "auth",
+          "to": "fail",
+          "kind": "failure",
+          "label": "아니오"
+        }
+      ],
+      "scenarios": [
+        {
+          "id": "ok",
+          "label": "연결",
+          "kind": "ongoing",
+          "summary": "접근 가능하면 스트림을 유지합니다.",
+          "path": [
+            "start",
+            "auth",
+            "stream"
+          ]
+        },
+        {
+          "id": "bad",
+          "label": "접근 거부",
+          "kind": "failure",
+          "summary": "접근 조건을 만족하지 못해 연결하지 않습니다.",
+          "path": [
+            "start",
+            "auth",
+            "fail"
+          ]
+        }
+      ]
+    }
+  ]
+}

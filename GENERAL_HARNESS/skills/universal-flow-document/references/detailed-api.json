@@ -1,0 +1,293 @@
+{
+  "meta": {
+    "title": "상세 API 작성 예제",
+    "detailLevel": "detailed",
+    "provenance": "허구의 테스트 계약. 실제 서비스/API 호출 없음."
+  },
+  "flows": [
+    {
+      "id": "example-api",
+      "title": "작업 접수와 비동기 결과",
+      "summary": "접수 응답과 후속 작업·결과 전달을 구분하는 상세 API 작성 예제입니다.",
+      "category": "API 예제",
+      "group": "비동기",
+      "entryKind": "HTTP",
+      "access": "예제의 작업 요청 권한",
+      "input": "작업 이름",
+      "output": "202 접수 또는 400 입력 오류",
+      "status": {
+        "kind": "designed",
+        "detail": "교육·검수용 가상 계약이며 구현된 제품 API가 아닙니다."
+      },
+      "coverage": {
+        "scope": "입력 검증·접수·비동기 결과·실패",
+        "basis": "이 예제에 선언한 가상 계약",
+        "excluded": [
+          "실제 HTTP 호출",
+          "특정 제품의 업무 규칙"
+        ]
+      },
+      "api": {
+        "method": "POST",
+        "path": "/example/jobs",
+        "request": "JSON {name}: 비어 있지 않은 문자열",
+        "response": "202 {jobId}; 400 {code: NAME_REQUIRED}",
+        "signature": "submitJob(request: JobRequest)",
+        "schemas": [
+          {
+            "name": "JobRequest",
+            "body": "{\"name\":\"작업 이름\"}",
+            "source": [
+              {
+                "document": "가상 예제 계약 — 실제 서비스 근거 아님",
+                "url": "https://example.com/contract"
+              }
+            ]
+          }
+        ]
+      },
+      "completion": {
+        "acceptance": "작업 등록 후 202와 jobId를 반환한다. 처리 완료를 뜻하지 않는다.",
+        "processing": "등록 시 위임된 작업이 별도로 결과를 생성한다.",
+        "resultDelivery": "호출자는 작업 결과를 조회한다. 이 예제는 조회 계약 내부를 다루지 않는다."
+      },
+      "nodes": [
+        {
+          "id": "start",
+          "type": "start",
+          "title": "요청 수신",
+          "row": 0,
+          "column": 0,
+          "description": "작업 이름을 입력받습니다.",
+          "outputs": [
+            "작업 요청"
+          ],
+          "owner": "호출자 → 예제 API",
+          "source": [
+            {
+              "document": "가상 예제 계약 — 실제 서비스 근거 아님",
+              "url": "https://example.com/contract"
+            }
+          ]
+        },
+        {
+          "id": "check",
+          "type": "decision",
+          "title": "이름이 있는가?",
+          "row": 1,
+          "column": 0,
+          "description": "이름의 공백 여부를 확인합니다.",
+          "outputs": [
+            "등록 가능 여부"
+          ],
+          "owner": "예제 API",
+          "source": [
+            {
+              "document": "가상 예제 계약 — 실제 서비스 근거 아님",
+              "url": "https://example.com/contract"
+            }
+          ],
+          "condition": "name.trim().length > 0"
+        },
+        {
+          "id": "register",
+          "type": "process",
+          "title": "작업 등록 · 위임",
+          "row": 2,
+          "column": 0,
+          "description": "식별자를 생성하고 작업을 등록합니다. 이후 응답과 작업 실행이 별도로 진행됩니다.",
+          "outputs": [
+            "jobId·등록된 작업"
+          ],
+          "owner": "예제 API",
+          "source": [
+            {
+              "document": "가상 예제 계약 — 실제 서비스 근거 아님",
+              "url": "https://example.com/contract"
+            }
+          ],
+          "stateChange": {
+            "before": "미등록",
+            "after": "접수됨"
+          }
+        },
+        {
+          "id": "accepted",
+          "type": "success",
+          "title": "202 · 접수 완료",
+          "row": 3,
+          "column": -1,
+          "description": "처리 완료 전 접수 상태를 반환합니다.",
+          "outputs": [
+            "202 {jobId}"
+          ],
+          "owner": "예제 API",
+          "source": [
+            {
+              "document": "가상 예제 계약 — 실제 서비스 근거 아님",
+              "url": "https://example.com/contract"
+            }
+          ]
+        },
+        {
+          "id": "worker",
+          "type": "async",
+          "title": "후속 처리",
+          "row": 3,
+          "column": 1,
+          "description": "등록된 작업을 처리합니다. 처리 중인 작업의 결과는 접수 응답과 별도로 확인합니다.",
+          "outputs": [
+            "처리 결과"
+          ],
+          "owner": "예제 API",
+          "source": [
+            {
+              "document": "가상 예제 계약 — 실제 서비스 근거 아님",
+              "url": "https://example.com/contract"
+            }
+          ]
+        },
+        {
+          "id": "done",
+          "type": "success",
+          "title": "결과 조회 가능",
+          "row": 4,
+          "column": 1,
+          "description": "생성한 결과를 호출자가 조회할 수 있습니다.",
+          "outputs": [
+            "조회 가능한 결과"
+          ],
+          "owner": "예제 API",
+          "source": [
+            {
+              "document": "가상 예제 계약 — 실제 서비스 근거 아님",
+              "url": "https://example.com/contract"
+            }
+          ]
+        },
+        {
+          "id": "reject",
+          "type": "failure",
+          "title": "400 · 입력 오류",
+          "row": 2,
+          "column": -1,
+          "description": "입력 오류를 반환하고 작업을 등록하지 않습니다.",
+          "outputs": [
+            "400 NAME_REQUIRED"
+          ],
+          "owner": "예제 API",
+          "source": [
+            {
+              "document": "가상 예제 계약 — 실제 서비스 근거 아님",
+              "url": "https://example.com/contract"
+            }
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "s-c",
+          "from": "start",
+          "to": "check",
+          "kind": "sync"
+        },
+        {
+          "id": "c-r",
+          "from": "check",
+          "to": "register",
+          "kind": "success",
+          "label": "있음"
+        },
+        {
+          "id": "c-f",
+          "from": "check",
+          "to": "reject",
+          "kind": "failure",
+          "label": "없음"
+        },
+        {
+          "id": "r-a",
+          "from": "register",
+          "to": "accepted",
+          "kind": "sync"
+        },
+        {
+          "id": "r-w",
+          "from": "register",
+          "to": "worker",
+          "kind": "async",
+          "label": "별도 작업"
+        },
+        {
+          "id": "w-d",
+          "from": "worker",
+          "to": "done",
+          "kind": "sync"
+        }
+      ],
+      "scenarios": [
+        {
+          "id": "accepted",
+          "label": "접수 응답",
+          "kind": "success",
+          "path": [
+            "start",
+            "check",
+            "register",
+            "accepted"
+          ],
+          "summary": "접수 성공은 후속 작업 완료가 아닙니다."
+        },
+        {
+          "id": "processed",
+          "label": "후속 결과",
+          "kind": "success",
+          "path": [
+            "start",
+            "check",
+            "register",
+            "worker",
+            "done"
+          ],
+          "summary": "별도로 진행하는 작업 결과를 관찰하는 경로입니다."
+        },
+        {
+          "id": "invalid",
+          "label": "이름 누락",
+          "kind": "failure",
+          "path": [
+            "start",
+            "check",
+            "reject"
+          ],
+          "summary": "작업 등록 전에 입력 오류를 반환합니다."
+        }
+      ],
+      "failureCases": [
+        {
+          "id": "name-required",
+          "nodeId": "check",
+          "scenarioId": "invalid",
+          "condition": "이름이 없거나 공백 문자열",
+          "status": "400",
+          "code": "NAME_REQUIRED",
+          "effect": "작업을 등록하지 않음",
+          "nextAction": "이름을 보완한 뒤 요청",
+          "retry": "같은 빈 입력으로 자동 재시도 금지",
+          "source": [
+            {
+              "document": "가상 예제 계약 — 실제 서비스 근거 아님",
+              "url": "https://example.com/contract"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "document": "가상 예제 계약 — 실제 서비스 근거 아님",
+          "url": "https://example.com/contract"
+        }
+      ]
+    }
+  ]
+}

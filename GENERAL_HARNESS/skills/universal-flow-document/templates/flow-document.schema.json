@@ -1,0 +1,653 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Universal Flow Document",
+  "type": "object",
+  "required": [
+    "meta",
+    "flows"
+  ],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": [
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subtitle": {
+          "type": "string"
+        },
+        "generatedAt": {
+          "type": "string"
+        },
+        "provenance": {
+          "type": "string"
+        },
+        "detailLevel": {
+          "enum": [
+            "overview",
+            "detailed"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "flows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "summary",
+          "nodes",
+          "edges"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1
+          },
+          "category": {
+            "type": "string"
+          },
+          "entryKind": {
+            "type": "string"
+          },
+          "input": {
+            "type": "string"
+          },
+          "output": {
+            "type": "string"
+          },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "type",
+                "title",
+                "row",
+                "column"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+                },
+                "type": {
+                  "enum": [
+                    "start",
+                    "process",
+                    "decision",
+                    "input_output",
+                    "database",
+                    "external",
+                    "event",
+                    "async",
+                    "callback",
+                    "stream",
+                    "success",
+                    "failure",
+                    "note",
+                    "hold"
+                  ]
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "row": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000
+                },
+                "column": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                },
+                "owner": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "why": {
+                  "type": "string"
+                },
+                "inputs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "outputs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "failures": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "source": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "file": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "document": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "symbol": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "method": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "line": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "revision": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "url": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                },
+                "entry": {
+                  "type": "boolean"
+                },
+                "openEnded": {
+                  "type": "boolean"
+                },
+                "condition": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "stateChange": {
+                  "type": "object",
+                  "properties": {
+                    "before": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "after": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "before",
+                    "after"
+                  ],
+                  "additionalProperties": false
+                },
+                "status": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "implemented",
+                        "designed",
+                        "conditional",
+                        "unknown"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "detail"
+                  ],
+                  "additionalProperties": false
+                },
+                "flowRef": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "additionalProperties": true
+            },
+            "minItems": 1
+          },
+          "edges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "from",
+                "to",
+                "kind"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+                },
+                "from": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+                },
+                "to": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+                },
+                "kind": {
+                  "enum": [
+                    "sync",
+                    "success",
+                    "failure",
+                    "async",
+                    "callback",
+                    "compensation"
+                  ]
+                },
+                "label": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": true
+            },
+            "minItems": 1
+          },
+          "scenarios": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "label",
+                "kind",
+                "path"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "kind": {
+                  "enum": [
+                    "success",
+                    "failure",
+                    "ongoing",
+                    "hold"
+                  ]
+                },
+                "summary": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+                  },
+                  "minItems": 1
+                },
+                "edgePath": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+                  }
+                }
+              }
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "file": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "document": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "symbol": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "method": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "line": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "url": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "minItems": 1
+          },
+          "group": {
+            "type": "string",
+            "minLength": 1
+          },
+          "access": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "enum": [
+                  "implemented",
+                  "designed",
+                  "conditional",
+                  "unknown"
+                ]
+              },
+              "detail": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "kind",
+              "detail"
+            ],
+            "additionalProperties": false
+          },
+          "coverage": {
+            "type": "object",
+            "properties": {
+              "scope": {
+                "type": "string",
+                "minLength": 1
+              },
+              "excluded": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 1
+              },
+              "basis": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "scope",
+              "basis"
+            ],
+            "additionalProperties": false
+          },
+          "api": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "minLength": 1
+              },
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "signature": {
+                "type": "string",
+                "minLength": 1
+              },
+              "request": {
+                "type": "string",
+                "minLength": 1
+              },
+              "response": {
+                "type": "string",
+                "minLength": 1
+              },
+              "schemas": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "body": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "source": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "file": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "document": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "symbol": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "method": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "line": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "revision": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "url": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": false
+                      },
+                      "minItems": 1
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "body"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "method",
+              "path",
+              "request",
+              "response"
+            ],
+            "additionalProperties": false
+          },
+          "completion": {
+            "type": "object",
+            "properties": {
+              "acceptance": {
+                "type": "string",
+                "minLength": 1
+              },
+              "processing": {
+                "type": "string",
+                "minLength": 1
+              },
+              "resultDelivery": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "acceptance",
+              "processing",
+              "resultDelivery"
+            ],
+            "additionalProperties": false
+          },
+          "failureCases": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "nodeId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "scenarioId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "condition": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "status": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "code": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "effect": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "nextAction": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "retry": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "source": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "file": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "document": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "symbol": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "method": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "line": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "revision": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "url": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "id",
+                "nodeId",
+                "scenarioId",
+                "condition",
+                "effect",
+                "nextAction"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": true
+      },
+      "minItems": 1
+    }
+  },
+  "description": "Flow document data contract. Shared process fields with optional API details."
+}

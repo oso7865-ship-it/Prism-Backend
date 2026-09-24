@@ -1,0 +1,40 @@
+{
+  "meta": {
+    "title": "주문 처리 흐름",
+    "subtitle": "코드 기반 실행 흐름",
+    "generatedAt": "2026-09-16",
+    "provenance": "source-code"
+  },
+  "flows": [
+    {
+      "id": "create-order",
+      "title": "주문 생성",
+      "summary": "주문 요청을 검증하고 재고를 확인한 뒤 주문을 저장합니다.",
+      "category": "Order",
+      "entryKind": "HTTP",
+      "input": "상품 ID, 수량",
+      "output": "생성된 주문",
+      "nodes": [
+        {"id":"start","type":"start","title":"주문 요청","row":0,"column":0,"description":"사용자가 주문 생성을 요청합니다."},
+        {"id":"validate","type":"process","title":"요청 검증","row":1,"column":0,"description":"필수 입력과 값 범위를 확인합니다.","why":"잘못된 값이 핵심 로직에 들어가는 것을 막기 위해 수행합니다."},
+        {"id":"stock","type":"database","title":"재고 조회","row":2,"column":0,"description":"현재 판매 가능한 재고를 조회합니다."},
+        {"id":"enough","type":"decision","title":"재고 충분?","row":3,"column":0,"description":"요청 수량을 처리할 재고가 있는지 판단합니다."},
+        {"id":"save","type":"database","title":"주문 저장","row":4,"column":-1,"description":"주문과 변경된 재고 상태를 영속화합니다."},
+        {"id":"success","type":"success","title":"주문 완료","row":5,"column":-1,"description":"생성된 주문 정보를 반환합니다."},
+        {"id":"failure","type":"failure","title":"재고 부족","row":4,"column":1,"description":"재고가 부족하여 주문을 중단합니다."}
+      ],
+      "edges": [
+        {"id":"e1","from":"start","to":"validate","kind":"sync"},
+        {"id":"e2","from":"validate","to":"stock","kind":"sync"},
+        {"id":"e3","from":"stock","to":"enough","kind":"sync"},
+        {"id":"e4","from":"enough","to":"save","kind":"success","label":"예"},
+        {"id":"e5","from":"enough","to":"failure","kind":"failure","label":"아니오"},
+        {"id":"e6","from":"save","to":"success","kind":"sync"}
+      ],
+      "scenarios": [
+        {"id":"ok","label":"성공","kind":"success","summary":"재고가 충분해 주문이 저장됩니다.","path":["start","validate","stock","enough","save","success"]},
+        {"id":"no-stock","label":"재고 부족","kind":"failure","summary":"재고가 부족해 저장 전에 종료합니다.","path":["start","validate","stock","enough","failure"]}
+      ]
+    }
+  ]
+}

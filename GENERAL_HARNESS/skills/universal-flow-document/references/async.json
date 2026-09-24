@@ -1,0 +1,106 @@
+{
+  "meta": {
+    "title": "비동기 작업",
+    "provenance": "golden-reference"
+  },
+  "flows": [
+    {
+      "id": "async",
+      "title": "비동기 작업",
+      "summary": "요청 수락과 후속 비동기 완료를 분리하는 패턴",
+      "category": "Golden Reference",
+      "entryKind": "Generic",
+      "nodes": [
+        {
+          "id": "start",
+          "type": "start",
+          "title": "요청",
+          "row": 0,
+          "column": 0
+        },
+        {
+          "id": "enqueue",
+          "type": "async",
+          "title": "작업 등록",
+          "row": 1,
+          "column": 0,
+          "description": "백그라운드 작업을 등록합니다."
+        },
+        {
+          "id": "accepted",
+          "type": "success",
+          "title": "수락 응답",
+          "row": 2,
+          "column": -1,
+          "description": "호출자에게 작업 수락을 먼저 알립니다."
+        },
+        {
+          "id": "worker",
+          "type": "process",
+          "title": "비동기 처리",
+          "row": 2,
+          "column": 1,
+          "description": "호출자 응답과 별개로 작업을 처리합니다."
+        },
+        {
+          "id": "finish",
+          "type": "success",
+          "title": "작업 완료",
+          "row": 3,
+          "column": 1
+        }
+      ],
+      "edges": [
+        {
+          "id": "e1",
+          "from": "start",
+          "to": "enqueue",
+          "kind": "sync"
+        },
+        {
+          "id": "e2",
+          "from": "enqueue",
+          "to": "accepted",
+          "kind": "sync"
+        },
+        {
+          "id": "e3",
+          "from": "enqueue",
+          "to": "worker",
+          "kind": "async"
+        },
+        {
+          "id": "e4",
+          "from": "worker",
+          "to": "finish",
+          "kind": "sync"
+        }
+      ],
+      "scenarios": [
+        {
+          "id": "accepted",
+          "label": "수락",
+          "kind": "success",
+          "summary": "작업은 등록되고 호출자는 먼저 응답받습니다.",
+          "path": [
+            "start",
+            "enqueue",
+            "accepted"
+          ]
+        },
+        {
+          "id": "work",
+          "label": "비동기 완료",
+          "kind": "success",
+          "summary": "등록된 작업이 별도로 완료됩니다.",
+          "path": [
+            "start",
+            "enqueue",
+            "worker",
+            "finish"
+          ]
+        }
+      ]
+    }
+  ]
+}

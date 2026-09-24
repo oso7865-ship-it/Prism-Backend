@@ -1,0 +1,68 @@
+{
+  "meta": {
+    "title": "단순 처리",
+    "provenance": "golden-reference"
+  },
+  "flows": [
+    {
+      "id": "simple-process",
+      "title": "단순 처리",
+      "summary": "입력 후 한 번의 핵심 처리를 거쳐 완료하는 최소 패턴",
+      "category": "Golden Reference",
+      "entryKind": "Generic",
+      "nodes": [
+        {
+          "id": "start",
+          "type": "start",
+          "title": "입력",
+          "row": 0,
+          "column": 0,
+          "description": "흐름이 시작됩니다."
+        },
+        {
+          "id": "work",
+          "type": "process",
+          "title": "핵심 처리",
+          "row": 1,
+          "column": 0,
+          "description": "핵심 작업을 수행합니다."
+        },
+        {
+          "id": "done",
+          "type": "success",
+          "title": "완료",
+          "row": 2,
+          "column": 0,
+          "description": "결과를 반환하고 종료합니다."
+        }
+      ],
+      "edges": [
+        {
+          "id": "e1",
+          "from": "start",
+          "to": "work",
+          "kind": "sync"
+        },
+        {
+          "id": "e2",
+          "from": "work",
+          "to": "done",
+          "kind": "sync"
+        }
+      ],
+      "scenarios": [
+        {
+          "id": "ok",
+          "label": "성공",
+          "kind": "success",
+          "summary": "정상 처리됩니다.",
+          "path": [
+            "start",
+            "work",
+            "done"
+          ]
+        }
+      ]
+    }
+  ]
+}

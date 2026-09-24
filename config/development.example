@@ -1,0 +1,6 @@
+APP_ENV=development
+# Set after starting a local PostgreSQL server. This is a local-only example.
+DATABASE_URL=postgresql+psycopg://prism:prism_local_only@127.0.0.1:5432/prism
+AI_ENABLED=false
+JOB_RUNNER_MODE=disabled
+POSTGRES_PASSWORD=prism_local_only
