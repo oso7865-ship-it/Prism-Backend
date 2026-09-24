@@ -38,3 +38,9 @@ jobs:
       - run: node GENERAL_HARNESS/scripts/validate-project-adapter.mjs --project-root . --require-adapter --strict --json
       - run: node GENERAL_HARNESS/scripts/validate-no-secrets.mjs
       - run: node GENERAL_HARNESS/scripts/validate-work-records.mjs --project-root . --reports reports --strict --json
+      - run: node GENERAL_HARNESS/scripts/validate-docs.mjs
+      - run: node GENERAL_HARNESS/scripts/validate-skills.mjs
+      - run: node GENERAL_HARNESS/scripts/validate-references.mjs
+      - run: node GENERAL_HARNESS/scripts/validate-report-consistency.mjs
+      - run: node GENERAL_HARNESS/scripts/validate-no-personal-paths.mjs
+      - run: node GENERAL_HARNESS/scripts/validate-harness.mjs

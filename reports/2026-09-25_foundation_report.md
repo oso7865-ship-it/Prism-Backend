@@ -3,17 +3,17 @@
 > 작성일: 2026-09-25
 > 패키징/배포일: 해당 없음
 > 작업 브랜치: main
-> 커밋/PR: 미커밋
+> 커밋/PR: 7c25b56 (검증한 구현 커밋)
 > 상태 기록 버전: 1
-> 상태 확인 시각: 2026-09-25T03:10:00+09:00
+> 상태 확인 시각: 2026-09-25T03:15:57+09:00
 > 구현 상태: 완료
 > 구현 근거: 현재 working-tree의 앱 골격·설정·테스트·CI·하네스 어댑터
 > 로컬 검증 상태: 진행 중
 > 로컬 검증 대상: 최초 개발 기반 working-tree
 > 로컬 검증 근거: Ruff check/format, mypy 통과; pytest 단위 4개 통과. DB 통합 1개는 로컬 Docker 부재로 미검증이며 원격 CI에서 실행 예정. httpx TestClient 지원 중단 예정 경고 1개.
-> 병합 상태: 미확인
+> 병합 상태: 완료
 > 병합 대상: origin/main
-> 병합 근거: 신규 저장소 첫 커밋 게시 전. 이후 기능 작업은 PR 사용.
+> 병합 근거: origin/main에 7c25b56 게시 확인. 새 저장소 초기 직접 push이며 PR 병합 사건은 없음.
 > 배포 상태: 미수행
 > 배포 근거: 공개 저장소 업로드만 요청됨. 서비스 배포 제외.
 > 실제 연동 상태: 미수행
@@ -62,3 +62,9 @@ Ruff check/format, mypy 통과; pytest 단위 4개 통과. DB 통합 1개는 로
 CI 결과를 확인하고 GitHub 로그인·User·Workspace 흐름으로 진행한다. 원본 아키텍처의 소유 문서와 영역별 ADR을 갱신한다.
 
 하네스의 파일명 정책에 따라 비밀 값 없는 설정 예시는 config/development.example로 제공한다. 실제 .env는 추적하지 않으며 비밀 검사 규칙을 완화하지 않았다.
+
+## 원격 검증 확정
+
+[7c25b56 GitHub CI](https://github.com/oso7865-ship-it/Prism-Backend/actions/runs/36039579708) success 확인. PostgreSQL 17에서 Alembic upgrade → downgrade → upgrade와 테스트 5개 통과. 로컬 Docker 부재로 미실행했던 DB 검증을 원격 Linux에서 수행했다. 로컬 검증 상태는 원격 증거와 별개다.
+
+남은 작업은 로컬 Docker 구동 확인과 실제 업무 기능이다. 운영 배포 및 외부 API 연동은 하지 않았다. 원본 HARNESS의 공백 서식은 그대로 보존했고 내용 수정은 manifest.localChanges에 선언한 부착 상태만 적용했다.

@@ -8,7 +8,7 @@
 | 이력 | 최신 판단 기준 | 기준 |
 |---|---|---|
 | 하네스 유지보수 최신 | `reports/2026-09-22_1524_flow-full-height-rule_report.md` | 긴 차트는 내부 세로 스크롤 없이 SVG 전체 높이로 펼치는 규칙으로 변경. 하네스 변경을 origin/codex/harness-skill-reinforcement에 공유, PR·병합 전. 활성 20개 |
-| 부착 프로젝트 최신 | `../../reports/2026-09-25_foundation_report.md` | 프로젝트 Report는 프로젝트 폴더에 남고, 하네스 규칙의 공백이 드러난 경우 요약만 하네스 유지보수 Report로 환류한다 |
+| 부착 프로젝트 최신 | [프로젝트 Report](../../reports/2026-09-25_foundation_report.md) | 프로젝트 Report는 프로젝트 폴더에 남고, 하네스 규칙의 공백이 드러난 경우 요약만 하네스 유지보수 Report로 환류한다 |
 
 > 주의: 이전 Report는 과거 의사결정 근거와 변경 증거로만 사용한다. Next Work 판단은 이 파일과 `05.WORKING_CONTEXT.md`를 우선한다.
 
