@@ -4,3 +4,10 @@ DATABASE_URL=postgresql+psycopg://prism:prism_local_only@127.0.0.1:5432/prism
 AI_ENABLED=false
 JOB_RUNNER_MODE=disabled
 POSTGRES_PASSWORD=prism_local_only
+AUTH_ENABLED=false
+PUBLIC_APP_ORIGIN=http://localhost:5173
+PUBLIC_API_ORIGIN=http://localhost:8000
+# Set these in your ignored .env before enabling auth. Never put secrets in frontend env.
+# GITHUB_OAUTH_CLIENT_ID=
+# GITHUB_OAUTH_CLIENT_SECRET=
+# JWT_SIGNING_KEY=use-an-independent-random-value-of-at-least-32-bytes

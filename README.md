@@ -1,6 +1,6 @@
 # PRism Backend
 
-Python 3.12 / FastAPI / SQLAlchemy / PostgreSQL 개발 기반입니다. 인증·팀 6개 테이블과 마이그레이션을 구현했습니다. 로그인·Workspace 서비스/API·PR·Job·분석·AI는 아직 미구현입니다. 운영 모드는 비활성화했으며 현 단계는 로컬 개발용입니다.
+Python 3.12 / FastAPI / SQLAlchemy / PostgreSQL 개발 기반입니다. 인증·팀 6개 테이블과 마이그레이션을 구현했습니다. GitHub 로그인·프로필·세션 갱신·로그아웃 API를 로컬 구현했습니다. 실제 GitHub 기본 로그인 흐름은 사용자 확인 완료이며 Workspace·PR·Job·분석·AI는 후속입니다. 운영 모드는 비활성화했으며 현 단계는 로컬 개발용입니다.
 
 ## 실행
 
@@ -57,3 +57,7 @@ uv run pytest -q -m "not integration"
 ## 확인된 검증 기록
 
 [초기 구현 CI](https://github.com/oso7865-ship-it/Prism-Backend/actions/runs/36039579708)는 이전 5개 테스트 기준 기록입니다. 이번 DB 단계는 로컬 Docker PostgreSQL 17에서 migration 왕복·drift 검사, 테스트 28개 및 실제 Uvicorn readiness 200을 확인했습니다. [이번 구현 커밋의 원격 CI](https://github.com/oso7865-ship-it/Prism-Backend/actions/runs/36127425357)도 통과했습니다. 현재 게시 상태는 [최신 Report](reports/_LATEST.md)를 따릅니다. [작업 계획·체크리스트](docs/work-plans/2026-09-25_identity-database.md), [검증·트러블슈팅 리포트](reports/2026-09-25_identity-database_report.md)를 참조하세요.
+
+## GitHub 로그인 수동 테스트
+
+[실행 방법·설정·수동 체크리스트](docs/GITHUB_LOGIN.md). 프론트는 http://localhost:5173 을 사용합니다. 로컬 OAuth 설정은 `.env`에만 있으며 Git에 포함하지 않습니다. 최신 구현·검증 상태는 [Report](reports/2026-09-25_github-login_report.md)를 따릅니다.
