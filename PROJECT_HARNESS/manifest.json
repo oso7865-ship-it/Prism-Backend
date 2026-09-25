@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "adapterVersion": "1.0.0",
+  "adapterVersion": "1.0.1",
   "harnessSource": {
     "repository": "https://github.com/oso7865-ship-it/HARNESS",
     "commit": "0b7dcf9d567eaaa0c883eaee73620aa07cf60019"
@@ -55,6 +55,26 @@
     {
       "path": "GENERAL_HARNESS/reports/_LATEST.md",
       "reason": "프로젝트 Report 포인터 연결"
+    },
+    {
+      "path": "GENERAL_HARNESS/skills/troubleshooting-report/SKILL.md",
+      "reason": "2026-09-25 사용자 요청 트러블슈팅 기록 보강. HARNESS 기준 커밋 이후 미커밋 로컬 패치 수동 반영"
+    },
+    {
+      "path": "GENERAL_HARNESS/02.SKILL_INDEX.md",
+      "reason": "2026-09-25 사용자 요청 트러블슈팅 기록 보강. HARNESS 기준 커밋 이후 미커밋 로컬 패치 수동 반영"
+    },
+    {
+      "path": "GENERAL_HARNESS/06.REPORT_TEMPLATE.md",
+      "reason": "2026-09-25 사용자 요청 트러블슈팅 기록 보강. HARNESS 기준 커밋 이후 미커밋 로컬 패치 수동 반영"
+    },
+    {
+      "path": "GENERAL_HARNESS/skills/agent-recovery/SKILL.md",
+      "reason": "2026-09-25 사용자 요청 트러블슈팅 기록 보강. HARNESS 기준 커밋 이후 미커밋 로컬 패치 수동 반영"
+    },
+    {
+      "path": "GENERAL_HARNESS/_WORKING_CONTEXT_HISTORY.md",
+      "reason": "DB 구현 전 프로젝트 상태 요약 보존. 하네스 동기화 아님"
     }
   ]
 }

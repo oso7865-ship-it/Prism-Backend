@@ -1,6 +1,6 @@
 # PRism Backend
 
-Python 3.12 / FastAPI / SQLAlchemy / PostgreSQL 개발 기반입니다. 로그인·Workspace·PR·Job·분석·AI는 아직 구현하지 않았습니다. 운영 모드는 의도적으로 비활성화했으며 현 단계는 로컬 개발용입니다.
+Python 3.12 / FastAPI / SQLAlchemy / PostgreSQL 개발 기반입니다. 인증·팀 6개 테이블과 마이그레이션을 구현했습니다. 로그인·Workspace 서비스/API·PR·Job·분석·AI는 아직 미구현입니다. 운영 모드는 비활성화했으며 현 단계는 로컬 개발용입니다.
 
 ## 실행
 
@@ -10,7 +10,7 @@ Git, uv 0.12.18, Python 3.12가 필요합니다. uv는 필요한 Python을 다�
 git clone https://github.com/oso7865-ship-it/Prism-Backend.git prism-backend
 cd prism-backend
 uv sync --locked
-uv run uvicorn app.main:create_app --factory --reload --no-access-log
+uv run uvicorn app.main:create_app --factory --loop app.shared.database.event_loop:loop_factory --reload --no-access-log
 ```
 
 DB 설정이 없어도 `/health/live`는 200입니다. `/health/ready`는 DB에 연결할 수 없으면 503이며 내부 오류·접속 문자열을 공개하지 않습니다. 외부 API 호출은 없습니다. AI_ENABLED=true와 미구현 Job runner 모드는 시작 시 거부합니다.
@@ -22,12 +22,12 @@ DB 설정이 없어도 `/health/live`는 200입니다. `/health/ready`는 DB에 
 ```bash
 docker compose up -d --wait
 uv run alembic upgrade head
-uv run uvicorn app.main:create_app --factory --reload --no-access-log
+uv run uvicorn app.main:create_app --factory --loop app.shared.database.event_loop:loop_factory --reload --no-access-log
 ```
 
 HeidiSQL: PostgreSQL TCP/IP / 127.0.0.1 / 5432 / 사용자 prism / DB prism / .env의 비밀번호. 포트는 루프백에만 바인딩합니다. named volume에 데이터가 유지되며 `docker compose down -v`는 데이터를 삭제하므로 평소에는 `docker compose down`만 사용합니다.
 
-마이그레이션은 빈 기준선 0001과 Alembic 이력만 생성합니다. 업무 테이블은 해당 기능에서 도입합니다. API startup에서 migration이나 create_all을 실행하지 않습니다.
+마이그레이션은 빈 기준선 0001 다음 0002에서 users, login_attempts, refresh_sessions, workspaces, workspace_members, invitations를 생성합니다. 물리 FK는 없으며 논리 관계 검증은 다음 서비스 단계입니다. API startup에서 migration이나 create_all을 실행하지 않습니다. [컬럼 명세](docs/database/IDENTITY_SCHEMA.md)와 [로컬 DB·HeidiSQL·별도 테스트 DB 안내](docs/database/LOCAL_POSTGRES.md)를 참고하세요.
 
 ## 검증
 
@@ -38,7 +38,7 @@ uv run mypy app
 uv run pytest -q -m "not integration"
 ```
 
-실제 DB 검사는 별도의 테스트 DB에 TEST_DATABASE_URL을 설정한 후 `uv run pytest -q -m integration`으로 실행합니다. 테스트는 일회성 임시 테이블의 rollback과 세션 트랜잭션을 확인합니다. CI는 PostgreSQL 17 서비스에서 migration upgrade/downgrade/upgrade 및 전체 테스트를 실행합니다. 로컬 Docker가 없는 환경의 실행 누락을 DB 검증 통과로 처리하지 않습니다.
+실제 DB 검사는 `_test`로 끝나는 별도 DB에 TEST_DATABASE_URL을 설정한 후 `uv run pytest -q -m integration`으로 실행합니다. 임시 스키마에서 제약조건·동시 쓰기·ORM 저장·트랜잭션 rollback을 검증합니다. CI에는 PostgreSQL 17 migration 왕복과 `alembic check`, 전체 테스트를 구성했습니다. 테스트 DB가 없어 skip된 경우 DB 검증 통과로 처리하지 않습니다.
 
 구조: app/main.py는 조립, app/shared/config는 설정, database는 세션·트랜잭션, observability는 health를 소유합니다. 업무 도메인은 실제 기능 추가 시 app/domain 아래에 만듭니다.
 
@@ -56,4 +56,4 @@ uv run pytest -q -m "not integration"
 
 ## 확인된 검증 기록
 
-[초기 구현 CI](https://github.com/oso7865-ship-it/Prism-Backend/actions/runs/36039579708) 통과. 실제 PostgreSQL 17 마이그레이션 왕복과 테스트 5개 통과. 로컬 Docker 실행은 아직 미확인이다.
+[초기 구현 CI](https://github.com/oso7865-ship-it/Prism-Backend/actions/runs/36039579708)는 이전 5개 테스트 기준 기록입니다. 이번 DB 단계는 로컬 Docker PostgreSQL 17에서 migration 왕복·drift 검사, 테스트 28개 및 실제 Uvicorn readiness 200을 확인했습니다. 이번 변경의 원격 CI는 아직 실행하지 않았습니다. [작업 계획·체크리스트](docs/work-plans/2026-09-25_identity-database.md), [검증·트러블슈팅 리포트](reports/2026-09-25_identity-database_report.md)를 참조하세요.

@@ -34,6 +34,7 @@ jobs:
       - run: uv run alembic upgrade head
       - run: uv run alembic downgrade base
       - run: uv run alembic upgrade head
+      - run: uv run alembic check
       - run: uv run pytest -q
       - run: node GENERAL_HARNESS/scripts/validate-project-adapter.mjs --project-root . --require-adapter --strict --json
       - run: node GENERAL_HARNESS/scripts/validate-no-secrets.mjs

@@ -276,3 +276,11 @@
 - 긴 흐름은 페이지 자체의 세로 스크롤로 읽는다. 차트 영역의 가로 이동은 좁은 화면에서 가독성을 유지할 때만 허용한다.
 - 모바일에서도 max-height·고정 높이·overflow-y로 내부 세로 스크롤을 다시 만들지 않는다.
 - 이번 작업은 스킬 지침만 변경했다. 공용 CSS와 기존 HTML은 새 규칙 적용 전이며 현재 판단 기준은 `reports/_LATEST.md`다.
+
+
+## PRism backend: DB 구현 전 2026-09-25 상태 요약
+
+
+- 개발 기반을 공개 origin/main에 게시했고 CI가 통과했다. 상세 증거는 프로젝트 루트 reports의 최신 기록을 확인한다.
+- Docker 로컬 실행, GitHub OAuth/App, DeepSeek와 배포는 후속 작업이다.
+- 트러블슈팅 기록 스킬을 로컬 반영했다(활성 21개). 원본 기준 SHA 이후 미커밋 패치이며 manifest.localChanges에 선언했다. 상세 기록은 프로젝트 루트 reports의 최신 포인터를 따른다.

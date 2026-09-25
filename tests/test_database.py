@@ -5,6 +5,7 @@ import pytest
 from sqlalchemy import text
 
 from app.shared.database.engine import build_engine, transaction
+from app.shared.database.event_loop import loop_factory
 
 
 @pytest.mark.integration
@@ -31,4 +32,4 @@ def test_real_postgresql_transaction_rollback() -> None:
         finally:
             await engine.dispose()
 
-    asyncio.run(scenario())
+    asyncio.run(scenario(), loop_factory=loop_factory)
