@@ -8,7 +8,7 @@
 | 이력 | 최신 판단 기준 | 기준 |
 |---|---|---|
 | 하네스 유지보수 최신 | `reports/2026-09-22_1524_flow-full-height-rule_report.md` | 긴 차트는 내부 세로 스크롤 없이 SVG 전체 높이로 펼치는 규칙으로 변경. 하네스 변경을 origin/codex/harness-skill-reinforcement에 공유, PR·병합 전. 활성 20개 |
-| 부착 프로젝트 최신 | [프로젝트 Report](../../reports/2026-09-25_publish-identity_report.md) | 인증·팀 6개 ORM/migration 및 로컬 Docker PostgreSQL 검증 완료. 게시·CI 상태는 연결된 Report 참조. 하네스 동기화 보류 |
+| 부착 프로젝트 최신 | [로그인 구현](../../reports/2026-09-25_github-login_report.md) | 자동 검사·실제 기본 로그인 사용자 확인 완료. 게시·CI 확인 진행 중 |
 
 > 주의: 이전 Report는 과거 의사결정 근거와 변경 증거로만 사용한다. Next Work 판단은 이 파일과 `05.WORKING_CONTEXT.md`를 우선한다.
 

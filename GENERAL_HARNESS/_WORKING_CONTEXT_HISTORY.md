@@ -284,3 +284,14 @@
 - 개발 기반을 공개 origin/main에 게시했고 CI가 통과했다. 상세 증거는 프로젝트 루트 reports의 최신 기록을 확인한다.
 - Docker 로컬 실행, GitHub OAuth/App, DeepSeek와 배포는 후속 작업이다.
 - 트러블슈팅 기록 스킬을 로컬 반영했다(활성 21개). 원본 기준 SHA 이후 미커밋 패치이며 manifest.localChanges에 선언했다. 상세 기록은 프로젝트 루트 reports의 최신 포인터를 따른다.
+
+
+## PRism 로그인 구현 전 2026-09-25 상태 요약
+
+
+- 인증·팀 6개 ORM과 Alembic 0002, 물리 FK 0. 서비스/API는 미구현.
+- 로컬 Docker PostgreSQL 17 healthy, 개발 prism revision 0002. 테스트 DB migration 왕복·drift 검사·28 tests·실제 readiness 200 통과.
+- Windows async 진입점은 shared/database/event_loop.py factory 사용.
+- 아키텍처 665a200·백엔드 구현 a2873f6을 origin/main에 게시하고 원격 CI 성공을 확인했다. architecture.json과 snapshot은 게시된 원본을 참조한다.
+- 하네스 동기화 보류. 이전 트러블슈팅 스킬 로컬 패치를 보존했다.
+- 상세 근거: 프로젝트 reports/_LATEST.md. 다음 단계: OAuth App 자격증명 준비 및 GitHub OAuth/Workspace 서비스.
