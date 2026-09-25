@@ -2,7 +2,7 @@
 
 > 작성일: 2026-09-25
 > 작업 브랜치: main
-> 커밋/PR: 사용자 요청에 따라 게시 진행 중
+> 커밋/PR: 8a07a7008ef576b721b1a4a17377e9ac1e5b5945 (main 직접 게시)
 > 상태 기록 버전: 1
 > 상태 확인 시각: 2026-09-26T00:32:07+09:00
 > 구현 상태: 완료
@@ -10,9 +10,9 @@
 > 로컬 검증 상태: 완료
 > 로컬 검증 대상: GitHub 로그인 미커밋 working-tree
 > 로컬 검증 근거: Ruff/mypy, 전체 pytest 47 passed(실제 PG·GitHub MockTransport), Windows 네이티브 진단은 §5 참조
-> 병합 상태: 진행 중
+> 병합 상태: 완료
 > 병합 대상: origin/main
-> 병합 근거: 2026-09-26 사용자 커밋·푸시 요청. origin/main과 동일 기준 확인, 일반 push 예정
+> 병합 근거: 사용자 요청에 따라 8a07a7008ef576b721b1a4a17377e9ac1e5b5945을 origin/main에 일반 push 완료
 > 배포 상태: 해당 없음
 > 배포 근거: 로컬 개발 단계
 > 실제 연동 상태: 완료
@@ -71,7 +71,7 @@ UI: 기존 스타일 유지, 로그인 primary link·프로필·로그아웃·�
 
 ## 6. 미해결 항목
 
-로그인 취소·다중 계정 등 확장 수동 체크, Windows 네이티브 진단 원인, 다중 탭 간 refresh 동기화(현재 한 탭 single-flight), 운영 HTTPS/Secure/프록시 검증, 로컬 OAuth 키 배포 전 교체. Workspace는 다음 단계다. 현재 게시·CI 확인 진행 중이며 결과는 아래 게시 기록을 따른다.
+로그인 취소·다중 계정 등 확장 수동 체크, Windows 네이티브 진단 원인, 다중 탭 간 refresh 동기화(현재 한 탭 single-flight), 운영 HTTPS/Secure/프록시 검증, 로컬 OAuth 키 배포 전 교체. Workspace는 다음 단계다. 게시 완료. CI 결과는 아래 게시 기록을 따른다.
 
 ## 7. Working Context 반영 여부
 
@@ -83,4 +83,6 @@ UI: 기존 스타일 유지, 로그인 primary link·프로필·로그아웃·�
 
 ## 9. 2026-09-26 게시 기록
 
-사용자 기본 로그인 테스트 확인 후 백엔드·프론트 각각 main 게시. 자동 승인 검토가 하네스 변경을 포함한 게시를 거절하여 게시 범위를 로그인 구현과 제품 문서로 축소했다. GENERAL_HARNESS·PROJECT_HARNESS 및 기존 트러블슈팅 스킬 리포트 변경은 로컬에 보존하고 이번 게시에서 제외한다. 실제 비밀값·.env·DB 볼륨 제외. 현재 커밋/푸시·CI 진행 중.
+사용자 기본 로그인 테스트 확인 후 백엔드·프론트 각각 main 게시. 자동 승인 검토가 하네스 변경을 포함한 게시를 거절하여 게시 범위를 로그인 구현과 제품 문서로 축소했다. GENERAL_HARNESS·PROJECT_HARNESS 및 기존 트러블슈팅 스킬 리포트 변경은 로컬에 보존하고 이번 게시에서 제외한다. 실제 비밀값·.env·DB 볼륨 제외. 구현 커밋 8a07a7008ef576b721b1a4a17377e9ac1e5b5945 일반 push 완료.
+
+GitHub Actions 전체 PASS: https://github.com/oso7865-ship-it/Prism-Backend/actions/runs/36155289198 (Linux 테스트·migration 왕복·정적 검사·문서 검사 포함). Windows 네이티브 진단 원인은 별도 미해결이다.
