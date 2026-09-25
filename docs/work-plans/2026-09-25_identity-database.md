@@ -60,7 +60,7 @@ architecture.json의 기존 기준 커밋은 c8070204eedb6a620481ef263e9e55ab945
 
 아래는 다음 단계의 요약이며 이번 실행 범위가 아니다. 기능별 착수 때 세부 설계·테스트를 추가한다.
 
-- [ ] 코드·원본 설계 커밋/푸시, architecture.json 실제 revision 연결, 새 변경의 원격 CI.
+- [x] 코드·원본 설계 커밋/푸시, architecture.json 실제 revision 연결, 구현 커밋 CI 성공(665a200 / a2873f6).
 - [ ] GitHub OAuth 로그인·callback·User 생성 및 세션 회전/폐기 API.
 - [ ] Workspace 생성·멤버·초대·권한, 부모 존재/팀 일치/OWNER 유지의 트랜잭션 검증.
 - [ ] GitHub App 실제 연결·저장소 권한·웹훅 및 관련 테이블.

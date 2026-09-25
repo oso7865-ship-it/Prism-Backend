@@ -56,4 +56,4 @@ uv run pytest -q -m "not integration"
 
 ## 확인된 검증 기록
 
-[초기 구현 CI](https://github.com/oso7865-ship-it/Prism-Backend/actions/runs/36039579708)는 이전 5개 테스트 기준 기록입니다. 이번 DB 단계는 로컬 Docker PostgreSQL 17에서 migration 왕복·drift 검사, 테스트 28개 및 실제 Uvicorn readiness 200을 확인했습니다. 이번 변경의 원격 CI는 아직 실행하지 않았습니다. [작업 계획·체크리스트](docs/work-plans/2026-09-25_identity-database.md), [검증·트러블슈팅 리포트](reports/2026-09-25_identity-database_report.md)를 참조하세요.
+[초기 구현 CI](https://github.com/oso7865-ship-it/Prism-Backend/actions/runs/36039579708)는 이전 5개 테스트 기준 기록입니다. 이번 DB 단계는 로컬 Docker PostgreSQL 17에서 migration 왕복·drift 검사, 테스트 28개 및 실제 Uvicorn readiness 200을 확인했습니다. [이번 구현 커밋의 원격 CI](https://github.com/oso7865-ship-it/Prism-Backend/actions/runs/36127425357)도 통과했습니다. 현재 게시 상태는 [최신 Report](reports/_LATEST.md)를 따릅니다. [작업 계획·체크리스트](docs/work-plans/2026-09-25_identity-database.md), [검증·트러블슈팅 리포트](reports/2026-09-25_identity-database_report.md)를 참조하세요.
