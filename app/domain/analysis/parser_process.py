@@ -28,13 +28,16 @@ async def parse_file(
         )
     # Isolated Python ignores PYTHONPATH/user site; allow only Windows runtime necessities.
     env = {k: v for k, v in os.environ.items() if k.upper() in ("SYSTEMROOT", "WINDIR")}
+    creationflags = 0
+    if sys.platform == "win32":
+        creationflags = subprocess.CREATE_NO_WINDOW
     proc = subprocess.Popen(
         [sys.executable, "-I", str(Path(__file__).with_name("parser_entry.py"))],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,
         env=env,
-        creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+        creationflags=creationflags,
     )
     communication = asyncio.create_task(
         asyncio.to_thread(

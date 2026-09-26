@@ -49,3 +49,10 @@ AI 문맥 부족 오탐은 재평가에서도 남았다. 후속은 NEEDS_CONTEXT
 - 원격 fetch 결과 세 저장소 모두 게시 전 ahead0/behind0. 사용자와 sandbox 소유자가 다른 환경이라 global 설정 대신 해당 명령/하위 프로세스에만 정확한 safe.directory를 전달했다.
 - 아키텍처 main cac51a07516cd2e36b3bf4cc45c9a17fad050002 게시 완료. [architecture CI](https://github.com/oso7865-ship-it/Prism-Architecture/actions/runs/36245178791) success 확인. backend/frontend architecture.json 연결 완료.
 - 과거 Report의 실제 적용 스킬 근거가 없는 항목은 legacy로 명시하고 기존 기록을 보존했다. 정식 새 Report의 적용 스킬·Gate는 이번 실행 근거로 기록했다.
+
+## 7. 첫 구현 게시와 원격 CI 관측
+
+- backend dev b389dcc7aa547b160ccc34f3b5070b30afa26902, frontend dev 9ebb019e2ec961ba73e3c30e0371862e55938793을 origin에 push 완료.
+- frontend [CI36245383786](https://github.com/oso7865-ship-it/Prism-Frontend/actions/runs/36245383786) success. main 병합/배포는 아님.
+- backend [CI36245379214](https://github.com/oso7865-ship-it/Prism-Backend/actions/runs/36245379214) 실패: Linux mypy에서 subprocess.CREATE_NO_WINDOW가 없는 속성으로 판정됐다. os.name 삼항식을 sys.platform == win32의 명시적 분기로 바꿔 타입 검사도 플랫폼 경계를 인식하게 수정했다. Windows에서는 계속 숨김 창, Linux에서는 creationflags0으로 기존 실행 의도를 유지한다.
+- 수정 후 Windows/Linux 두 플랫폼 mypy 및 프로세스 취소/타임아웃 포함 정적 규칙 suite를 재검증하고 후속 커밋·CI로 확인한다. 로컬 Windows 검사만으로 Linux 정합성을 추정하지 않는 것이 재발 방지 기준이다.
