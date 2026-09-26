@@ -20,14 +20,14 @@
 최초 요청 generation0, 명시적 rerun은 같은 base/head에 현재 규칙·설정으로 generation 증가. GitHub가 그 PR의 base/head를 바꾼 경우 SNAPSHOT_CHANGED로 실패하며 PR 재동기화 후 현재 PR 분석을 사용한다. 과거 임의 diff 재구성은 지원하지 않는다. 연결 해제/팀 접근 철회/lease 상실/취소 후 늦은 결과는 저장하지 않는다.
 
 ## 활성 범위
-Rule set `static-1.0.0`, 규칙별 버전 `1.0.0`. 제안 38개 중 아래 23개만 활성이다.
+Rule set `static-1.1.0`, 규칙별 버전 `1.0.0`. 제안 38개 중 아래 29개가 활성이다.
 
 | 영역 | 활성 규칙 | 내용 |
 |---|---|---|
-| 공통 | COM-001,002,004,009,010 | 500줄 파일, 60줄 함수, 인수 5개 초과, credential 형식, private key 블록 |
+| 공통 | COM-001,002,003,004,009,010 | 500줄 파일, 60줄 함수, 조건/반복 중첩4 초과, 인수 5개 초과, credential 형식, private key 블록 |
 | Java | JAVA-004,005,006,007,008 | 빈 catch, wildcard import, 빈 반복문, public static 비final 필드, 문자열 literal 참조 비교 |
-| Python | PY-001,002,003,006 | mutable literal 기본 인수, bare except, pass except, wildcard import |
-| JavaScript | JS-001,002,003,004 | var, 느슨한 비교(null 비교 제외), debugger, 빈 catch |
+| Python | PY-001,002,003,004,005,006,008 | mutable literal 기본 인수, bare except, pass except, eval/exec, wildcard import, 포괄 except |
+| JavaScript | JS-001,002,003,004,005,006 | var, 느슨한 비교(null 비교 제외), debugger, 빈 catch, eval/Function |
 | TypeScript | TS-001,002,003,004,005 | any, ts-ignore, ts-nocheck, non-null assertion, 이중 assertion |
 
 Tree-sitter가 선언/구문 구조를 검사하며 사용자 코드를 실행하거나 패키지를 설치하지 않는다. 심볼 해석·타입 검사·데이터 흐름·프레임워크 의미 분석은 지원하지 않는다. 설정의 rules/layer_mappings 변경은 CONFIG_UNSUPPORTED로 거부한다. ignored_paths는 구문 규칙에 적용되고 비밀 형식 검사는 유지된다.
@@ -39,3 +39,7 @@ Tree-sitter가 선언/구문 구조를 검사하며 사용자 코드를 실행�
 
 ## 검증
 규칙별 위반2·정상2·유사정상1 이상 fixture, 4언어 구문 오류, 프로세스 timeout, PostgreSQL 통합 권한/경합/취소/재시도/snapshot 변경/연결 철회/마이그레이션 테스트를 실행한다. 실제 증거와 미해결 환경 이슈는 최신 Report에 기록한다.
+
+## 규칙 확장 (static-1.1.0)
+
+기존23개에 COM-003(조건/반복 깊이>4), PY-004/005(내장 eval/exec 직접 호출), PY-008(포괄 except), JS-005/006(eval/Function 동적 코드 생성)을 추가한29개다. 이름 바인딩·동적 변경을 확신할 수 없으면 해당 규칙 NOT_EVALUATED/BINDING_UNRESOLVED, 파일 범위 PARTIAL이다. 파일 안의 다른 이름 사용까지 보수적으로 제외하며 전역 타입/심볼 해석은 하지 않는다. 런타임 monkey patch와 외부 주입은 검증하지 않는다. PY-003과 PY-008 중복은 제외한다. 함수 경계에서 깊이를 초기화하며 else-if/elif는 같은 깊이로 취급한다. 새6규칙은 version1.0.0이고 기존 규칙 버전은 유지한다. 나머지9개 후보는 비활성이다.

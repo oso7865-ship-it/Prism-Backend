@@ -1,3 +1,5 @@
+import ipaddress
+import re
 from typing import Literal
 from urllib.parse import urlsplit
 
@@ -9,7 +11,7 @@ from sqlalchemy.engine import make_url
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore", hide_input_in_errors=True)
 
-    app_env: Literal["development", "test"] = "development"
+    app_env: Literal["development", "test", "production"] = "development"
     database_url: SecretStr | None = None
     ai_enabled: bool = False
     deepseek_api_key: SecretStr | None = None
@@ -33,19 +35,31 @@ class Settings(BaseSettings):
 
     @field_validator("public_app_origin", "public_api_origin")
     @classmethod
-    def local_origin_only(cls, value: str) -> str:
+    def bare_origin(cls, value: str) -> str:
         parsed = urlsplit(value)
         if (
-            parsed.scheme != "http"
-            or parsed.hostname not in {"localhost", "127.0.0.1"}
+            parsed.scheme not in {"http", "https"}
+            or not parsed.hostname
             or parsed.path
             or parsed.query
             or parsed.fragment
             or parsed.username
             or parsed.password
+            or any(c.isspace() for c in value)
+            or "\\" in value
+            or "?" in value
+            or "#" in value
         ):
-            raise ValueError("Only bare local HTTP origins are supported in development")
+            raise ValueError("A bare HTTP(S) origin is required")
+        try:
+            parsed.port
+        except ValueError:
+            raise ValueError("Invalid origin port") from None
         return value
+
+    @property
+    def secure_cookies(self) -> bool:
+        return self.app_env == "production"
 
     @property
     def github_app_ready(self) -> bool:
@@ -97,7 +111,7 @@ class Settings(BaseSettings):
         return value
 
     @model_validator(mode="after")
-    def disable_unimplemented_integrations(self) -> "Settings":
+    def validate_runtime(self) -> "Settings":
         if self.ai_enabled and not (
             self.deepseek_api_key
             and self.database_url
@@ -109,6 +123,49 @@ class Settings(BaseSettings):
             )
         if self.jwt_signing_key and len(self.jwt_signing_key.get_secret_value().encode()) < 32:
             raise ValueError("JWT_SIGNING_KEY must contain at least 32 bytes")
-        if urlsplit(self.public_app_origin).hostname != urlsplit(self.public_api_origin).hostname:
-            raise ValueError("Local app and API origins must use the same cookie hostname")
+        origins = [urlsplit(self.public_app_origin), urlsplit(self.public_api_origin)]
+        if self.app_env == "production":
+            for origin in origins:
+                host = origin.hostname or ""
+                if origin.scheme != "https" or origin.port not in (None, 443):
+                    raise ValueError("Production origins require HTTPS on port 443")
+                if "." not in host or host.endswith((".localhost", ".local", ".invalid")):
+                    raise ValueError("Production origins require a public DNS hostname")
+                if len(host) > 253 or any(
+                    not re.fullmatch(r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?", label)
+                    for label in host.split(".")
+                ):
+                    raise ValueError("Invalid production hostname")
+                try:
+                    ipaddress.ip_address(host)
+                except ValueError:
+                    pass
+                else:
+                    raise ValueError("Production origins must use DNS hostnames")
+            if self.public_app_origin != self.public_api_origin:
+                raise ValueError("Production OAuth/API must use the exact frontend proxy origin")
+            if not self.auth_ready:
+                raise ValueError(
+                    "Production requires database and complete authentication settings"
+                )
+            assert self.database_url
+            if make_url(self.database_url.get_secret_value()).query.get("sslmode") != "verify-full":
+                raise ValueError("Production database requires sslmode=verify-full")
+            if self.sync_runner_enabled or self.analysis_runner_enabled:
+                if not self.github_app_ready:
+                    raise ValueError("Production runners require complete GitHub App settings")
+            if self.github_app_ready and (
+                not self.github_webhook_secret
+                or len(self.github_webhook_secret.get_secret_value().encode()) < 32
+            ):
+                raise ValueError(
+                    "Production GitHub App requires a webhook secret of at least 32 bytes"
+                )
+        else:
+            if any(
+                o.scheme != "http" or o.hostname not in {"localhost", "127.0.0.1"} for o in origins
+            ):
+                raise ValueError("Development/test origins must use local HTTP")
+            if origins[0].hostname != origins[1].hostname:
+                raise ValueError("Local app and API origins must use the same cookie hostname")
         return self

@@ -1,0 +1,19 @@
+{
+  "at": "2026-09-26T16:04:07.119984+00:00",
+  "scope": "100 small synthetic files sequentially; not worst-case load",
+  "network": "none",
+  "memory_limit_mb": 512,
+  "result": {
+    "uid": 999,
+    "files": 100,
+    "languages": 4,
+    "statuses": [
+      "INCLUDED"
+    ],
+    "elapsed_seconds": 28.312,
+    "parser_timeout": "PASS",
+    "live": 200,
+    "ready_without_db": 503,
+    "cgroup_peak_bytes": 141434880
+  }
+}

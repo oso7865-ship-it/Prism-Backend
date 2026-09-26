@@ -2,7 +2,7 @@
 
 ## 준비
 
-이번 구현은 로컬 개발용이다. 프론트와 콜백을 모두 **localhost**로 연다. localhost와 127.0.0.1을 브라우저 주소에서 섞으면 로그인 바인딩 쿠키를 공유하지 못한다.
+이 문서의 실행 예시는 로컬 개발용이다. 프론트와 콜백을 모두 **localhost**로 연다. localhost와 127.0.0.1을 브라우저 주소에서 섞으면 로그인 바인딩 쿠키를 공유하지 못한다.
 
 GitHub OAuth App: Homepage `http://localhost:5173`, Redirect URI `http://localhost:8000/api/v1/auth/github/callback`. wildcard·Device Flow는 끈다. 로그인용 OAuth App과 저장소 접근용 GitHub App은 별도다. GitHub 만료 access/refresh를 받아도 사용자 확인 후 둘 다 보존하지 않으며 PRism 자체 세션을 사용한다.
 
@@ -17,7 +17,7 @@ GITHUB_OAUTH_CLIENT_SECRET=발급한_Secret
 JWT_SIGNING_KEY=32바이트_이상의_독립된_난수_서명키
 ```
 
-DB 설정은 [로컬 PostgreSQL](database/LOCAL_POSTGRES.md)을 따른다. AUTH_ENABLED=false 또는 키/DB 설정 누락 시 로그인은 503이고 health 기능은 계속 사용할 수 있다. 운영 출처와 APP_ENV=production은 아직 지원하지 않는다.
+DB 설정은 [로컬 PostgreSQL](database/LOCAL_POSTGRES.md)을 따른다. AUTH_ENABLED=false 또는 키/DB 설정 누락 시 로그인은 503이고 health 기능은 계속 사용할 수 있다. APP_ENV=production의 HTTPS·Secure cookie·TLS 설정은 [배포 전 준비](PREDEPLOYMENT.md)를 따른다. 공개 환경의 실제 OAuth 검증은 별도다.
 
 ## 실행
 

@@ -1,3 +1,3 @@
 # Latest project report
 
-[품질 재평가·Windows 진단·Git 게시](2026-09-26_recheck-publish_report.md)
+[배포 직전 준비와 종합 검증](2026-09-27_predeployment_report.md)

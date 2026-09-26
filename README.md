@@ -1,6 +1,6 @@
 # PRism Backend
 
-Python 3.12 / FastAPI / SQLAlchemy / PostgreSQL 개발 기반입니다. 인증·팀·저장소·PR·Job·Webhook·분석 15개 테이블과 마이그레이션을 구현했습니다. GitHub 로그인·프로필·세션 갱신·로그아웃 API를 로컬 구현했습니다. 실제 GitHub 기본 로그인 흐름은 사용자 확인 완료이며 Workspace·저장소 연결·PR sync Job을 추가 구현했고 실제 GitHub App 연결과 PR 조회를 확인했습니다. 고정 커밋 정적 분석과 결과 API를 구현했습니다. AI는 후속입니다. 운영 모드는 비활성화했으며 현 단계는 로컬 개발용입니다.
+Python 3.12 / FastAPI / SQLAlchemy / PostgreSQL 개발 기반입니다. 인증·팀·저장소·PR·Job·Webhook·분석 15개 테이블과 마이그레이션을 구현했습니다. GitHub 로그인·프로필·세션 갱신·로그아웃 API를 로컬 구현했습니다. 실제 GitHub 기본 로그인 흐름은 사용자 확인 완료이며 Workspace·저장소 연결·PR sync Job을 추가 구현했고 실제 GitHub App 연결과 PR 조회를 확인했습니다. 고정 커밋 정적 분석과 결과 API를 구현했습니다. 수동 DeepSeek 리뷰도 구현했습니다. 운영 모드는 비활성화했으며 현 단계는 로컬 개발용입니다.
 
 ## 실행
 
@@ -74,7 +74,7 @@ Webhook 자동 PR 동기화와 설치 철회 차단을 구현했다. 설정·현
 
 ## PR 정적 분석 (2026-09-26)
 
-0005 migration 적용 후 `.env`에서 `ANALYSIS_RUNNER_ENABLED=true`로 수동 분석 runner를 켭니다. Java/Python/JavaScript/TypeScript의 검증된 23개 규칙을 지원합니다. [실행·API·제한](docs/STATIC_ANALYSIS.md), [작업 계획](docs/work-plans/2026-09-26_static-analysis.md), [검증 기록](reports/2026-09-26_static-analysis_report.md)을 참조하세요. AI의 기본 설정은 OFF이며 아래 안내에 따라 로컬에서 수동 활성화합니다. 공개 Webhook 자동 분석 검증은 별도입니다.
+0005 migration 적용 후 `.env`에서 `ANALYSIS_RUNNER_ENABLED=true`로 수동 분석 runner를 켭니다. Java/Python/JavaScript/TypeScript의 fixture 검증을 마친 29개 규칙을 지원합니다. [실행·API·제한](docs/STATIC_ANALYSIS.md), [작업 계획](docs/work-plans/2026-09-26_static-analysis.md), [검증 기록](reports/2026-09-26_static-analysis_report.md)을 참조하세요. AI의 기본 설정은 OFF이며 아래 안내에 따라 로컬에서 수동 활성화합니다. 공개 Webhook 자동 분석 검증은 별도입니다.
 
 ## 수동 AI 리뷰
 
@@ -83,3 +83,7 @@ Webhook 자동 PR 동기화와 설치 철회 차단을 구현했다. 설정·현
 [설계·체크리스트](docs/work-plans/2026-09-26_ai-review.md)
 
 DeepSeek가 읽는 리뷰 지침·버전·오프라인 평가 방법은 [리뷰 하네스](docs/REVIEW_HARNESS.md)를 따른다. 개발 에이전트용 GENERAL_HARNESS와 분리한다.
+
+## 배포 직전 준비
+
+[배포 설정·운영 절차](docs/PREDEPLOYMENT.md)를 확인하세요. production HTTPS·Secure cookie·프록시 설정과 Docker 이미지를 준비했으며 실제 공개 배포는 수행하지 않았습니다. 검증 결과와 남은 사용자 결정은 [최신 Report](reports/_LATEST.md)를 따릅니다.

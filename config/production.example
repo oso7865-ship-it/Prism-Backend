@@ -1,0 +1,23 @@
+# TEMPLATE ONLY. Replace every placeholder in the provider's secret settings.
+APP_ENV=production
+DATABASE_URL=postgresql+psycopg://REPLACE_USER:REPLACE_PASSWORD@REPLACE_DB_HOST/prism?sslmode=verify-full
+# Use your database provider's CA with sslrootcert if needed; do not disable verification.
+AUTH_ENABLED=true
+PUBLIC_APP_ORIGIN=https://replace-app.invalid
+# OAuth and App callback use the FRONTEND proxy origin, not the Render origin.
+PUBLIC_API_ORIGIN=https://replace-app.invalid
+GITHUB_OAUTH_CLIENT_ID=
+GITHUB_OAUTH_CLIENT_SECRET=
+JWT_SIGNING_KEY=
+GITHUB_APP_ID=
+GITHUB_APP_SLUG=
+GITHUB_APP_CLIENT_ID=
+GITHUB_APP_CLIENT_SECRET=
+GITHUB_APP_PRIVATE_KEY=
+GITHUB_WEBHOOK_SECRET=
+SYNC_RUNNER_ENABLED=false
+ANALYSIS_RUNNER_ENABLED=false
+AI_ENABLED=false
+DEEPSEEK_API_KEY=
+DEEPSEEK_MODEL=deepseek-flash
+AI_DAILY_LIMIT=5

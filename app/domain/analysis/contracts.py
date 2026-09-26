@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from pydantic import BaseModel, ConfigDict, Field
 
-RULE_SET = "static-1.0.0"
+RULE_SET = "static-1.1.0"
 MAX_FILE = 200 * 1024
 MAX_TOTAL = 2 * 1024 * 1024
 MAX_FILES = 100
@@ -64,6 +64,37 @@ RULES = {
             "COM-002", "함수 또는 메서드가 60줄을 초과합니다. 주석을 포함한 선언 범위 기준입니다."
         ),
         Rule("COM-004", "선언 인수가 5개를 초과합니다. 역할 분리를 검토하세요."),
+        Rule("COM-003", "조건·반복 중첩 깊이가 4를 초과합니다. 함수 경계 기준입니다."),
+        Rule(
+            "PY-004",
+            "내장 eval 직접 호출입니다. 입력 신뢰 경계를 확인하세요. 취약성은 미검증입니다.",
+            "SECURITY",
+            confidence="MEDIUM",
+        ),
+        Rule(
+            "PY-005",
+            "내장 exec 직접 호출입니다. 입력 신뢰 경계를 확인하세요. 취약성은 미검증입니다.",
+            "SECURITY",
+            confidence="MEDIUM",
+        ),
+        Rule(
+            "PY-008",
+            "Exception/BaseException 포괄 처리입니다. 최외곽 실패 경계인지 확인하세요.",
+            "RELIABILITY",
+            confidence="MEDIUM",
+        ),
+        Rule(
+            "JS-005",
+            "내장 eval 직접 호출 형태입니다. 공격자 입력 여부는 미검증입니다.",
+            "SECURITY",
+            confidence="MEDIUM",
+        ),
+        Rule(
+            "JS-006",
+            "Function 생성자를 사용한 동적 코드 생성입니다. 입력 신뢰 경계를 확인하세요.",
+            "SECURITY",
+            confidence="MEDIUM",
+        ),
         Rule(
             "COM-009",
             "알려진 credential 형식이 발견되었습니다. 유효성은 미검증이며 값은 저장하지 않습니다.",

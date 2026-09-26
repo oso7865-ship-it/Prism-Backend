@@ -59,3 +59,13 @@ backend 전체146 tests는 AI 리뷰 구현 당시 기록이며 이후 하네스
 ## 2026-09-26 게시 준비 후속
 
 수정 지침7회 재평가도 자동6/7 PASS, 락 문맥 부족의 추측성 지적2건 FAIL 유지. Windows native 오류는 nProtect GameGuard 모듈 npggNT64.des+0x2769 발생으로 특정했으며 외부 모듈 내부 결함이나 깨끗한 세션 비교는 후속이다. backend170 tests, frontend38 tests/build PASS. 현재 게시/CI 사실은 [최신 Report](../reports/_LATEST.md)를 따른다. 과거 미커밋 표기는 당시 상태이며 하네스 원본 동기화·공개 배포는 미진행이다.
+
+## 2026-09-27 최신 개발 상태
+
+AI 근거 계약을 서버 검증과 UI에 연결했고 static-1.1.0은29개 규칙이다. backend208 tests, frontend40 tests/build, Windows/Linux mypy PASS. 새 AI 실제 유료7회 평가 결과는 구조7/7, 내용6/7로 락 문맥 부족 오탐1건이 남았다. Windows는 테스트 중 GameGuard가 로드되어 clean-session 검증 미완료(native진단2회). 실제 app110파일에서 새 규칙7개 관찰을 수동 점검했으나 정확도/누락률의 일반화된 측정은 아니다. 남은 정적 후보는9개다. dev 및 architecture main 미커밋, 기존 게시 CI 결과와 구분한다. 상세는 최신 Report를 따른다.
+
+## 2026-09-27 배포 전 준비
+
+사용자가 목표를 실제 배포 이전으로 한정했다. production HTTPS/쿠키/TLS 검증, Docker/Render/Vercel 템플릿, 운영·복구 절차를 추가했다. 백엔드222 tests, 프론트51 tests/build PASS. 이번 Windows 회귀는 GameGuard 모듈 before/after 모두 false, native진단0이다(이전 진단의 근본 원인 수정 주장 아님). 별도 테스트 DB 합성 데이터 복원 PASS. 네 언어100개 소형 파일의 네트워크 차단512MiB 컨테이너 검사에서 peak141,434,880bytes 관찰. 최악 입력/실사용 부하 측정은 아니다.
+
+주소·DB provider/CA·운영 키·비용/알림 수신처 확정과 실제 공개 OAuth/Webhook은 후속이다. AI6/7 품질과 규칙9개는 보류한다. 임의의 배포 완료율을 추가 산출하지 않는다. 현재 게시 결과는 최신 Report를 따른다.

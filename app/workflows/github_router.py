@@ -35,7 +35,13 @@ def github_router(flow: ConnectRepository, auth: AuthAPI, settings: Settings) ->
     ) -> ConnectStart:
         url, binding = await flow.start(p.user_id, wid, body.full_name)
         response.set_cookie(
-            COOKIE, binding, max_age=600, httponly=True, secure=False, samesite="lax", path="/"
+            COOKIE,
+            binding,
+            max_age=600,
+            httponly=True,
+            secure=settings.secure_cookies,
+            samesite="lax",
+            path="/",
         )
         return ConnectStart(authorization_url=url)
 
@@ -56,7 +62,9 @@ def github_router(flow: ConnectRepository, auth: AuthAPI, settings: Settings) ->
         response = RedirectResponse(
             settings.public_app_origin + "/?repository_result=" + result, 302
         )
-        response.delete_cookie(COOKIE, path="/", httponly=True, samesite="lax")
+        response.delete_cookie(
+            COOKIE, path="/", httponly=True, secure=settings.secure_cookies, samesite="lax"
+        )
         return response
 
     return router

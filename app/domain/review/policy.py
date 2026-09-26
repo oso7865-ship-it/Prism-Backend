@@ -25,6 +25,10 @@ class Issue(BaseModel):
     line: int = Field(ge=1)
     severity: Literal["INFO", "WARNING", "ERROR"]
     basis: Literal["SUPPORTED", "NEEDS_CONTEXT"]
+    evidence_lines: list[int] = Field(min_length=1, max_length=8)
+    trigger: str = Field(min_length=1, max_length=400)
+    consequence: str = Field(min_length=1, max_length=400)
+    assumptions: list[str] = Field(max_length=3)
     title: str = Field(min_length=1, max_length=160)
     evidence: str = Field(min_length=1, max_length=800)
     suggestion: str = Field(min_length=1, max_length=800)
@@ -144,6 +148,7 @@ def validate_result(raw: str, bundle: InputBundle) -> dict[str, object]:
     if len(raw.encode()) > 24000 or SECRET.search(raw):
         raise ValueError("INVALID_OUTPUT")
     output = ReviewOutput.model_validate_json(raw)
+    files = {f["file_id"]: f for f in json.loads(bundle.payload)["files"]}
     issues = []
     for issue in output.issues:
         if issue.basis == "NEEDS_CONTEXT" and issue.severity == "ERROR":
@@ -151,6 +156,21 @@ def validate_result(raw: str, bundle: InputBundle) -> dict[str, object]:
         anchor = bundle.anchors.get(issue.file_id)
         if not anchor or issue.line not in anchor[1]:
             raise ValueError("INVALID_OUTPUT_LOCATION")
+        refs = set(issue.evidence_lines)
+        changed = {line["line"] for line in files[issue.file_id]["lines"] if line["changed"]}
+        if (
+            len(refs) != len(issue.evidence_lines)
+            or issue.line not in refs
+            or not refs <= anchor[1]
+            or not refs & changed
+        ):
+            raise ValueError("INVALID_EVIDENCE_LINES")
+        if any(not s.strip() or len(s) > 400 for s in issue.assumptions):
+            raise ValueError("INVALID_ASSUMPTIONS")
+        if (issue.basis == "SUPPORTED") != (not issue.assumptions):
+            raise ValueError("INCONSISTENT_EVIDENCE_BASIS")
+        if not issue.trigger.strip() or not issue.consequence.strip():
+            raise ValueError("EMPTY_EVIDENCE")
         issues.append({**issue.model_dump(exclude={"file_id"}), "file_path": anchor[0]})
     return {
         "summary": output.summary,

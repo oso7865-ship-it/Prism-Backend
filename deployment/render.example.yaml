@@ -1,0 +1,36 @@
+# Preparation template only. Choose region and PostgreSQL separately.
+# Importing a Blueprint can create a service and incur cost: not performed by this task.
+services:
+  - type: web
+    name: prism-api
+    runtime: docker
+    plan: free
+    branch: dev
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health/ready
+    autoDeployTrigger: off
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: AUTH_ENABLED
+        value: "true"
+      - key: PUBLIC_APP_ORIGIN
+        sync: false
+      - key: PUBLIC_API_ORIGIN
+        sync: false
+      - key: GITHUB_OAUTH_CLIENT_ID
+        sync: false
+      - key: GITHUB_OAUTH_CLIENT_SECRET
+        sync: false
+      - key: JWT_SIGNING_KEY
+        sync: false
+      - key: AI_ENABLED
+        value: "false"
+      - key: SYNC_RUNNER_ENABLED
+        value: "false"
+      - key: ANALYSIS_RUNNER_ENABLED
+        value: "false"
+# Run alembic upgrade head once before rollout. Do not put migrations in CMD.
+# Add GitHub App and optional DeepSeek values from config/production.example.

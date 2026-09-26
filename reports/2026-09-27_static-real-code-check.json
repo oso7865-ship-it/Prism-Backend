@@ -1,0 +1,100 @@
+{
+  "scope": "current PRism backend app sources only; no source text persisted",
+  "files_scanned": 110,
+  "results": [
+    {
+      "path": "app/domain/analysis/analyzer.py",
+      "findings": [
+        {
+          "rule_id": "COM-003",
+          "start_line": 202,
+          "end_line": 203
+        }
+      ],
+      "not_evaluated": []
+    },
+    {
+      "path": "app/domain/analysis/worker.py",
+      "findings": [
+        {
+          "rule_id": "PY-008",
+          "start_line": 84,
+          "end_line": 86
+        }
+      ],
+      "not_evaluated": []
+    },
+    {
+      "path": "app/domain/pull_request/repository.py",
+      "findings": [],
+      "not_evaluated": [
+        "PY-004",
+        "PY-005"
+      ]
+    },
+    {
+      "path": "app/domain/review/worker.py",
+      "findings": [
+        {
+          "rule_id": "PY-008",
+          "start_line": 104,
+          "end_line": 106
+        }
+      ],
+      "not_evaluated": []
+    },
+    {
+      "path": "app/domain/webhook/exceptions.py",
+      "findings": [],
+      "not_evaluated": [
+        "PY-008"
+      ]
+    },
+    {
+      "path": "app/shared/config/settings.py",
+      "findings": [
+        {
+          "rule_id": "PY-008",
+          "start_line": 95,
+          "end_line": 96
+        }
+      ],
+      "not_evaluated": []
+    },
+    {
+      "path": "app/shared/exception/base.py",
+      "findings": [],
+      "not_evaluated": [
+        "PY-008"
+      ]
+    },
+    {
+      "path": "app/shared/jobs/runner.py",
+      "findings": [
+        {
+          "rule_id": "PY-008",
+          "start_line": 30,
+          "end_line": 31
+        },
+        {
+          "rule_id": "PY-008",
+          "start_line": 38,
+          "end_line": 39
+        }
+      ],
+      "not_evaluated": []
+    },
+    {
+      "path": "app/shared/observability/health.py",
+      "findings": [
+        {
+          "rule_id": "PY-008",
+          "start_line": 19,
+          "end_line": 21
+        }
+      ],
+      "not_evaluated": []
+    }
+  ],
+  "manual_review": "1 nesting observation in analyzer, 6 broad except observations in worker/config/runner/health boundaries. All correspond to intended advisory syntax; broad except sites are intentional error boundaries, not confirmed defects. No repository-wide semantic precision or recall claim."
+}

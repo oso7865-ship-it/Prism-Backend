@@ -10,6 +10,54 @@ from app.shared.github.client import GitHubFailure
 
 # Every active rule has two violations, two normal inputs and a lookalike normal input.
 CASES = {
+    "COM-003": (
+        "a.js",
+        [
+            "if(a){if(b){if(c){if(d){if(e){work();}}}}}",
+            "while(a){for(;;){if(b){while(c){if(d){break;}}}}}",
+        ],
+        [
+            "if(a){if(b){if(c){if(d){work();}}}}",
+            "if(a){}else if(b){}else if(c){}else if(d){}else if(e){}",
+            "const s='if(a){if(b){if(c){if(d){if(e){}}}}}';",
+        ],
+    ),
+    "PY-004": (
+        "a.py",
+        ["eval(value)", "def f(x):\n return eval(x)"],
+        ["parse(value)", "obj.eval(value)", "def f(eval):\n return eval(value)"],
+    ),
+    "PY-005": (
+        "a.py",
+        ["exec(value)", "def f(x):\n exec(x)"],
+        ["execute(value)", "obj.exec(value)", "exec = custom\nexec(value)"],
+    ),
+    "PY-008": (
+        "a.py",
+        [
+            "try:\n work()\nexcept Exception:\n raise",
+            "try:\n work()\nexcept BaseException as e:\n log(e)",
+        ],
+        [
+            "try:\n work()\nexcept ValueError:\n raise",
+            "try:\n work()\nexcept Exception:\n pass",
+            "Exception = CustomError\ntry:\n work()\nexcept Exception:\n raise",
+        ],
+    ),
+    "JS-005": (
+        "a.js",
+        ["eval(value);", "function f(x){return eval(x);}"],
+        ["parse(value);", "obj.eval(value);", "function f(eval){return eval(value);}"],
+    ),
+    "JS-006": (
+        "a.ts",
+        ["new Function(value);", "Function('x', value);"],
+        [
+            "new Other(value);",
+            "const s='new Function(value)';",
+            "class Function {} new Function(value);",
+        ],
+    ),
     "JAVA-004": (
         "a.java",
         [

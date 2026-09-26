@@ -90,7 +90,15 @@ def create_app(
     async def check() -> bool:
         return await database_ready(engine)
 
-    app = FastAPI(title="PRism API", version="0.1.0", lifespan=lifespan)
+    production = settings.app_env == "production"
+    app = FastAPI(
+        title="PRism API",
+        version="0.1.0",
+        lifespan=lifespan,
+        docs_url=None if production else "/docs",
+        redoc_url=None if production else "/redoc",
+        openapi_url=None if production else "/openapi.json",
+    )
     register_handlers(app)
 
     @app.middleware("http")
@@ -98,8 +106,13 @@ def create_app(
         response = await call_next(request)
         if request.url.path.startswith("/api/"):
             response.headers["Cache-Control"] = "private, no-store"
+            response.headers["CDN-Cache-Control"] = "no-store"
+            response.headers["Vercel-CDN-Cache-Control"] = "no-store"
             response.headers["Referrer-Policy"] = "no-referrer"
             response.headers["X-Content-Type-Options"] = "nosniff"
+        if production:
+            response.headers["Strict-Transport-Security"] = "max-age=31536000"
+            response.headers["X-Frame-Options"] = "DENY"
         return response
 
     app.include_router(health_router(readiness_check or check))

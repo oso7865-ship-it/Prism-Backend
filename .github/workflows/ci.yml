@@ -36,6 +36,8 @@ jobs:
       - run: uv run alembic upgrade head
       - run: uv run alembic check
       - run: uv run pytest -q
+      - run: docker build -t prism-predeploy:local .
+      - run: uv run python scripts/check_container.py --output /tmp/prism-container-smoke.json
       - run: node GENERAL_HARNESS/scripts/validate-project-adapter.mjs --project-root . --require-adapter --strict --json
       - run: node GENERAL_HARNESS/scripts/validate-no-secrets.mjs
       - run: node GENERAL_HARNESS/scripts/validate-work-records.mjs --project-root . --reports reports --strict --json

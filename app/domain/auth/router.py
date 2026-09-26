@@ -16,13 +16,13 @@ REFRESH_COOKIE = "prism_refresh"
 BINDING_COOKIE = "prism_oauth_binding"
 
 
-def set_refresh(response: Response, tokens: SessionTokens) -> None:
+def set_refresh(response: Response, tokens: SessionTokens, settings: Settings) -> None:
     response.set_cookie(
         REFRESH_COOKIE,
         tokens.refresh_token,
         max_age=max(0, int((tokens.expires_at - datetime.now(UTC)).total_seconds())),
         httponly=True,
-        secure=False,
+        secure=settings.secure_cookies,
         samesite="lax",
         path="/",
     )
@@ -48,7 +48,7 @@ def auth_router(service: AuthService, settings: Settings) -> APIRouter:
             attempt.binding,
             max_age=600,
             httponly=True,
-            secure=False,
+            secure=settings.secure_cookies,
             samesite="lax",
             path="/",
         )
@@ -69,10 +69,12 @@ def auth_router(service: AuthService, settings: Settings) -> APIRouter:
                     request.cookies.get(BINDING_COOKIE, ""),
                 )
                 response = RedirectResponse(settings.public_app_origin + "/", 302)
-                set_refresh(response, tokens)
+                set_refresh(response, tokens, settings)
         except AppException:
             response = RedirectResponse(settings.public_app_origin + "/?auth_error=failed", 302)
-        response.delete_cookie(BINDING_COOKIE, path="/", httponly=True, samesite="lax")
+        response.delete_cookie(
+            BINDING_COOKIE, path="/", httponly=True, secure=settings.secure_cookies, samesite="lax"
+        )
         return response
 
     @router.post("/refresh", response_model=SessionResponse)
@@ -84,9 +86,15 @@ def auth_router(service: AuthService, settings: Settings) -> APIRouter:
             if error.kind != ErrorKind.UNAUTHORIZED:
                 raise
             denied = error_response(error.code, error.public_message, 401)
-            denied.delete_cookie(REFRESH_COOKIE, path="/", httponly=True, samesite="lax")
+            denied.delete_cookie(
+                REFRESH_COOKIE,
+                path="/",
+                httponly=True,
+                secure=settings.secure_cookies,
+                samesite="lax",
+            )
             return denied
-        set_refresh(response, tokens)
+        set_refresh(response, tokens, settings)
         return SessionResponse(access_token=tokens.access_token)
 
     @router.post("/logout", status_code=204)
@@ -94,7 +102,9 @@ def auth_router(service: AuthService, settings: Settings) -> APIRouter:
         require_csrf(request, settings)
         await service.logout(request.cookies.get(REFRESH_COOKIE, ""))
         response = Response(status_code=204)
-        response.delete_cookie(REFRESH_COOKIE, path="/", httponly=True, samesite="lax")
+        response.delete_cookie(
+            REFRESH_COOKIE, path="/", httponly=True, secure=settings.secure_cookies, samesite="lax"
+        )
         return response
 
     return router

@@ -27,3 +27,7 @@ SUPPORTED는 모델이 제공 코드에서 근거를 찾았다는 분류이며 �
 ### 실제 평가 기록
 
 2026-09-26 새 페르소나 평가7회: 자동6/7 PASS, 문맥 부족 사례1개 FAIL. 체크 기준은 유지하고 지침의 추측성 지적·피해 과장 억제를 보완했다. 수정 지침의 실제 모델 재평가는 별도다. [품질·안정성 보고서](../reports/2026-09-26_quality-stability_report.md)를 따른다. 수동 유료 평가 도구는 `python -m scripts.run_paid_review_evaluation <new-output.json> --allow-seven-paid-calls`로 명시적으로 실행하며 기존 파일 덮어쓰기/자동 재시도 없이7회만 호출한다.
+
+## 근거 계약 보강 — rh1-f48cca7b771801e0
+
+새 issue는 evidence_lines, trigger, consequence, assumptions를 필수 제공한다. 서버는 제공된 HEAD 줄·변경 줄 포함·basis와 가정의 일관성을 검사한다. SUPPORTED는 가정 없음, NEEDS_CONTEXT는 명시한 미확인 전제를 요구하되 보이지 않는 메서드 계약만으로 이슈를 만들지 않는다. 출력 전체 거부와 품질 평가를 구분하며 서버가 이슈를 조용히 삭제하지 않는다. UI는 과거 필드 없는 결과를 그대로 읽는다. 추가 사용자 승인으로 새 버전7회 평가를 수행했다. 구조7/7, 내용6/7이며 락 문맥 부족 오탐1건이 남았다. 이전 버전6/7과 구분하며 성공적인 품질 개선으로 단정하지 않는다.
