@@ -46,6 +46,7 @@ def production(**changes):
         {"public_app_origin": "https://localhost"},
         {"public_app_origin": "https://127.0.0.1"},
         {"public_app_origin": "https://PRISM.example.com"},
+        {"public_app_origin": "HTTPS://prism.example.com"},
         {"public_app_origin": "https://prism.example.com:443"},
         {"public_app_origin": "https://bad..example.com"},
         {"public_app_origin": "https://-bad.example.com"},

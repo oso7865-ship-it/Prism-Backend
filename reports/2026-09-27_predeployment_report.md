@@ -93,3 +93,5 @@ origin/dev 76443f943ff7d4254d51b811e968699d259ee8fb commit/push 성공. 이번 �
 ## 12. Origin 보완 후 최종 로컬 회귀
 
 backend reports/2026-09-27_predeployment-final-windows.json: 전체224 passed/50.91초, exit0. Native진단2회·GameGuard 모듈 before false→after true 재관찰. 앞선222개/진단0은 그 실행만의 기록이며 현재 Windows 안정성 완전 해결을 의미하지 않는다. 최종 코드의 Linux CI는 후속 게시로 확인한다. 프론트 코드는98a4fce 이후 변경 없고51테스트/CI 성공을 유지한다.
+
+Origin 추가 경계: scheme 대문자도 브라우저 정규화와 다른 문자열이므로 bare_origin에서 거부한다. production 관련17테스트 PASS(1.52초, 해당 실행 native진단 없음), Ruff/format PASS. 현재 최종 전체 회귀 결과는 아래 마지막 CI 절을 따른다.

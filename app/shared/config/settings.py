@@ -39,6 +39,7 @@ class Settings(BaseSettings):
         parsed = urlsplit(value)
         if (
             parsed.scheme not in {"http", "https"}
+            or not value.startswith(parsed.scheme + "://")
             or not parsed.hostname
             or parsed.path
             or parsed.query
