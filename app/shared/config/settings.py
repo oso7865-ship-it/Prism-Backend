@@ -129,6 +129,8 @@ class Settings(BaseSettings):
                 host = origin.hostname or ""
                 if origin.scheme != "https" or origin.port not in (None, 443):
                     raise ValueError("Production origins require HTTPS on port 443")
+                if origin.geturl() != f"https://{host}":
+                    raise ValueError("Production origins require lowercase hostnames without ports")
                 if "." not in host or host.endswith((".localhost", ".local", ".invalid")):
                     raise ValueError("Production origins require a public DNS hostname")
                 if len(host) > 253 or any(

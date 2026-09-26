@@ -1,0 +1,15 @@
+{
+  "started_at": "2026-09-26T16:15:04.698689+00:00",
+  "status": "FINISHED",
+  "finished_at": "2026-09-26T16:15:58.441593+00:00",
+  "exit_code": 0,
+  "native_access_violations": 2,
+  "module_observation": {
+    "before": false,
+    "after": true
+  },
+  "test_summary": [
+    "224 passed in 50.91s"
+  ],
+  "scope": "dedicated test DB, full pytest; stdout/stderr held in memory only"
+}

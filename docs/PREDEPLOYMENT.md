@@ -5,7 +5,7 @@
 ## 현재 준비물
 
 - Dockerfile: Python 3.12, lock 고정 의존성, 비root, 단일 worker, PORT, healthcheck. 비밀값과 고객 소스를 이미지에 포함하지 않는다.
-- config/production.example: 운영 환경변수 자리. 공개 frontend 주소 두 origin은 동일해야 한다. DB TLS는 verify-full과 제공자 CA를 사용한다.
+- config/production.example: 운영 환경변수 자리. 공개 frontend 주소 두 origin은 동일해야 하며 소문자 hostname·기본 포트 생략 형식을 사용한다. DB TLS는 verify-full과 제공자 CA를 사용한다.
 - deployment/render.example.yaml: 자동 배포 OFF·무료 데모 플랜 예시. import도 실제 서비스 생성이므로 이번 작업에서 실행하지 않았다. 무료 기동 지연 때문에 상시 처리 보장은 하지 않는다.
 - frontend의 deployment/vercel.template.json: API·health proxy → SPA 순서, private/no-store, 보안 헤더. API 실제 주소 확정 후 PRISM_API_ORIGIN을 설정하고 npm run configure:deployment 실행. 기존 vercel.json은 덮어쓰지 않는다.
 - [작업 계획](work-plans/2026-09-27_predeployment.md), [프로젝트 상태](PROJECT_STATUS.md), [정적 분석 범위](STATIC_ANALYSIS.md).

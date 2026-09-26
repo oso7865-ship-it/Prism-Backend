@@ -69,3 +69,5 @@ AI 근거 계약을 서버 검증과 UI에 연결했고 static-1.1.0은29개 규
 사용자가 목표를 실제 배포 이전으로 한정했다. production HTTPS/쿠키/TLS 검증, Docker/Render/Vercel 템플릿, 운영·복구 절차를 추가했다. 백엔드222 tests, 프론트51 tests/build PASS. 이번 Windows 회귀는 GameGuard 모듈 before/after 모두 false, native진단0이다(이전 진단의 근본 원인 수정 주장 아님). 별도 테스트 DB 합성 데이터 복원 PASS. 네 언어100개 소형 파일의 네트워크 차단512MiB 컨테이너 검사에서 peak141,434,880bytes 관찰. 최악 입력/실사용 부하 측정은 아니다.
 
 주소·DB provider/CA·운영 키·비용/알림 수신처 확정과 실제 공개 OAuth/Webhook은 후속이다. AI6/7 품질과 규칙9개는 보류한다. 임의의 배포 완료율을 추가 산출하지 않는다. 현재 게시 결과는 최신 Report를 따른다.
+
+최종 Origin 보완 후 backend224 tests PASS. Windows 추가 전체 회귀에서 GameGuard 모듈 로드/native진단2회가 다시 관찰되어 환경 의존 이슈는 유지한다. 직전222개/진단0은 당시 실행 결과다. Linux CI와 구분하며 최종 게시 SHA는 최신 Report를 따른다.

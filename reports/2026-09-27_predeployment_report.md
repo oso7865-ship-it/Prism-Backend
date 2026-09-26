@@ -3,13 +3,13 @@
 > 작성일: 2026-09-27
 > 패키징/배포일: 해당 없음
 > 작업 브랜치: dev
-> 커밋/PR: 미커밋
+> 커밋/PR: 76443f943ff7d4254d51b811e968699d259ee8fb
 > 상태 기록 버전: 1
 > 상태 확인 시각: 2026-09-27T01:07:12+09:00
 > 구현 상태: 완료
 > 구현 근거: production 설정·쿠키·Docker·배포 템플릿·운영 문서의 이번 working-tree diff
 > 로컬 검증 상태: 완료
-> 로컬 검증 대상: 배포 전 작업 트리 및 이전 evidence-rules 변경 포함
+> 로컬 검증 대상: 76443f943ff7d4254d51b811e968699d259ee8fb의 코드; 문서 게시 기록은 별도 후속 커밋
 > 로컬 검증 근거: backend222 tests, frontend51 tests/build, 합성 DB 복원·컨테이너 smoke와 본문3절
 > 병합 상태: 미수행
 > 병합 대상: origin/main
@@ -79,3 +79,17 @@ Security Gate: HTTPS/정확한 Origin·Secure 쿠키·TLS·서버 secrets·캐�
 work-records/docs/skills/references/report-consistency/no-personal-paths/harness 검사 양쪽 PASS. 아키텍처 main c9275e62bb0efba3e42910e3dbcfe3b77f21409b commit/push 성공, consumer revision 갱신. 구현 두 저장소 dev는 게시 준비 상태. 진행 Job0 확인 후 최신 API로 재시작, frontend proxy readiness200·API private/no-store 확인.
 
 게시 전 secret 검사: backend370/front228 tracked files의 금지 파일·알려진 패턴 PASS, 세 저장소에서 로컬 .env 비밀값과의 literal 비교 일치0. 원문 키를 출력하거나 저장하지 않았다. Git 소유권 때문에 escalated 하위 검사1회 실패했고 정상 sandbox에서 같은 검사 재실행 PASS. 전역 safe.directory는 변경하지 않았다.
+
+## 10. 구현 게시 관측 (2026-09-27T01:12:49+09:00)
+
+origin/dev 76443f943ff7d4254d51b811e968699d259ee8fb commit/push 성공. 이번 구현 변경이 포함된 SHA이며 현재 추가 변경은 게시 결과 문서 기록뿐이다. architecture CI36254469671 성공, frontend CI36254575184 성공 확인. backend CI36254567841은 실행 중으로 완료 판정은 후속 기록한다. 구현 main 병합·실배포는 미수행.
+
+## 11. 최초 게시 CI와 설정 경계 추가 확인 (2026-09-27T01:15:15+09:00)
+
+[아키텍처 CI36254469671](https://github.com/oso7865-ship-it/Prism-Architecture/actions/runs/36254469671), [backend CI36254567841](https://github.com/oso7865-ship-it/Prism-Backend/actions/runs/36254567841), [frontend CI36254575184](https://github.com/oso7865-ship-it/Prism-Frontend/actions/runs/36254575184) 모두 성공. backend는 Linux 전체222 tests·migration 왕복/drift·Docker build/100파일 smoke를 포함한다.
+
+추가 검토에서 production origin의 대문자 hostname 또는 명시적 :443이 브라우저 Origin 정규화와 달라 CSRF 비교를 실패시킬 수 있어 startup에서 거부하도록 보완했다. 두 거부 사례를 추가한16테스트 PASS, Ruff/format PASS. 새 backend 코드에는 후속 커밋/CI가 필요하며 앞선 CI는76443f9에 한정한다. sandbox 실행의 focused 테스트에서 기존 Windows native진단3회가 재관찰됐으나 pytest exit0이다. §3의 진단0은 앞선 escalated 전체 실행의 관측이며 영구 해결 의미가 아니다. Windows 환경 의존 진단은 잔여 한계로 유지한다.
+
+## 12. Origin 보완 후 최종 로컬 회귀
+
+backend reports/2026-09-27_predeployment-final-windows.json: 전체224 passed/50.91초, exit0. Native진단2회·GameGuard 모듈 before false→after true 재관찰. 앞선222개/진단0은 그 실행만의 기록이며 현재 Windows 안정성 완전 해결을 의미하지 않는다. 최종 코드의 Linux CI는 후속 게시로 확인한다. 프론트 코드는98a4fce 이후 변경 없고51테스트/CI 성공을 유지한다.
