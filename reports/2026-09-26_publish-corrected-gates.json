@@ -1,0 +1,22 @@
+[
+  {
+    "repository": "prism-backend",
+    "check": "validate-no-secrets",
+    "exit": 1
+  },
+  {
+    "repository": "prism-backend",
+    "check": "validate-work-records",
+    "exit": 0
+  },
+  {
+    "repository": "prism-frontend",
+    "check": "validate-no-secrets",
+    "exit": 0
+  },
+  {
+    "repository": "prism-frontend",
+    "check": "validate-work-records",
+    "exit": 0
+  }
+]

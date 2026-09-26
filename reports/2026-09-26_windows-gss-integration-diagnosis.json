@@ -1,0 +1,8 @@
+{
+  "variant": "integration_gss_disabled",
+  "exit": 0,
+  "native_diagnostics": 2,
+  "summary": [
+    "============================= 37 passed in 33.22s ============================="
+  ]
+}

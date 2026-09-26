@@ -1,0 +1,59 @@
+{
+  "started_at": "2026-09-26T11:31:24.629823+00:00",
+  "case": "python-mutable-default",
+  "model": "deepseek-flash",
+  "harness": {
+    "version": "rh1-d9133f8d1cc6f1c1",
+    "modules": [
+      "core",
+      "checks",
+      "output",
+      "python"
+    ],
+    "system_digest": "1265376841c8328db888b504853418f945deee8a06c34085e3a63a7a68796afe"
+  },
+  "attempts": 1,
+  "scope": "standalone synthetic evaluation; newly authorized after network diagnosis",
+  "status": "COMPLETED",
+  "usage": {
+    "input_tokens": 1158,
+    "output_tokens": 333
+  },
+  "result": {
+    "summary": "3줄짜리 신규 함수 `add`가 기본 인자로 가변 리스트 `[]`를 사용하고, 그 리스트에 append한 뒤 반환합니다. 호출 간 상태가 공유되는 전형적인 Python 함정이 코드 자체에서 직접 확인됩니다.",
+    "issues": [
+      {
+        "line": 1,
+        "severity": "ERROR",
+        "basis": "SUPPORTED",
+        "title": "가변 기본 인자로 인한 호출 간 상태 공유",
+        "evidence": "기본 인자 `items=[]`는 함수 정의 시점에 한 번만 평가되어 모든 호출이 같은 리스트 객체를 공유합니다. `items`를 생략한 두 번째 호출은 이전 호출이 append한 값을 포함한 리스트를 받게 되어, 반환값이 호출 이력에 따라 누적·오염됩니다.",
+        "suggestion": "기본값을 `None`으로 두고 함수 내부에서 `if items is None: items = []`로 새 리스트를 생성하거나, 호출자가 항상 리스트를 넘기도록 시그니처를 변경하세요.",
+        "file_path": "sample.py"
+      }
+    ],
+    "limitations": "제공된 3줄 외에 이 함수의 호출부, 동시성 환경, 테스트 여부는 확인할 수 없습니다. 실제 누적 오염은 `items`를 생략한 반복 호출 시 발생하며, 정적 분석 도구 실행 결과는 제공되지 않았습니다.",
+    "reviewed_files": 1,
+    "omitted_files": 0,
+    "coverage": {
+      "files": [
+        {
+          "file_id": "f1",
+          "file_path": "sample.py",
+          "provided_lines": 3
+        }
+      ],
+      "excluded": [],
+      "unfetched_files": 0
+    },
+    "scope": "제공된 HEAD 변경·주변 줄만 검토. 삭제 줄·전체 파일·의존성 및 실행 결과는 미검증."
+  },
+  "grade": {
+    "id": "python-mutable-default",
+    "valid": true,
+    "missed": 0,
+    "unexpected": 0,
+    "passed": true
+  },
+  "duration_seconds": 2.547
+}

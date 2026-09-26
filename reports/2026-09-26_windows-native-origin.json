@@ -1,0 +1,29 @@
+[
+  {
+    "attempt": 1,
+    "exit": 0,
+    "origins": [],
+    "diagnostics": 2,
+    "summary": [
+      "8 passed in 12.26s"
+    ]
+  },
+  {
+    "attempt": 2,
+    "exit": 0,
+    "origins": [],
+    "diagnostics": 2,
+    "summary": [
+      "8 passed in 12.12s"
+    ]
+  },
+  {
+    "attempt": 3,
+    "exit": 0,
+    "origins": [],
+    "diagnostics": 0,
+    "summary": [
+      "8 passed in 12.13s"
+    ]
+  }
+]

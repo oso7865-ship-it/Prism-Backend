@@ -295,3 +295,19 @@
 - 아키텍처 665a200·백엔드 구현 a2873f6을 origin/main에 게시하고 원격 CI 성공을 확인했다. architecture.json과 snapshot은 게시된 원본을 참조한다.
 - 하네스 동기화 보류. 이전 트러블슈팅 스킬 로컬 패치를 보존했다.
 - 상세 근거: 프로젝트 reports/_LATEST.md. 다음 단계: OAuth App 자격증명 준비 및 GitHub OAuth/Workspace 서비스.
+
+## 2026-09-25 상태 요약
+
+- GitHub 로그인·프로필·refresh·logout과 Vue 화면 구현. 기본 실제 로그인·새로고침·로그아웃 사용자 확인 완료. 게시·CI 확인 진행 중.
+- 백엔드 47 tests / 프론트 8 tests 및 build/typecheck 통과. Windows 네이티브 DB 진단 원인은 미확정으로 Report에 기록.
+- Docker 런타임 소켓을 백업·재생성해 PostgreSQL healthy 복구. 볼륨/설정 보존.
+- 로컬 브라우저는 localhost:5173, callback localhost:8000. 다른 호스트 이름 혼용 금지.
+- 다음: 게시·CI 확인→Workspace 서비스. 하네스 동기화 보류.
+
+## 2026-09-26 상태 요약
+
+- 팀·권한·초대/OWNER 이전, GitHub App 연결, PR sync Job/조회와 Vue 화면 구현. 상세: reports/2026-09-26_workspace-repositories_report.md.
+- 백엔드 전체62 tests 및 추가된2개 포함 GitHub14 tests·Ruff/mypy, 프론트 15 tests·build/typecheck 통과. migration 0003/11개 테이블/FK0, 로컬 개발 DB upgrade 및 drift 검사 완료.
+- 실제 App 등록·실계정 연동·사용자 수동 UI 테스트 대기. Windows Psycopg 네이티브 진단 원인은 미해결.
+- 이번 변경은 dev 미커밋. 아키텍처는 main의 ADR-INTEGRATION-002 미커밋. 게시 후 architecture.json 기준 갱신 필요.
+- 다음: App 등록/수동 검증 후 게시 여부 결정, 분석 실행·Webhook 묶음. 하네스 사본 동기화 보류.

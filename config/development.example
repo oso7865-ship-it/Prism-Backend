@@ -2,6 +2,10 @@ APP_ENV=development
 # Set after starting a local PostgreSQL server. This is a local-only example.
 DATABASE_URL=postgresql+psycopg://prism:prism_local_only@127.0.0.1:5432/prism
 AI_ENABLED=false
+# Backend only. AI requires auth, GitHub App, DB and this key.
+DEEPSEEK_API_KEY=
+DEEPSEEK_MODEL=deepseek-flash
+AI_DAILY_LIMIT=5
 JOB_RUNNER_MODE=disabled
 POSTGRES_PASSWORD=prism_local_only
 AUTH_ENABLED=false
@@ -11,3 +15,16 @@ PUBLIC_API_ORIGIN=http://localhost:8000
 # GITHUB_OAUTH_CLIENT_ID=
 # GITHUB_OAUTH_CLIENT_SECRET=
 # JWT_SIGNING_KEY=use-an-independent-random-value-of-at-least-32-bytes
+
+# GitHub App repository connection (separate from login OAuth App)
+# GITHUB_APP_ID=123456
+# GITHUB_APP_SLUG=your-app-slug
+# GITHUB_APP_CLIENT_ID=your-app-client-id
+# GITHUB_APP_CLIENT_SECRET=replace-locally
+# GITHUB_APP_PRIVATE_KEY=replace-locally-with-PEM
+SYNC_RUNNER_ENABLED=false
+# GitHub Webhook secret (separate from App/OAuth credentials; keep actual value in .env)
+# GITHUB_WEBHOOK_SECRET=
+
+# Manual static analysis jobs; requires local DB and configured GitHub App
+ANALYSIS_RUNNER_ENABLED=false

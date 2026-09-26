@@ -37,6 +37,38 @@ def db():
         with engine.begin() as connection:
             with Operations.context(MigrationContext.configure(connection)):
                 migration.upgrade()
+        spec = importlib.util.spec_from_file_location(
+            "repository_migration", "migrations/versions/0003_repository_sync.py"
+        )
+        migration = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(migration)
+        with engine.begin() as connection:
+            with Operations.context(MigrationContext.configure(connection)):
+                migration.upgrade()
+        spec = importlib.util.spec_from_file_location(
+            "webhook_migration", "migrations/versions/0004_webhook_deliveries.py"
+        )
+        migration = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(migration)
+        with engine.begin() as connection:
+            with Operations.context(MigrationContext.configure(connection)):
+                migration.upgrade()
+        spec = importlib.util.spec_from_file_location(
+            "analysis_migration", "migrations/versions/0005_static_analysis.py"
+        )
+        migration = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(migration)
+        with engine.begin() as connection:
+            with Operations.context(MigrationContext.configure(connection)):
+                migration.upgrade()
+        spec = importlib.util.spec_from_file_location(
+            "review_migration", "migrations/versions/0006_ai_review.py"
+        )
+        migration = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(migration)
+        with engine.begin() as connection:
+            with Operations.context(MigrationContext.configure(connection)):
+                migration.upgrade()
         yield engine
     finally:
         engine.dispose()

@@ -1,0 +1,14 @@
+[
+  {
+    "variant": "app_import_default",
+    "exit": 0,
+    "native_diagnostics": 0,
+    "twenty_connections_passed": true
+  },
+  {
+    "variant": "app_import_gss_disabled",
+    "exit": 0,
+    "native_diagnostics": 0,
+    "twenty_connections_passed": true
+  }
+]

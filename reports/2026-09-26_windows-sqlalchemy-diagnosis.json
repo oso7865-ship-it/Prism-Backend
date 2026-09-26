@@ -1,0 +1,6 @@
+{
+  "variant": "sqlalchemy_async_ten_connections",
+  "exit": 0,
+  "native_diagnostics": 0,
+  "passed": true
+}

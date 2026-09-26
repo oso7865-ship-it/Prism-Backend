@@ -5,6 +5,7 @@ from uuid import UUID
 from fastapi import Header
 
 from app.domain.auth.exceptions import SessionExpired
+from app.domain.auth.installation import InstallState as InstallState
 from app.domain.auth.service import AuthService
 from app.domain.user.api import UserSnapshot
 

@@ -1,0 +1,13 @@
+{
+  "exit": 0,
+  "origins": [
+    "NATIVE_ADDRESS 0x7ffb3cb42769",
+    "NATIVE_ORIGIN npggNT64.des offset=0x2769",
+    "NATIVE_ADDRESS 0x7ffb3cb42769",
+    "NATIVE_ORIGIN npggNT64.des offset=0x2769"
+  ],
+  "diagnostics": 2,
+  "summary": [
+    "8 passed in 12.39s"
+  ]
+}

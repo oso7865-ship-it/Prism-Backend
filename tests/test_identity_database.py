@@ -37,7 +37,7 @@ MODELS = {
 
 
 def test_metadata_and_dependency_boundary():
-    assert set(Base.metadata.tables) == TABLES
+    assert TABLES <= set(Base.metadata.tables)
     assert not any(table.foreign_keys for table in Base.metadata.tables.values())
     for path in Path("app/shared").rglob("*.py"):
         for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
@@ -105,7 +105,7 @@ def row(table):
 @pytest.mark.integration
 def test_catalog_and_orm_roundtrip(db):
     catalog = inspect(db)
-    assert set(catalog.get_table_names()) == TABLES
+    assert TABLES <= set(catalog.get_table_names())
     with Session(db) as session:
         for table, model in MODELS.items():
             assert not catalog.get_foreign_keys(table)

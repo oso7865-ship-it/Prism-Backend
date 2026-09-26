@@ -1,7 +1,7 @@
 from typing import Literal
 from urllib.parse import urlsplit
 
-from pydantic import SecretStr, field_validator, model_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.engine import make_url
 
@@ -12,8 +12,19 @@ class Settings(BaseSettings):
     app_env: Literal["development", "test"] = "development"
     database_url: SecretStr | None = None
     ai_enabled: bool = False
+    deepseek_api_key: SecretStr | None = None
+    deepseek_model: Literal["deepseek-flash", "deepseek-v4-pro", "deepseek-chat"] = "deepseek-flash"
+    ai_daily_limit: int = Field(default=5, ge=1, le=5)
     job_runner_mode: Literal["disabled"] = "disabled"
     auth_enabled: bool = False
+    github_app_id: int | None = Field(default=None, gt=0)
+    github_app_slug: str | None = None
+    github_app_client_id: str | None = None
+    github_app_client_secret: SecretStr | None = None
+    github_app_private_key: SecretStr | None = None
+    github_webhook_secret: SecretStr | None = None
+    sync_runner_enabled: bool = False
+    analysis_runner_enabled: bool = False
     github_oauth_client_id: str | None = None
     github_oauth_client_secret: SecretStr | None = None
     jwt_signing_key: SecretStr | None = None
@@ -34,6 +45,29 @@ class Settings(BaseSettings):
             or parsed.password
         ):
             raise ValueError("Only bare local HTTP origins are supported in development")
+        return value
+
+    @property
+    def github_app_ready(self) -> bool:
+        return bool(
+            self.github_app_id
+            and self.github_app_slug
+            and self.github_app_client_id
+            and self.github_app_client_secret
+            and self.github_app_private_key
+        )
+
+    @property
+    def app_callback_url(self) -> str:
+        return self.public_api_origin + "/api/v1/github-app/callback"
+
+    @field_validator("github_app_slug")
+    @classmethod
+    def valid_slug(cls, value: str | None) -> str | None:
+        import re
+
+        if value is not None and not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,99}", value):
+            raise ValueError("Invalid GitHub App slug")
         return value
 
     @property
@@ -64,8 +98,15 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def disable_unimplemented_integrations(self) -> "Settings":
-        if self.ai_enabled:
-            raise ValueError("AI integration is not implemented")
+        if self.ai_enabled and not (
+            self.deepseek_api_key
+            and self.database_url
+            and self.auth_ready
+            and self.github_app_ready
+        ):
+            raise ValueError(
+                "AI requires DeepSeek key, database, authentication and GitHub App settings"
+            )
         if self.jwt_signing_key and len(self.jwt_signing_key.get_secret_value().encode()) < 32:
             raise ValueError("JWT_SIGNING_KEY must contain at least 32 bytes")
         if urlsplit(self.public_app_origin).hostname != urlsplit(self.public_api_origin).hostname:

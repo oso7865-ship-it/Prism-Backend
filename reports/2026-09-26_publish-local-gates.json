@@ -1,0 +1,92 @@
+[
+  {
+    "repository": "prism-backend",
+    "check": "validate-project-adapter",
+    "exit": 0
+  },
+  {
+    "repository": "prism-backend",
+    "check": "validate-no-secrets",
+    "exit": 1
+  },
+  {
+    "repository": "prism-backend",
+    "check": "validate-work-records",
+    "exit": 1
+  },
+  {
+    "repository": "prism-backend",
+    "check": "validate-docs",
+    "exit": 0
+  },
+  {
+    "repository": "prism-backend",
+    "check": "validate-skills",
+    "exit": 0
+  },
+  {
+    "repository": "prism-backend",
+    "check": "validate-references",
+    "exit": 0
+  },
+  {
+    "repository": "prism-backend",
+    "check": "validate-report-consistency",
+    "exit": 0
+  },
+  {
+    "repository": "prism-backend",
+    "check": "validate-no-personal-paths",
+    "exit": 0
+  },
+  {
+    "repository": "prism-backend",
+    "check": "validate-harness",
+    "exit": 0
+  },
+  {
+    "repository": "prism-frontend",
+    "check": "validate-project-adapter",
+    "exit": 0
+  },
+  {
+    "repository": "prism-frontend",
+    "check": "validate-no-secrets",
+    "exit": 1
+  },
+  {
+    "repository": "prism-frontend",
+    "check": "validate-work-records",
+    "exit": 1
+  },
+  {
+    "repository": "prism-frontend",
+    "check": "validate-docs",
+    "exit": 0
+  },
+  {
+    "repository": "prism-frontend",
+    "check": "validate-skills",
+    "exit": 0
+  },
+  {
+    "repository": "prism-frontend",
+    "check": "validate-references",
+    "exit": 0
+  },
+  {
+    "repository": "prism-frontend",
+    "check": "validate-report-consistency",
+    "exit": 0
+  },
+  {
+    "repository": "prism-frontend",
+    "check": "validate-no-personal-paths",
+    "exit": 0
+  },
+  {
+    "repository": "prism-frontend",
+    "check": "validate-harness",
+    "exit": 0
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "variant": "default",
+    "exit": 0,
+    "native_diagnostics": 0,
+    "ten_connections_passed": true
+  },
+  {
+    "variant": "gss_disabled",
+    "exit": 0,
+    "native_diagnostics": 0,
+    "ten_connections_passed": true
+  },
+  {
+    "variant": "ssl_disabled",
+    "exit": 0,
+    "native_diagnostics": 0,
+    "ten_connections_passed": true
+  }
+]

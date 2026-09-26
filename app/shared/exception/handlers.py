@@ -19,6 +19,8 @@ def error_response(code: str, message: str, status: int) -> JSONResponse:
 def register_handlers(app: FastAPI) -> None:
     async def domain_error(request: Request, exc: AppException) -> JSONResponse:
         status = {
+            ErrorKind.NOT_FOUND: 404,
+            ErrorKind.CONFLICT: 409,
             ErrorKind.UNAUTHORIZED: 401,
             ErrorKind.FORBIDDEN: 403,
             ErrorKind.INVALID_INPUT: 422,

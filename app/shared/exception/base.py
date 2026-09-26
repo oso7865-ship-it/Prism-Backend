@@ -2,6 +2,8 @@ from enum import StrEnum
 
 
 class ErrorKind(StrEnum):
+    NOT_FOUND = "NOT_FOUND"
+    CONFLICT = "CONFLICT"
     UNAUTHORIZED = "UNAUTHORIZED"
     FORBIDDEN = "FORBIDDEN"
     INVALID_INPUT = "INVALID_INPUT"
