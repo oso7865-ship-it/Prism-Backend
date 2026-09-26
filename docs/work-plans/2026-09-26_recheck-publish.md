@@ -5,7 +5,9 @@
 - [x] 수정 버전 rh1-3b9b53482a3791ef로 합성7사례 각1회 유료 재평가, 자동 재시도0: 자동6/7 PASS, 문맥 부족 실패 유지
 - [x] Windows native 예외의 모듈/위치 확인: npggNT64.des+0x2769, nProtect GameGuard. 외부 모듈 동작 근본 수정/제거는 범위 밖
 - [x] 게시 전 기존 문서의 현재/과거 상태 구분, Report 형식 정정, migration 구문 lint 수정
-- [ ] 아키텍처 문서·도구 검증 후 main 게시
-- [ ] backend/frontend architecture revision 갱신, local 빌드·테스트·secret/Git 제외 검수
-- [ ] dev 커밋·푸시 및 원격 CI 확인
-- [ ] 관측된 Git/CI 상태와 남은 한계 기록
+- [x] 아키텍처 문서·도구 검증 후 main 게시
+- [x] backend/frontend architecture revision 갱신, local 빌드·테스트·secret/Git 제외 검수
+- [x] dev 커밋·푸시 및 원격 CI 확인
+- [x] 관측된 Git/CI 상태와 남은 한계 기록
+
+결과: reports/2026-09-26_recheck-publish_report.md. 평가·조사·게시 단계 수행 완료, AI 오탐 및 깨끗한 Windows 세션 검증은 잔여 한계로 보존.

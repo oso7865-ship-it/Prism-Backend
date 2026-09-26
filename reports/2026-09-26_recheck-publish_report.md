@@ -2,7 +2,7 @@
 
 > 작성일: 2026-09-26
 > 작업 브랜치: dev
-> 커밋/PR: 게시 준비 중
+> 커밋/PR: 구현 게시259c3caa62c482d26c1ab005b62f4338083c3171, 후속 문서 기록 포함
 > 작업 범위: M
 > 적용 스킬: git-workflow, terminal-ops, troubleshooting-report
 > 적용 Gate: Security Gate, Document Gate
@@ -56,3 +56,12 @@ AI 문맥 부족 오탐은 재평가에서도 남았다. 후속은 NEEDS_CONTEXT
 - frontend [CI36245383786](https://github.com/oso7865-ship-it/Prism-Frontend/actions/runs/36245383786) success. main 병합/배포는 아님.
 - backend [CI36245379214](https://github.com/oso7865-ship-it/Prism-Backend/actions/runs/36245379214) 실패: Linux mypy에서 subprocess.CREATE_NO_WINDOW가 없는 속성으로 판정됐다. os.name 삼항식을 sys.platform == win32의 명시적 분기로 바꿔 타입 검사도 플랫폼 경계를 인식하게 수정했다. Windows에서는 계속 숨김 창, Linux에서는 creationflags0으로 기존 실행 의도를 유지한다.
 - 수정 후 Windows/Linux 두 플랫폼 mypy 및 프로세스 취소/타임아웃 포함 정적 규칙 suite를 재검증하고 후속 커밋·CI로 확인한다. 로컬 Windows 검사만으로 Linux 정합성을 추정하지 않는 것이 재발 방지 기준이다.
+
+## 8. 수정 검증·게시 확정
+
+- parser_process의 플랫폼 분리 후 mypy110파일 Linux/Windows 각각 PASS, 정적 규칙42개 PASS. backend dev259c3caa62c482d26c1ab005b62f4338083c3171 push 완료.
+- [backend 수정 CI36245552982](https://github.com/oso7865-ship-it/Prism-Backend/actions/runs/36245552982) success 확인: Linux 타입/포맷, migration upgrade→base→head, drift 검사, 전체 테스트, 문서/비밀값/하네스 검증 포함.
+- frontend9ebb019e2ec961ba73e3c30e0371862e55938793 및 architecture cac51a07516cd2e36b3bf4cc45c9a17fad050002의 위 CI도 success. backend/frontend main 병합 및 실제 배포는 미수행이다.
+- [최종 로컬 비밀값·기록 게이트](2026-09-26_publish-final-gates.json)는 양 저장소 모두 exit0. 이전 실패 gate 파일은 진단 이력이며 이 결과로 대체된다. 실제 비밀값 검사/키 파일 제외도 통과했다.
+- 진행 Job0 확인 후 로컬 API를 게시 코드로 재시작했다. 후속 상태 기록은 코드 변경 없이 별도 커밋으로 공유한다. 이 문서의 CI 증거는 명시된 구현 커밋 대상이며 이후 기록 커밋의 CI 결과는 GitHub에서 별도로 확인한다.
+- 최종 한계: AI 문맥 부족 평가 FAIL 유지, GameGuard가 로드되지 않은 깨끗한 Windows 세션 재검증 필요. 어느 것도 CI success로 해결됐다고 해석하지 않는다.
