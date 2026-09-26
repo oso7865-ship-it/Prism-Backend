@@ -26,6 +26,8 @@ Docker는 Python3.12·uv lock·비root·단일worker·PORT·접근로그OFF·런
 - [x] 운영 점검·이관·migration·rollback·잔여 체크리스트
 - [x] UI 가능한 실제 경로·모바일/키보드 점검
 - [x] 전체 테스트·타입·문서·비밀값 검사
-- [ ] architecture 먼저 게시, 소비 revision 갱신, backend/frontend dev 게시·CI
+- [x] architecture 먼저 게시, 소비 revision 갱신, backend/frontend dev 게시·CI
 
 Security 사전 검토: 권한 범위는 유지하고 production에서 추가 제약만 적용한다. 외부 전송/키발급/실배포 없음. DB 사전 검토: 삭제는 이번 검증용 고유 스키마로만 제한하고 검증 전후 식별자를 확인한다. 사용자 승인한 테스트 DB 복구 검증 범위의 정리만 수행한다.
+
+최종 구현 게시: architecture c9275e6, backend85038e2, frontend98a4fce와 해당 CI 성공 확인. 결과 문서는 후속 커밋으로 공유한다. 상세 검증과 운영 미정값은 reports/2026-09-27_predeployment_report.md 및 docs/PREDEPLOYMENT.md.

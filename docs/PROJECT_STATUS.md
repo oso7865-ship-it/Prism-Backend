@@ -71,3 +71,5 @@ AI 근거 계약을 서버 검증과 UI에 연결했고 static-1.1.0은29개 규
 주소·DB provider/CA·운영 키·비용/알림 수신처 확정과 실제 공개 OAuth/Webhook은 후속이다. AI6/7 품질과 규칙9개는 보류한다. 임의의 배포 완료율을 추가 산출하지 않는다. 현재 게시 결과는 최신 Report를 따른다.
 
 최종 Origin 보완 후 backend224 tests PASS. Windows 추가 전체 회귀에서 GameGuard 모듈 로드/native진단2회가 다시 관찰되어 환경 의존 이슈는 유지한다. 직전222개/진단0은 당시 실행 결과다. Linux CI와 구분하며 최종 게시 SHA는 최신 Report를 따른다.
+
+최종 Linux CI36255001493: backend85038e2 전체225 tests·migration왕복/drift·Docker build/100소형파일 PASS. frontend98a4fce/51 tests·architecturec9275e6 CI 성공. 배포 전 구현 게시 완료이며 실제 배포는 미수행.
