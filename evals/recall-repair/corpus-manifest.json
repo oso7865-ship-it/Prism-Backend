@@ -1,0 +1,16 @@
+{
+  "scope": "Labels and rubric never sent to model; test code is legitimate contract evidence",
+  "independent_human_review": false,
+  "corpora": {
+    "core-v2": {
+      "sha256": "ea1bfd85c034839cd0a0fcfb2c0ecc2da12d682ecf6b48cefdfa9d4e9222c91a",
+      "cases": 6,
+      "defects": 2
+    },
+    "holdout-v1": {
+      "sha256": "14db1777a489fdfbf307c35f2ba3207f3eb4145cc39f4bcfd70d92e654c0fe19",
+      "cases": 8,
+      "defects": 4
+    }
+  }
+}

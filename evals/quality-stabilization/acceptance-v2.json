@@ -1,0 +1,86 @@
+[
+  {
+    "id": "python-short-circuit-safe",
+    "path": "size.py",
+    "patch": "@@ -0,0 +1,4 @@\n+def size(values: list[int] | None) -> int:\n+    if values is None or len(values) == 0:\n+        return 0\n+    return len(values)",
+    "expected_lines": []
+  },
+  {
+    "id": "js-short-circuit-safe",
+    "path": "size.js",
+    "patch": "@@ -0,0 +1,4 @@\n+export function size(values) {\n+  if (values === null || values.length === 0) return 0;\n+  return values.length;\n+}",
+    "expected_lines": []
+  },
+  {
+    "id": "ts-disjunction-safe",
+    "path": "size.ts",
+    "patch": "@@ -0,0 +1,4 @@\n+export function size(values: string | null): number {\n+  if (values !== null && values.length > 0) return values.length;\n+  return 0;\n+}",
+    "expected_lines": []
+  },
+  {
+    "id": "java-disjunction-safe",
+    "path": "Size.java",
+    "patch": "@@ -0,0 +1,6 @@\n+class Size {\n+  static int size(String value) {\n+    if (value != null && value.length() > 0) return value.length();\n+    return 0;\n+  }\n+}",
+    "expected_lines": []
+  },
+  {
+    "id": "java-zero-array-safe",
+    "path": "Empty.java",
+    "patch": "@@ -0,0 +1,5 @@\n+class Empty {\n+  static byte[] empty() {\n+    return new byte[0];\n+  }\n+}",
+    "expected_lines": []
+  },
+  {
+    "id": "python-zero-range-safe",
+    "path": "empty.py",
+    "patch": "@@ -0,0 +1,2 @@\n+def empty() -> list[int]:\n+    return list(range(0, 0, 1))",
+    "expected_lines": []
+  },
+  {
+    "id": "python-short-circuit-bug",
+    "path": "size.py",
+    "patch": "@@ -0,0 +1,4 @@\n+def size(values: list[int] | None) -> int:\n+    if values is None and len(values) == 0:\n+        return 0\n+    return len(values)",
+    "expected_lines": [
+      2
+    ]
+  },
+  {
+    "id": "js-short-circuit-bug",
+    "path": "size.js",
+    "patch": "@@ -0,0 +1,4 @@\n+export function size(values) {\n+  if (values === null && values.length === 0) return 0;\n+  return values.length;\n+}",
+    "expected_lines": [
+      2
+    ]
+  },
+  {
+    "id": "ts-disjunction-bug",
+    "path": "size.ts",
+    "patch": "@@ -0,0 +1,4 @@\n+export function size(values: string | null): number {\n+  if (values !== null || values.length > 0) return values.length;\n+  return 0;\n+}",
+    "expected_lines": [
+      2
+    ]
+  },
+  {
+    "id": "java-disjunction-bug",
+    "path": "Size.java",
+    "patch": "@@ -0,0 +1,6 @@\n+class Size {\n+  static int size(String value) {\n+    if (value != null || value.length() > 0) return value.length();\n+    return 0;\n+  }\n+}",
+    "expected_lines": [
+      3
+    ]
+  },
+  {
+    "id": "java-zero-array-bug",
+    "path": "Empty.java",
+    "patch": "@@ -0,0 +1,5 @@\n+class Empty {\n+  static byte[] empty() {\n+    return new byte[-2];\n+  }\n+}",
+    "expected_lines": [
+      3
+    ]
+  },
+  {
+    "id": "python-zero-range-bug",
+    "path": "empty.py",
+    "patch": "@@ -0,0 +1,2 @@\n+def empty() -> list[int]:\n+    return list(range(0, 0, 0))",
+    "expected_lines": [
+      2
+    ]
+  }
+]

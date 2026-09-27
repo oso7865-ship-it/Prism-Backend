@@ -31,6 +31,22 @@ def test_ai_cannot_be_enabled_before_implementation() -> None:
         Settings(_env_file=None, ai_enabled=True)
 
 
+def test_ai_daily_limit_defaults_to_30(monkeypatch) -> None:
+    monkeypatch.delenv("AI_DAILY_LIMIT", raising=False)
+    assert Settings(_env_file=None).ai_daily_limit == 30
+
+
+@pytest.mark.parametrize("limit", [1, 5, 30])
+def test_ai_daily_limit_can_be_lowered(limit) -> None:
+    assert Settings(_env_file=None, ai_daily_limit=limit).ai_daily_limit == limit
+
+
+@pytest.mark.parametrize("limit", [0, 31])
+def test_ai_daily_limit_rejects_out_of_range(limit) -> None:
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None, ai_daily_limit=limit)
+
+
 def test_database_secret_is_masked_and_wrong_driver_is_rejected() -> None:
     secret = "canary-password"
     settings = Settings(

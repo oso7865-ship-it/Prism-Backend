@@ -67,6 +67,12 @@ class PRService:
                 raise missing()
             return sync_view(row)
 
+    async def latest(self, uid: UUID, wid: UUID, rid: UUID) -> SyncView | None:
+        async with transaction(self.ready()) as s:
+            repo = await RepositoryAccess(s).require(uid, wid, rid)
+            row = await store.latest(s, wid, rid, repo.connection_generation)
+            return sync_view(row) if row else None
+
     async def listing(self, uid: UUID, wid: UUID, rid: UUID, cursor: UUID | None) -> list[PRView]:
         async with transaction(self.ready()) as s:
             await RepositoryAccess(s).require(uid, wid, rid)

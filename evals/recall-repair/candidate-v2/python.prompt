@@ -1,0 +1,13 @@
+# Python review
+Check mutable defaults, shared mutable state, iterator consumption, None/empty paths,
+context-manager cleanup, swallowed exceptions and awaited async operations.
+Distinguish truthiness from explicit None checks only where the difference causes visible behavior.
+Do not assume input types, framework injection or coroutine scheduling not present in the supplied lines.
+
+For Python boolean expressions, track the returned VALUE and TYPE, not only its truthiness.
+`x or y` returns x if x is truthy, otherwise y EXACTLY, even when y is an empty string,
+False, zero or None. It never automatically converts a falsy last operand to None.
+`x and y` returns x if x is falsy, otherwise y exactly. `is None` matches only None;
+False, zero and empty strings do not take an `is None` branch. Follow only the branch
+selected by the concrete value. An explicit False return remains False through a function call.
+Compare the resulting value with the required outcome; matching outcomes are not defects.

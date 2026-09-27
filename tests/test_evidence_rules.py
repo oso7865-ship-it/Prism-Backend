@@ -64,9 +64,10 @@ def test_evidence_keeps_uncertainty_visible_and_does_not_silently_filter():
     result = validate_result(
         response(basis="NEEDS_CONTEXT", assumptions=["null 입력 가능 여부"]), bundle
     )
-    assert len(result["issues"]) == 1
-    assert result["issues"][0]["assumptions"] == ["null 입력 가능 여부"]
-    assert "file_id" not in result["issues"][0]
+    assert result["issues"] == []
+    assert len(result["questions"]) == 1
+    assert result["questions"][0]["assumptions"] == ["null 입력 가능 여부"]
+    assert "file_id" not in result["questions"][0]
 
 
 @pytest.mark.parametrize(

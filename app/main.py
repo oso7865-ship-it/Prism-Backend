@@ -17,6 +17,7 @@ from app.domain.pull_request.router import pr_router
 from app.domain.pull_request.service import SyncWorker
 from app.domain.repository.router import repository_router
 from app.domain.review.provider import DeepSeekProvider
+from app.domain.review.reranker import LocalReranker
 from app.domain.review.router import review_router
 from app.domain.review.worker import ReviewWorker
 from app.domain.user.router import user_router
@@ -68,7 +69,10 @@ def create_app(
                 handlers["ANALYZE_PR"] = AnalysisWorker(engine, github_app).execute
             if settings.ai_enabled:
                 handlers["EXPLAIN_FINDINGS"] = ReviewWorker(
-                    engine, github_app, DeepSeekProvider(settings)
+                    engine,
+                    github_app,
+                    DeepSeekProvider(settings),
+                    LocalReranker() if settings.review_reranker_enabled else None,
                 ).execute
             runner = asyncio.create_task(
                 run_jobs(
@@ -123,7 +127,7 @@ def create_app(
     app.include_router(repository_router(engine, AuthAPI(auth)))
     app.include_router(pr_router(engine, AuthAPI(auth), github_app))
     app.include_router(analysis_router(engine, AuthAPI(auth), settings.analysis_runner_enabled))
-    app.include_router(review_router(engine, AuthAPI(auth), settings))
+    app.include_router(review_router(engine, AuthAPI(auth), settings, github_app))
     app.include_router(
         github_router(ConnectRepository(engine, github_app), AuthAPI(auth), settings)
     )

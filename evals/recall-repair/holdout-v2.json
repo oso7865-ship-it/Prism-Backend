@@ -1,0 +1,142 @@
+[
+  {
+    "id": "python-zip-bug",
+    "path": "totals.py",
+    "patch": "@@ -1,9 +1,10 @@\n def total(prices: list[int], counts: list[int]) -> int:\n+    return sum(p * n for p, n in zip(prices, counts))\n \n def test_contract():\n     assert total([3, 4], [2, 1]) == 10\n     try:\n         total([3, 4], [2])\n     except ValueError:\n         return\n     raise AssertionError(\"Mismatched lengths must be rejected, not silently truncated\")",
+    "expected_locations": [
+      [
+        2,
+        2
+      ]
+    ],
+    "expected_lines": [],
+    "contract": "Reject unequal lengths; zip otherwise silently ignores unmatched entries.",
+    "kind": "authored-holdout",
+    "label_review": "agent-oracle-and-source-inspected; independent-human-review-pending",
+    "provenance": null,
+    "rubric": {
+      "required_behavior": "Reject unequal lengths; zip otherwise silently ignores unmatched entries.",
+      "reject": "unreachable trigger, wrong effect, invented contract, duplicate or generic question"
+    }
+  },
+  {
+    "id": "python-zip-fixed",
+    "path": "totals.py",
+    "patch": "@@ -1,10 +1,11 @@\n def total(prices: list[int], counts: list[int]) -> int:\n+    if len(prices) != len(counts): raise ValueError(\"length mismatch\")\n     return sum(p * n for p, n in zip(prices, counts))\n \n def test_contract():\n     assert total([3, 4], [2, 1]) == 10\n     try:\n         total([3, 4], [2])\n     except ValueError:\n         return\n     raise AssertionError(\"Mismatched lengths must be rejected, not silently truncated\")",
+    "expected_locations": [],
+    "expected_lines": [],
+    "contract": "Reject unequal lengths; zip otherwise silently ignores unmatched entries.",
+    "kind": "authored-holdout",
+    "label_review": "agent-oracle-and-source-inspected; independent-human-review-pending",
+    "provenance": null,
+    "rubric": {
+      "required_behavior": "Reject unequal lengths; zip otherwise silently ignores unmatched entries.",
+      "reject": "unreachable trigger, wrong effect, invented contract, duplicate or generic question"
+    }
+  },
+  {
+    "id": "java-ratio-bug",
+    "path": "Ratio.java",
+    "patch": "@@ -1,9 +1,10 @@\n class Ratio {\n     static double ratio(int used, int total) {\n         if (total <= 0) throw new IllegalArgumentException();\n+        return used / total;\n     }\n     static void testContract() {\n         if (ratio(1, 2) != 0.5) throw new AssertionError(\"fraction must be preserved\");\n         if (ratio(0, 2) != 0.0) throw new AssertionError(\"zero numerator is valid\");\n     }\n }",
+    "expected_locations": [
+      [
+        4,
+        4
+      ]
+    ],
+    "expected_lines": [],
+    "contract": "Positive total is guarded; ratio(1,2) must be0.5, not integer-truncated0.",
+    "kind": "authored-holdout",
+    "label_review": "agent-oracle-and-source-inspected; independent-human-review-pending",
+    "provenance": null,
+    "rubric": {
+      "required_behavior": "Positive total is guarded; ratio(1,2) must be0.5, not integer-truncated0.",
+      "reject": "unreachable trigger, wrong effect, invented contract, duplicate or generic question"
+    }
+  },
+  {
+    "id": "java-ratio-fixed",
+    "path": "Ratio.java",
+    "patch": "@@ -1,9 +1,10 @@\n class Ratio {\n     static double ratio(int used, int total) {\n         if (total <= 0) throw new IllegalArgumentException();\n+        return (double) used / total;\n     }\n     static void testContract() {\n         if (ratio(1, 2) != 0.5) throw new AssertionError(\"fraction must be preserved\");\n         if (ratio(0, 2) != 0.0) throw new AssertionError(\"zero numerator is valid\");\n     }\n }",
+    "expected_locations": [],
+    "expected_lines": [],
+    "contract": "Positive total is guarded; ratio(1,2) must be0.5, not integer-truncated0.",
+    "kind": "authored-holdout",
+    "label_review": "agent-oracle-and-source-inspected; independent-human-review-pending",
+    "provenance": null,
+    "rubric": {
+      "required_behavior": "Positive total is guarded; ratio(1,2) must be0.5, not integer-truncated0.",
+      "reject": "unreachable trigger, wrong effect, invented contract, duplicate or generic question"
+    }
+  },
+  {
+    "id": "javascript-sum-bug",
+    "path": "total.js",
+    "patch": "@@ -1,6 +1,7 @@\n function total(values) {\n+  return values.reduce((a, b) => a + b);\n }\n function testContract() {\n   if (total([]) !== 0) throw new Error(\"empty list must sum to zero\");\n   if (total([2, 3]) !== 5) throw new Error(\"sum mismatch\");\n }",
+    "expected_locations": [
+      [
+        2,
+        2
+      ]
+    ],
+    "expected_lines": [],
+    "contract": "Empty arrays are valid and must return0; reduce without initial value throws.",
+    "kind": "authored-holdout",
+    "label_review": "agent-oracle-and-source-inspected; independent-human-review-pending",
+    "provenance": null,
+    "rubric": {
+      "required_behavior": "Empty arrays are valid and must return0; reduce without initial value throws.",
+      "reject": "unreachable trigger, wrong effect, invented contract, duplicate or generic question"
+    }
+  },
+  {
+    "id": "javascript-sum-fixed",
+    "path": "total.js",
+    "patch": "@@ -1,6 +1,7 @@\n function total(values) {\n+  return values.reduce((a, b) => a + b, 0);\n }\n function testContract() {\n   if (total([]) !== 0) throw new Error(\"empty list must sum to zero\");\n   if (total([2, 3]) !== 5) throw new Error(\"sum mismatch\");\n }",
+    "expected_locations": [],
+    "expected_lines": [],
+    "contract": "Empty arrays are valid and must return0; reduce without initial value throws.",
+    "kind": "authored-holdout",
+    "label_review": "agent-oracle-and-source-inspected; independent-human-review-pending",
+    "provenance": null,
+    "rubric": {
+      "required_behavior": "Empty arrays are valid and must return0; reduce without initial value throws.",
+      "reject": "unreachable trigger, wrong effect, invented contract, duplicate or generic question"
+    }
+  },
+  {
+    "id": "typescript-retries-bug",
+    "path": "options.ts",
+    "patch": "@@ -1,6 +1,7 @@\n function retryCount(options: { retries?: number }): number {\n+  return options.retries || 3;\n }\n function testContract() {\n   if (retryCount({ retries: 0 }) !== 0) throw new Error(\"zero explicitly disables retries\");\n   if (retryCount({}) !== 3) throw new Error(\"only missing values use default3\");\n }",
+    "expected_locations": [
+      [
+        2,
+        2
+      ]
+    ],
+    "expected_lines": [],
+    "contract": "Zero must be preserved; only undefined options use3. Do not invent requirements for negatives.",
+    "kind": "authored-holdout",
+    "label_review": "agent-oracle-and-source-inspected; independent-human-review-pending",
+    "provenance": null,
+    "rubric": {
+      "required_behavior": "Zero must be preserved; only undefined options use3. Do not invent requirements for negatives.",
+      "reject": "unreachable trigger, wrong effect, invented contract, duplicate or generic question"
+    }
+  },
+  {
+    "id": "typescript-retries-fixed",
+    "path": "options.ts",
+    "patch": "@@ -1,6 +1,7 @@\n function retryCount(options: { retries?: number }): number {\n+  return options.retries ?? 3;\n }\n function testContract() {\n   if (retryCount({ retries: 0 }) !== 0) throw new Error(\"zero explicitly disables retries\");\n   if (retryCount({}) !== 3) throw new Error(\"only missing values use default3\");\n }",
+    "expected_locations": [],
+    "expected_lines": [],
+    "contract": "Zero must be preserved; only undefined options use3. Do not invent requirements for negatives.",
+    "kind": "authored-holdout",
+    "label_review": "agent-oracle-and-source-inspected; independent-human-review-pending",
+    "provenance": null,
+    "rubric": {
+      "required_behavior": "Zero must be preserved; only undefined options use3. Do not invent requirements for negatives.",
+      "reject": "unreachable trigger, wrong effect, invented contract, duplicate or generic question"
+    }
+  }
+]

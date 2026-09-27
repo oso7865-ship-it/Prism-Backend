@@ -23,6 +23,13 @@ def pr_router(engine: AsyncEngine | None, auth: AuthAPI, github: GitHubClient) -
             await service.sync(p.user_id, wid, rid, body.page, body.pr_number)
         )
 
+    @router.get("/repositories/{rid}/syncs/latest", response_model=SyncResponse | None)
+    async def latest_sync(
+        wid: UUID, rid: UUID, p: Annotated[CurrentPrincipal, principal]
+    ) -> SyncResponse | None:
+        row = await service.latest(p.user_id, wid, rid)
+        return SyncResponse.model_validate(row) if row else None
+
     @router.get("/repositories/{rid}/syncs/{sid}", response_model=SyncResponse)
     async def sync_status(
         wid: UUID, rid: UUID, sid: UUID, p: Annotated[CurrentPrincipal, principal]

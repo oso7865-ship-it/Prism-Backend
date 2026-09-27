@@ -1,0 +1,170 @@
+[
+  {
+    "id": "python-short-circuit-safe",
+    "path": "size.py",
+    "patch": "@@ -0,0 +1,4 @@\n+def size(values: list[int] | None) -> int:\n+    if values is None or len(values) == 0:\n+        return 0\n+    return len(values)",
+    "expected_lines": []
+  },
+  {
+    "id": "js-short-circuit-safe",
+    "path": "size.js",
+    "patch": "@@ -0,0 +1,4 @@\n+export function size(values) {\n+  if (values === null || values.length === 0) return 0;\n+  return values.length;\n+}",
+    "expected_lines": []
+  },
+  {
+    "id": "ts-disjunction-safe",
+    "path": "size.ts",
+    "patch": "@@ -0,0 +1,4 @@\n+export function size(values: string | null): number {\n+  if (values !== null && values.length > 0) return values.length;\n+  return 0;\n+}",
+    "expected_lines": []
+  },
+  {
+    "id": "java-disjunction-safe",
+    "path": "Size.java",
+    "patch": "@@ -0,0 +1,6 @@\n+class Size {\n+  static int size(String value) {\n+    if (value != null && value.length() > 0) return value.length();\n+    return 0;\n+  }\n+}",
+    "expected_lines": []
+  },
+  {
+    "id": "java-zero-array-safe",
+    "path": "Empty.java",
+    "patch": "@@ -0,0 +1,5 @@\n+class Empty {\n+  static byte[] empty() {\n+    return new byte[0];\n+  }\n+}",
+    "expected_lines": []
+  },
+  {
+    "id": "python-zero-range-safe",
+    "path": "empty.py",
+    "patch": "@@ -0,0 +1,2 @@\n+def empty() -> list[int]:\n+    return list(range(0, 0, 1))",
+    "expected_lines": []
+  },
+  {
+    "id": "python-short-circuit-bug",
+    "path": "size.py",
+    "patch": "@@ -0,0 +1,4 @@\n+def size(values: list[int] | None) -> int:\n+    if values is None and len(values) == 0:\n+        return 0\n+    return len(values)",
+    "expected_lines": [
+      2
+    ]
+  },
+  {
+    "id": "js-short-circuit-bug",
+    "path": "size.js",
+    "patch": "@@ -0,0 +1,4 @@\n+export function size(values) {\n+  if (values === null && values.length === 0) return 0;\n+  return values.length;\n+}",
+    "expected_lines": [
+      2
+    ]
+  },
+  {
+    "id": "ts-disjunction-bug",
+    "path": "size.ts",
+    "patch": "@@ -0,0 +1,4 @@\n+export function size(values: string | null): number {\n+  if (values !== null || values.length > 0) return values.length;\n+  return 0;\n+}",
+    "expected_lines": [
+      2
+    ]
+  },
+  {
+    "id": "java-disjunction-bug",
+    "path": "Size.java",
+    "patch": "@@ -0,0 +1,6 @@\n+class Size {\n+  static int size(String value) {\n+    if (value != null || value.length() > 0) return value.length();\n+    return 0;\n+  }\n+}",
+    "expected_lines": [
+      3
+    ]
+  },
+  {
+    "id": "java-zero-array-bug",
+    "path": "Empty.java",
+    "patch": "@@ -0,0 +1,5 @@\n+class Empty {\n+  static byte[] empty() {\n+    return new byte[-2];\n+  }\n+}",
+    "expected_lines": [
+      3
+    ]
+  },
+  {
+    "id": "python-zero-range-bug",
+    "path": "empty.py",
+    "patch": "@@ -0,0 +1,2 @@\n+def empty() -> list[int]:\n+    return list(range(0, 0, 0))",
+    "expected_lines": [
+      2
+    ]
+  },
+  {
+    "id": "py-int-safe",
+    "path": "parse.py",
+    "patch": "@@ -0,0 +1,2 @@\n+def parse():\n+    return int(\"12\")",
+    "expected_lines": []
+  },
+  {
+    "id": "py-int-bug",
+    "path": "parse.py",
+    "patch": "@@ -0,0 +1,2 @@\n+def parse():\n+    return int(\"twelve\")",
+    "expected_lines": [
+      2
+    ]
+  },
+  {
+    "id": "py-min-safe",
+    "path": "smallest.py",
+    "patch": "@@ -0,0 +1,2 @@\n+def smallest():\n+    return min([2, 1])",
+    "expected_lines": []
+  },
+  {
+    "id": "py-min-bug",
+    "path": "smallest.py",
+    "patch": "@@ -0,0 +1,2 @@\n+def smallest():\n+    return min([])",
+    "expected_lines": [
+      2
+    ]
+  },
+  {
+    "id": "js-json-safe",
+    "path": "parse.js",
+    "patch": "@@ -0,0 +1,3 @@\n+export function parse() {\n+  return JSON.parse('{\"a\":1}');\n+}",
+    "expected_lines": []
+  },
+  {
+    "id": "js-json-bug",
+    "path": "parse.js",
+    "patch": "@@ -0,0 +1,3 @@\n+export function parse() {\n+  return JSON.parse('{oops}');\n+}",
+    "expected_lines": [
+      2
+    ]
+  },
+  {
+    "id": "ts-date-safe",
+    "path": "date.ts",
+    "patch": "@@ -0,0 +1,3 @@\n+export function date(): string {\n+  return new Date(\"2026-01-01T00:00:00Z\").toISOString();\n+}",
+    "expected_lines": []
+  },
+  {
+    "id": "ts-date-bug",
+    "path": "date.ts",
+    "patch": "@@ -0,0 +1,3 @@\n+export function date(): string {\n+  return new Date(\"not-a-date\").toISOString();\n+}",
+    "expected_lines": [
+      2
+    ]
+  },
+  {
+    "id": "java-int-safe",
+    "path": "Parse.java",
+    "patch": "@@ -0,0 +1,5 @@\n+class Parse {\n+  static int parse() {\n+    return Integer.parseInt(\"12\");\n+  }\n+}",
+    "expected_lines": []
+  },
+  {
+    "id": "java-int-bug",
+    "path": "Parse.java",
+    "patch": "@@ -0,0 +1,5 @@\n+class Parse {\n+  static int parse() {\n+    return Integer.parseInt(\"twelve\");\n+  }\n+}",
+    "expected_lines": [
+      3
+    ]
+  },
+  {
+    "id": "java-substring-safe",
+    "path": "Prefix.java",
+    "patch": "@@ -0,0 +1,5 @@\n+class Prefix {\n+  static String prefix() {\n+    return \"ab\".substring(0, 2);\n+  }\n+}",
+    "expected_lines": []
+  },
+  {
+    "id": "java-substring-bug",
+    "path": "Prefix.java",
+    "patch": "@@ -0,0 +1,5 @@\n+class Prefix {\n+  static String prefix() {\n+    return \"ab\".substring(0, 9);\n+  }\n+}",
+    "expected_lines": [
+      3
+    ]
+  }
+]

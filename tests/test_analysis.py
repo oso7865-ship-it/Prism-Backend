@@ -31,6 +31,17 @@ BLOB = hashlib.sha1(b"blob " + str(len(SOURCE)).encode() + b"\0" + SOURCE).hexdi
 
 def analysis_provider(req):
     path = req.url.path
+    if path == "/repos/octo/sample/contents/x.js":
+        assert req.url.params["ref"] == "b" * 40
+        return httpx.Response(
+            200,
+            json={
+                "type": "file",
+                "size": len(SOURCE),
+                "encoding": "base64",
+                "content": base64.b64encode(SOURCE).decode(),
+            },
+        )
     if path == "/repos/octo/sample/pulls/1":
         return httpx.Response(
             200, json={"base": {"sha": "a" * 40}, "head": {"sha": "b" * 40}, "changed_files": 1}
@@ -294,7 +305,7 @@ def test_analysis_migration_roundtrip(db):
         migration.downgrade()
         assert "analysis_runs" not in inspect(conn).get_table_names()
         migration.upgrade()
-        assert len(inspect(conn).get_table_names()) == 16
+        assert len(inspect(conn).get_table_names()) == 17
 
 
 @pytest.mark.parametrize("change", ["cancel", "disconnect", "snapshot"])

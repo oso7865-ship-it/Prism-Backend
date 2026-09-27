@@ -5,7 +5,9 @@ AI_ENABLED=false
 # Backend only. AI requires auth, GitHub App, DB and this key.
 DEEPSEEK_API_KEY=
 DEEPSEEK_MODEL=deepseek-flash
-AI_DAILY_LIMIT=5
+AI_DAILY_LIMIT=30
+# Experimental local context ranking. Keep off unless its quality gate passes.
+REVIEW_RERANKER_ENABLED=false
 JOB_RUNNER_MODE=disabled
 POSTGRES_PASSWORD=prism_local_only
 AUTH_ENABLED=false

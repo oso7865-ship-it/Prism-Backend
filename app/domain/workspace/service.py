@@ -60,7 +60,17 @@ class WorkspaceService:
     async def members(self, uid: UUID, wid: UUID, cursor: UUID | None) -> list[MemberView]:
         async with transaction(self.ready()) as s:
             await require(s, uid, wid, "read")
-            return [MemberView(m.user_id, m.role) for m in await store.members(s, wid, cursor)]
+            members = await store.members(s, wid, cursor)
+            profiles = await UserAPI(s).profiles([m.user_id for m in members])
+            return [
+                MemberView(
+                    m.user_id,
+                    m.role,
+                    profiles[m.user_id].login if m.user_id in profiles else None,
+                    profiles[m.user_id].display_name if m.user_id in profiles else None,
+                )
+                for m in members
+            ]
 
     async def invite(self, uid: UUID, wid: UUID, target: int, role: str) -> InvitationCreated:
         async with transaction(self.ready()) as s:

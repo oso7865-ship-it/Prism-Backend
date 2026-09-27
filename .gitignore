@@ -12,3 +12,16 @@ coverage/
 .vscode/
 .idea/
 *.log
+
+# Documentation is versioned only in Prism-Architecture (ADR-ARCH-003).
+*.md
+*.mdx
+*.rst
+*.adoc
+*.pdf
+*.docx
+/docs/
+/reports/
+/GENERAL_HARNESS/
+/PROJECT_HARNESS/
+/app/domain/review/harness/system.txt

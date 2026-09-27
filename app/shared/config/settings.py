@@ -14,9 +14,10 @@ class Settings(BaseSettings):
     app_env: Literal["development", "test", "production"] = "development"
     database_url: SecretStr | None = None
     ai_enabled: bool = False
+    review_reranker_enabled: bool = False
     deepseek_api_key: SecretStr | None = None
     deepseek_model: Literal["deepseek-flash", "deepseek-v4-pro", "deepseek-chat"] = "deepseek-flash"
-    ai_daily_limit: int = Field(default=5, ge=1, le=5)
+    ai_daily_limit: int = Field(default=30, ge=1, le=30)
     job_runner_mode: Literal["disabled"] = "disabled"
     auth_enabled: bool = False
     github_app_id: int | None = Field(default=None, gt=0)

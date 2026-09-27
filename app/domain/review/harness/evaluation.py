@@ -12,7 +12,9 @@ def score(case: dict[str, Any], response: dict[str, Any]) -> dict[str, object]:
         result = validate_result(json.dumps(response), bundle)
     except ValueError:
         return {"id": case["id"], "valid": False, "passed": False}
-    issues = result["issues"]
+    findings, questions = result["issues"], result["questions"]
+    assert isinstance(findings, list) and isinstance(questions, list)
+    issues = findings + questions
     assert isinstance(issues, list)
     expected = set(case["expected_lines"])
     supported = {i["line"] for i in issues if i["basis"] == "SUPPORTED"}

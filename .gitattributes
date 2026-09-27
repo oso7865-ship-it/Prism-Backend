@@ -3,3 +3,11 @@
 *.md text eol=lf
 *.json text eol=lf
 *.yml text eol=lf
+
+# Prompts are byte-preserved executable resources/fixtures.
+*.prompt -text whitespace=cr-at-eol
+
+# Frozen evaluation corpora retain the bytes recorded before paid evaluations.
+evals/recall-repair/core-v2.json -text whitespace=cr-at-eol
+evals/recall-repair/holdout-v1.json -text whitespace=cr-at-eol
+evals/recall-repair/holdout-v2.json -text whitespace=cr-at-eol

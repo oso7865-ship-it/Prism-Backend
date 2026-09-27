@@ -1,0 +1,5 @@
+{
+  "file": "evals\\recall-repair\\holdout-v2.json",
+  "sha256": "3a3330659b46c17dd939583777861d12a4d1f442563388f998b5bcb548f93f86",
+  "reason": "Before any model evaluation: anchor the Python zip defect at the actual changed return, not an inserted pass. v1 preserved and never evaluated."
+}

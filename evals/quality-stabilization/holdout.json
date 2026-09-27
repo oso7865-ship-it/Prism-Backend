@@ -1,0 +1,232 @@
+[
+  {
+    "id": "py-index-safe",
+    "path": "src/tail.py",
+    "patch": "@@ -0,0 +1,4 @@\n+def tail(values: list[int]) -> int | None:\n+    if not values:\n+        return None\n+    return values[len(values) - 1]",
+    "expected_lines": [],
+    "rubric": "Empty list returns None; last index is in bounds."
+  },
+  {
+    "id": "py-index-bug",
+    "path": "src/tail.py",
+    "patch": "@@ -0,0 +1,4 @@\n+def tail(values: list[int]) -> int | None:\n+    if not values:\n+        return None\n+    return values[len(values)]",
+    "expected_lines": [
+      4
+    ],
+    "rubric": "Nonempty list indexes past the last element."
+  },
+  {
+    "id": "py-import-safe",
+    "path": "src/inverse.py",
+    "patch": "@@ -0,0 +1,4 @@\n+from normalizer import nonzero\n+\n+def inverse(value: int) -> float:\n+    return 10 / nonzero(value)",
+    "expected_lines": [],
+    "rubric": "Helper excludes zero.",
+    "files": {
+      "src/inverse.py": "from normalizer import nonzero\n\ndef inverse(value: int) -> float:\n    return 10 / nonzero(value)",
+      "src/normalizer.py": "def nonzero(value: int) -> int:\n    return 1 if value == 0 else value"
+    },
+    "required_context": {
+      "path": "src/normalizer.py",
+      "lines": [
+        1,
+        2
+      ]
+    }
+  },
+  {
+    "id": "py-import-bug",
+    "path": "src/inverse.py",
+    "patch": "@@ -0,0 +1,4 @@\n+from normalizer import nonzero\n+\n+def inverse(value: int) -> float:\n+    return 10 / nonzero(value)",
+    "expected_lines": [
+      4
+    ],
+    "rubric": "Zero input yields division by zero at changed caller.",
+    "files": {
+      "src/inverse.py": "from normalizer import nonzero\n\ndef inverse(value: int) -> float:\n    return 10 / nonzero(value)",
+      "src/normalizer.py": "def nonzero(value: int) -> int:\n    return 0 if value == 0 else value"
+    },
+    "required_context": {
+      "path": "src/normalizer.py",
+      "lines": [
+        1,
+        2
+      ]
+    }
+  },
+  {
+    "id": "java-index-safe",
+    "path": "src/Tail.java",
+    "patch": "@@ -0,0 +1,6 @@\n+class Tail {\n+  static int tail(int[] values) {\n+    if (values == null || values.length == 0) return 0;\n+    return values[values.length - 1];\n+  }\n+}",
+    "expected_lines": [],
+    "rubric": "Guarded null/empty and valid last index."
+  },
+  {
+    "id": "java-index-bug",
+    "path": "src/Tail.java",
+    "patch": "@@ -0,0 +1,6 @@\n+class Tail {\n+  static int tail(int[] values) {\n+    if (values == null || values.length == 0) return 0;\n+    return values[values.length];\n+  }\n+}",
+    "expected_lines": [
+      4
+    ],
+    "rubric": "Nonempty array always accesses length, outside bounds."
+  },
+  {
+    "id": "java-import-safe",
+    "path": "src/Ratio.java",
+    "patch": "@@ -0,0 +1,5 @@\n+class Ratio {\n+  static int ratio(int input) {\n+    return 100 / Divisor.normalize(input);\n+  }\n+}",
+    "expected_lines": [],
+    "rubric": "Nonzero denominator for every int.",
+    "files": {
+      "src/Ratio.java": "class Ratio {\n  static int ratio(int input) {\n    return 100 / Divisor.normalize(input);\n  }\n}",
+      "src/Divisor.java": "class Divisor {\n  static int normalize(int value) {\n    return value == 0 ? 1 : value;\n  }\n}"
+    },
+    "required_context": {
+      "path": "src/Divisor.java",
+      "lines": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    }
+  },
+  {
+    "id": "java-import-bug",
+    "path": "src/Ratio.java",
+    "patch": "@@ -0,0 +1,5 @@\n+class Ratio {\n+  static int ratio(int input) {\n+    return 100 / Divisor.normalize(input);\n+  }\n+}",
+    "expected_lines": [
+      3
+    ],
+    "rubric": "Zero input visibly produces denominator zero.",
+    "files": {
+      "src/Ratio.java": "class Ratio {\n  static int ratio(int input) {\n    return 100 / Divisor.normalize(input);\n  }\n}",
+      "src/Divisor.java": "class Divisor {\n  static int normalize(int value) {\n    return value == 0 ? 0 : value;\n  }\n}"
+    },
+    "required_context": {
+      "path": "src/Divisor.java",
+      "lines": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    }
+  },
+  {
+    "id": "js-first-safe",
+    "path": "src/remove.js",
+    "patch": "@@ -0,0 +1,5 @@\n+export function removeFirstMatch(items, value) {\n+  const index = items.indexOf(value);\n+  if (index >= 0) items.splice(index, 1);\n+  return items;\n+}",
+    "expected_lines": [],
+    "rubric": "Matched index zero is removed; absent value unchanged."
+  },
+  {
+    "id": "js-first-bug",
+    "path": "src/remove.js",
+    "patch": "@@ -0,0 +1,5 @@\n+export function removeFirstMatch(items, value) {\n+  const index = items.indexOf(value);\n+  if (index > 0) items.splice(index, 1);\n+  return items;\n+}",
+    "expected_lines": [
+      3
+    ],
+    "rubric": "First element match is never removed, contrary to function behavior."
+  },
+  {
+    "id": "js-import-safe",
+    "path": "src/display.js",
+    "patch": "@@ -0,0 +1,4 @@\n+import { labelFor } from \"./labels.js\";\n+export function display(id) {\n+  return labelFor(id).toUpperCase();\n+}",
+    "expected_lines": [],
+    "rubric": "Throw stops evaluation before toUpperCase; other path returns string.",
+    "files": {
+      "src/display.js": "import { labelFor } from \"./labels.js\";\nexport function display(id) {\n  return labelFor(id).toUpperCase();\n}",
+      "src/labels.js": "export function labelFor(id) {\n  if (id === 0) throw new Error(\"missing\");\n  return \"Guest\";\n}"
+    },
+    "required_context": {
+      "path": "src/labels.js",
+      "lines": [
+        1,
+        2,
+        3,
+        4
+      ]
+    }
+  },
+  {
+    "id": "js-import-bug",
+    "path": "src/display.js",
+    "patch": "@@ -0,0 +1,4 @@\n+import { labelFor } from \"./labels.js\";\n+export function display(id) {\n+  return labelFor(id).toUpperCase();\n+}",
+    "expected_lines": [
+      3
+    ],
+    "rubric": "id=0 returns null then toUpperCase throws.",
+    "files": {
+      "src/display.js": "import { labelFor } from \"./labels.js\";\nexport function display(id) {\n  return labelFor(id).toUpperCase();\n}",
+      "src/labels.js": "export function labelFor(id) {\n  if (id === 0) return null;\n  return \"Guest\";\n}"
+    },
+    "required_context": {
+      "path": "src/labels.js",
+      "lines": [
+        1,
+        2,
+        3,
+        4
+      ]
+    }
+  },
+  {
+    "id": "ts-zero-safe",
+    "path": "src/config.ts",
+    "patch": "@@ -0,0 +1,4 @@\n+export function configured(value: number | undefined): number {\n+  if (value !== undefined) return value;\n+  return 10;\n+}",
+    "expected_lines": [],
+    "rubric": "Undefined alone uses default; zero preserved."
+  },
+  {
+    "id": "ts-zero-bug",
+    "path": "src/config.ts",
+    "patch": "@@ -0,0 +1,4 @@\n+export function configured(value: number | undefined): number {\n+  if (value) return value;\n+  return 10;\n+}",
+    "expected_lines": [
+      2
+    ],
+    "rubric": "Explicit numeric zero is incorrectly replaced by default10."
+  },
+  {
+    "id": "ts-import-safe",
+    "path": "src/name.ts",
+    "patch": "@@ -0,0 +1,4 @@\n+import { recordFor } from \"./records\";\n+export function name(id: number): string {\n+  return recordFor(id).name;\n+}",
+    "expected_lines": [],
+    "rubric": "Every returning path has name; throw halts caller.",
+    "files": {
+      "src/name.ts": "import { recordFor } from \"./records\";\nexport function name(id: number): string {\n  return recordFor(id).name;\n}",
+      "src/records.ts": "export function recordFor(id: number): {name: string} {\n  if (id === 0) throw new Error(\"missing\");\n  return {name: \"Guest\"};\n}"
+    },
+    "required_context": {
+      "path": "src/records.ts",
+      "lines": [
+        1,
+        2,
+        3,
+        4
+      ]
+    }
+  },
+  {
+    "id": "ts-import-bug",
+    "path": "src/name.ts",
+    "patch": "@@ -0,0 +1,4 @@\n+import { recordFor } from \"./records\";\n+export function name(id: number): string {\n+  return recordFor(id).name;\n+}",
+    "expected_lines": [
+      3
+    ],
+    "rubric": "Visible nullable result dereferenced for id=0; TS strictness unspecified.",
+    "files": {
+      "src/name.ts": "import { recordFor } from \"./records\";\nexport function name(id: number): string {\n  return recordFor(id).name;\n}",
+      "src/records.ts": "export function recordFor(id: number): {name: string} | null {\n  if (id === 0) return null;\n  return {name: \"Guest\"};\n}"
+    },
+    "required_context": {
+      "path": "src/records.ts",
+      "lines": [
+        1,
+        2,
+        3,
+        4
+      ]
+    }
+  }
+]

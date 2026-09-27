@@ -1,0 +1,112 @@
+[
+  {
+    "id": "js-short-circuit-safe",
+    "path": "size.js",
+    "patch": "@@ -0,0 +1,4 @@\n+export function size(values) {\n+  if (values === null || values.length === 0) return 0;\n+  return values.length;\n+}",
+    "expected_lines": []
+  },
+  {
+    "id": "ts-disjunction-safe",
+    "path": "size.ts",
+    "patch": "@@ -0,0 +1,4 @@\n+export function size(values: string | null): number {\n+  if (values !== null && values.length > 0) return values.length;\n+  return 0;\n+}",
+    "expected_lines": []
+  },
+  {
+    "id": "java-zero-array-safe",
+    "path": "Empty.java",
+    "patch": "@@ -0,0 +1,5 @@\n+class Empty {\n+  static byte[] empty() {\n+    return new byte[0];\n+  }\n+}",
+    "expected_lines": []
+  },
+  {
+    "id": "python-zero-range-safe",
+    "path": "empty.py",
+    "patch": "@@ -0,0 +1,2 @@\n+def empty() -> list[int]:\n+    return list(range(0, 0, 1))",
+    "expected_lines": []
+  },
+  {
+    "id": "js-short-circuit-bug",
+    "path": "size.js",
+    "patch": "@@ -0,0 +1,4 @@\n+export function size(values) {\n+  if (values === null && values.length === 0) return 0;\n+  return values.length;\n+}",
+    "expected_lines": [
+      2
+    ]
+  },
+  {
+    "id": "ts-disjunction-bug",
+    "path": "size.ts",
+    "patch": "@@ -0,0 +1,4 @@\n+export function size(values: string | null): number {\n+  if (values !== null || values.length > 0) return values.length;\n+  return 0;\n+}",
+    "expected_lines": [
+      2
+    ]
+  },
+  {
+    "id": "java-zero-array-bug",
+    "path": "Empty.java",
+    "patch": "@@ -0,0 +1,5 @@\n+class Empty {\n+  static byte[] empty() {\n+    return new byte[-2];\n+  }\n+}",
+    "expected_lines": [
+      3
+    ]
+  },
+  {
+    "id": "python-zero-range-bug",
+    "path": "empty.py",
+    "patch": "@@ -0,0 +1,2 @@\n+def empty() -> list[int]:\n+    return list(range(0, 0, 0))",
+    "expected_lines": [
+      2
+    ]
+  },
+  {
+    "id": "js-async-safe",
+    "path": "src/access.js",
+    "patch": "@@ -0,0 +1,5 @@\n+import { permitted } from \"./permission.js\";\n+export async function access() {\n+  if (!await permitted()) return \"denied\";\n+  return \"allowed\";\n+}",
+    "expected_lines": [],
+    "files": {
+      "src/access.js": "import { permitted } from \"./permission.js\";\nexport async function access() {\n  if (!await permitted()) return \"denied\";\n  return \"allowed\";\n}",
+      "src/permission.js": "export async function permitted() {\n  return false;\n}"
+    },
+    "required_context": {
+      "path": "src/permission.js",
+      "lines": [
+        1,
+        2,
+        3
+      ]
+    }
+  },
+  {
+    "id": "js-async-bug",
+    "path": "src/access.js",
+    "patch": "@@ -0,0 +1,5 @@\n+import { permitted } from \"./permission.js\";\n+export async function access() {\n+  if (!permitted()) return \"denied\";\n+  return \"allowed\";\n+}",
+    "expected_lines": [
+      3
+    ],
+    "files": {
+      "src/access.js": "import { permitted } from \"./permission.js\";\nexport async function access() {\n  if (!permitted()) return \"denied\";\n  return \"allowed\";\n}",
+      "src/permission.js": "export async function permitted() {\n  return false;\n}"
+    },
+    "required_context": {
+      "path": "src/permission.js",
+      "lines": [
+        1,
+        2,
+        3
+      ]
+    }
+  },
+  {
+    "id": "js-html-question",
+    "path": "src/render.js",
+    "patch": "@@ -0,0 +1,3 @@\n+export function render(element, content) {\n+  element.innerHTML = content;\n+}",
+    "expected_lines": [],
+    "expected_questions": [
+      2
+    ]
+  },
+  {
+    "id": "py-hidden-callee-safe",
+    "path": "src/title.py",
+    "patch": "@@ -0,0 +1,4 @@\n+from documents import title_for\n+\n+def heading(identifier):\n+    return title_for(identifier).upper()",
+    "expected_lines": [],
+    "expected_questions": []
+  }
+]

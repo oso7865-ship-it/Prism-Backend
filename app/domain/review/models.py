@@ -25,7 +25,7 @@ class ReviewRun(EntityMixin, UpdatedAtMixin, Base):
         ),
         CheckConstraint(
             "generation>=0 AND connection_generation>0 AND input_tokens>="
-            "0 AND output_tokens>=0 AND call_attempts BETWEEN 0 AND 1",
+            "0 AND output_tokens>=0 AND call_attempts BETWEEN 0 AND 2",
             name="ck_review_counts",
         ),
         CheckConstraint(
@@ -56,3 +56,22 @@ class ReviewRun(EntityMixin, UpdatedAtMixin, Base):
     usage_uncertain: Mapped[bool] = mapped_column(server_default=text("false"))
     error_code: Mapped[str | None] = mapped_column(String(64))
     result: Mapped[dict[str, object] | None] = mapped_column(JSONB)
+
+
+class ReviewFeedback(EntityMixin, UpdatedAtMixin, Base):
+    __tablename__ = "review_feedback"
+    __table_args__ = (
+        UniqueConstraint("review_id", "user_id", "issue_key", name="uq_review_feedback"),
+        Index("ix_review_feedback_owner", "workspace_id", "user_id", "updated_at"),
+        CheckConstraint(
+            "state IN ('OPEN','ACKNOWLEDGED','PLANNED','INTENDED','FALSE_POSITIVE')",
+            name="ck_feedback_state",
+        ),
+        CheckConstraint("issue_key ~ '^[0-9a-f]{64}$'", name="ck_feedback_key"),
+    )
+    workspace_id: Mapped[UUID]
+    review_id: Mapped[UUID]
+    user_id: Mapped[UUID]
+    issue_key: Mapped[str] = mapped_column(String(64))
+    state: Mapped[str] = mapped_column(String(20))
+    note: Mapped[str] = mapped_column(String(500), server_default=text("''"))

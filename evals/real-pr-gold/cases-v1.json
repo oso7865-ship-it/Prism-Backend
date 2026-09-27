@@ -1,0 +1,138 @@
+[
+  {
+    "id": "requests-6589-before",
+    "path": "content_length.py",
+    "patch": "@@ -0,0 +1,3 @@\n+def body_length(body: str | bytes) -> int:\n+    # The transport sends str bodies as UTF-8 bytes.\n+    return len(body)",
+    "expected_lines": [],
+    "expected_locations": [
+      [
+        3,
+        3
+      ]
+    ],
+    "provenance": {
+      "url": "https://github.com/psf/requests/pull/6589",
+      "base_sha": "7a13c041dbef42f9f3feb14110f02626f6892e9a",
+      "head_sha": "3fd309a5c14e4cfbd96bea6c8e71b4958fe090bb",
+      "source_path": "src/requests/utils.py",
+      "evidence": "PR diff and test_content_length_for_string_data_counts_bytes / test_content_length_for_bytes_data"
+    },
+    "kind": "public-pr-derived-minimal-reproduction",
+    "label_review": "agent-inspected-upstream-diff-and-tests; independent-human-signoff-pending",
+    "rubric": {
+      "required_behavior": "Non-ASCII str is counted as characters instead of wire bytes.",
+      "counterexample": "ASCII and already-encoded bytes have correct lengths; no claim they always fail.",
+      "reject": "wrong secondary consequence, duplicate defect, missing-contract question without visible concern"
+    }
+  },
+  {
+    "id": "requests-6589-after",
+    "path": "content_length.py",
+    "patch": "@@ -0,0 +1,4 @@\n+def body_length(body: str | bytes) -> int:\n+    # The transport sends str bodies as UTF-8 bytes.\n+    wire = body.encode(\"utf-8\") if isinstance(body, str) else body\n+    return len(wire)",
+    "expected_lines": [],
+    "expected_locations": [],
+    "provenance": {
+      "url": "https://github.com/psf/requests/pull/6589",
+      "base_sha": "7a13c041dbef42f9f3feb14110f02626f6892e9a",
+      "head_sha": "3fd309a5c14e4cfbd96bea6c8e71b4958fe090bb",
+      "source_path": "src/requests/utils.py",
+      "evidence": "PR diff and test_content_length_for_string_data_counts_bytes / test_content_length_for_bytes_data"
+    },
+    "kind": "public-pr-derived-minimal-reproduction",
+    "label_review": "agent-inspected-upstream-diff-and-tests; independent-human-signoff-pending",
+    "rubric": {
+      "required_behavior": "No defect in the supplied str/bytes contract.",
+      "counterexample": "bytes branch is not encoded twice; empty payload length0 is valid.",
+      "reject": "wrong secondary consequence, duplicate defect, missing-contract question without visible concern"
+    }
+  },
+  {
+    "id": "requests-6589-bytes-normal",
+    "path": "content_length.py",
+    "patch": "@@ -0,0 +1,3 @@\n+def body_length(body: bytes) -> int:\n+    # The transport sends these bytes unchanged.\n+    return len(body)",
+    "expected_lines": [],
+    "expected_locations": [],
+    "provenance": {
+      "url": "https://github.com/psf/requests/pull/6589",
+      "base_sha": "7a13c041dbef42f9f3feb14110f02626f6892e9a",
+      "head_sha": "3fd309a5c14e4cfbd96bea6c8e71b4958fe090bb",
+      "source_path": "src/requests/utils.py",
+      "evidence": "PR diff and test_content_length_for_string_data_counts_bytes / test_content_length_for_bytes_data"
+    },
+    "kind": "public-pr-derived-minimal-reproduction",
+    "label_review": "agent-inspected-upstream-diff-and-tests; independent-human-signoff-pending",
+    "rubric": {
+      "required_behavior": "No defect for byte inputs including multibyte UTF-8.",
+      "counterexample": "Do not invent str inputs outside this explicit bytes contract.",
+      "reject": "wrong secondary consequence, duplicate defect, missing-contract question without visible concern"
+    }
+  },
+  {
+    "id": "requests-6074-before",
+    "path": "ca_settings.py",
+    "patch": "@@ -0,0 +1,7 @@\n+def choose_verification(env: dict[str, str], verify: bool = True):\n+    if verify:\n+        verify = env.get(\"APP_CA_BUNDLE\") or env.get(\"CURL_CA_BUNDLE\")\n+    return verify\n+\n+def tls_enabled(env: dict[str, str]) -> bool:\n+    return bool(choose_verification(env, True))",
+    "expected_lines": [],
+    "expected_locations": [
+      [
+        3,
+        7
+      ]
+    ],
+    "provenance": {
+      "url": "https://github.com/psf/requests/pull/6074",
+      "base_sha": "5e749546a26ce62e53d0a14ae1455f8b066fe19f",
+      "head_sha": "79c4a017fe341fb989d3a7876cf4e44b87601b58",
+      "source_path": "requests/sessions.py",
+      "evidence": "PR diff and test_env_cert_bundles parametrized empty/missing/explicit-path values"
+    },
+    "kind": "public-pr-derived-minimal-reproduction",
+    "label_review": "agent-inspected-upstream-diff-and-tests; independent-human-signoff-pending",
+    "rubric": {
+      "required_behavior": "Empty/missing CA variables turn intended verificationTrue into a falsy value. One finding is enough.",
+      "counterexample": "Do not claim arbitrary nonempty bundle paths disable verification.",
+      "reject": "wrong secondary consequence, duplicate defect, missing-contract question without visible concern"
+    }
+  },
+  {
+    "id": "requests-6074-after",
+    "path": "ca_settings.py",
+    "patch": "@@ -0,0 +1,7 @@\n+def choose_verification(env: dict[str, str], verify: bool = True):\n+    if verify:\n+        verify = env.get(\"APP_CA_BUNDLE\") or env.get(\"CURL_CA_BUNDLE\") or verify\n+    return verify\n+\n+def tls_enabled(env: dict[str, str]) -> bool:\n+    return bool(choose_verification(env, True))",
+    "expected_lines": [],
+    "expected_locations": [],
+    "provenance": {
+      "url": "https://github.com/psf/requests/pull/6074",
+      "base_sha": "5e749546a26ce62e53d0a14ae1455f8b066fe19f",
+      "head_sha": "79c4a017fe341fb989d3a7876cf4e44b87601b58",
+      "source_path": "requests/sessions.py",
+      "evidence": "PR diff and test_env_cert_bundles parametrized empty/missing/explicit-path values"
+    },
+    "kind": "public-pr-derived-minimal-reproduction",
+    "label_review": "agent-inspected-upstream-diff-and-tests; independent-human-signoff-pending",
+    "rubric": {
+      "required_behavior": "No defect: missing/empty environment keeps explicitTrue.",
+      "counterexample": "The fallback preserves verification; do not demand nonempty env values.",
+      "reject": "wrong secondary consequence, duplicate defect, missing-contract question without visible concern"
+    }
+  },
+  {
+    "id": "requests-6074-explicit-false",
+    "path": "ca_settings.py",
+    "patch": "@@ -0,0 +1,5 @@\n+def choose_verification(env: dict[str, str], verify: bool = True):\n+    # This configuration resolver must preserve an explicit False choice.\n+    if verify:\n+        verify = env.get(\"APP_CA_BUNDLE\") or env.get(\"CURL_CA_BUNDLE\") or verify\n+    return verify",
+    "expected_lines": [],
+    "expected_locations": [],
+    "provenance": {
+      "url": "https://github.com/psf/requests/pull/6074",
+      "base_sha": "5e749546a26ce62e53d0a14ae1455f8b066fe19f",
+      "head_sha": "79c4a017fe341fb989d3a7876cf4e44b87601b58",
+      "source_path": "requests/sessions.py",
+      "evidence": "PR diff and test_env_cert_bundles parametrized empty/missing/explicit-path values"
+    },
+    "kind": "public-pr-derived-minimal-reproduction",
+    "label_review": "agent-inspected-upstream-diff-and-tests; independent-human-signoff-pending",
+    "rubric": {
+      "required_behavior": "No defect in resolver honoring explicitFalse.",
+      "counterexample": "Do not turn a documented caller choice into a fabricated resolver defect.",
+      "reject": "wrong secondary consequence, duplicate defect, missing-contract question without visible concern"
+    }
+  }
+]

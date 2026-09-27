@@ -1,0 +1,10 @@
+{
+  "checks.prompt": "ac59da6a297c792115cef099ddd2d9c432671cdbc96c9f8b29bb3863d51acb9e",
+  "core.prompt": "8c6960536e6a2b7f8b1310e99c52be2fef9cfe52d0ba9b267a9593f0e123c4bb",
+  "java.prompt": "8d51bbb0c63e97ae04a75db5a54beaaa787ec5551fb1521d3a456f91ea1471c5",
+  "javascript.prompt": "a38cb14b841eee440ef4c5e9fbb3bac59e85d0edf5d00267afeeb753da0911fa",
+  "output.prompt": "beb3e5129667f9bf342b9eef934a7898f2e14efcc5800f28a7c4b9eb110c5130",
+  "python.prompt": "f1389cc983bf3562c371ed6d22521242c916a99bdba066bc8357e8f4100e2863",
+  "typescript.prompt": "e702e1a722a2143250a96b19af156df0c394aad5c3a208d6fa2bf0296755a7c8",
+  "verification.prompt": "439d9a9b4b01f128fbfffeafe9b9ef2d3021c5fa22044e5252a67c59dcd9402e"
+}

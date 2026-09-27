@@ -77,10 +77,13 @@ def test_prompt_injection_is_untrusted_data_and_html_is_plain_text():
     system, _ = compose(bundle.payload, ReviewOutput.model_json_schema())
     assert "untrusted" in system and "No tools" in system
     result = validate_result(
-        json.dumps({"summary": "<script>alert(1)</script>", "issues": [], "limitations": "제한"}),
+        json.dumps(
+            {"summary": "<script>alert(1)</script>", "issues": [], "limitations": "<b>제한</b>"}
+        ),
         bundle,
     )
-    assert result["summary"] == "<script>alert(1)</script>"  # Vue text interpolation, never v-html.
+    assert "<script>" not in result["summary"]  # Model overview is no longer displayed.
+    assert result["limitations"] == "<b>제한</b>"  # Vue text interpolation, never v-html.
 
 
 def test_coverage_is_local_metadata_and_reasons_are_complete():
@@ -91,7 +94,7 @@ def test_coverage_is_local_metadata_and_reasons_are_complete():
             {"filename": "missing.py"},
             file(path="vendor/a.py"),
             file("@@ -0,0 +1 @@\n+password='sensitive_value'", "secret.py"),
-            file("+" * 8193, "large.py"),
+            file("+" * 16385, "large.py"),
             file("@@ -1 +0,0 @@\n-removed", "removed.py"),
             file(path="../invalid.py"),
             file(path="ghp_" + "a" * 30 + ".py"),
@@ -128,7 +131,7 @@ def test_input_and_file_limits_have_distinct_reasons():
     assert [f["reason"] for f in bundle.coverage["excluded"]] == ["FILE_LIMIT"] * 2
     assert bundle.coverage["unfetched_files"] is None
     patch = "@@ -0,0 +1,120 @@\n" + "\n".join("+" + "x" * 45 for _ in range(120))
-    bundle = prepare([file(patch, f"{i}.py") for i in range(4)], [], [])
+    bundle = prepare([file(patch, f"{i}.py") for i in range(8)], [], [])
     assert any(f["reason"] == "INPUT_LIMIT" for f in bundle.coverage["excluded"])
     assert len(bundle.payload.encode()) <= MAX_INPUT
 

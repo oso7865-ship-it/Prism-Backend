@@ -1,3 +1,4 @@
+import hashlib
 import json
 import re
 from dataclasses import dataclass
@@ -8,8 +9,9 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from app.domain.review.harness import version
 
-POLICY = "BOUNDED_CODE_V1"
-MAX_INPUT = 24576
+POLICY = "BOUNDED_CODE_V4"
+MAX_FILE = 16384
+MAX_INPUT = 49152
 SECRET = re.compile(
     "-----BEGIN [A-Z ]*PRIVATE KEY|(?:gh[pousr]_[A-Za-z0-9]{15,}|"
     "github_pat_[A-Za-z0-9_]{15,}|sk-[A-Za-z0-9_-]{12,}|AKIA[A-Z0"
@@ -21,11 +23,21 @@ SECRET = re.compile(
 
 class Issue(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
-    file_id: str = Field(max_length=8)
-    line: int = Field(ge=1)
+    file_id: str = Field(
+        max_length=8, description="Changed file containing the reported operation."
+    )
+    line: int = Field(ge=1, description="Provided HEAD line in this item's file_id.")
     severity: Literal["INFO", "WARNING", "ERROR"]
     basis: Literal["SUPPORTED", "NEEDS_CONTEXT"]
-    evidence_lines: list[int] = Field(min_length=1, max_length=8)
+    evidence_lines: list[int] = Field(
+        min_length=1,
+        max_length=8,
+        description=(
+            "Unique provided lines ONLY in this item's file_id; include line and a changed line. "
+            "NEVER mix related-file line numbers here. "
+            "Cite related file IDs/lines in evidence text."
+        ),
+    )
     trigger: str = Field(min_length=1, max_length=400)
     consequence: str = Field(min_length=1, max_length=400)
     assumptions: list[str] = Field(max_length=3)
@@ -41,6 +53,12 @@ class ReviewOutput(BaseModel):
     limitations: str = Field(min_length=1, max_length=1600)
 
 
+def issue_key(issue: dict[str, object]) -> str:
+    """Heuristic identity, never proof that two findings are semantically equal."""
+    value = f"{issue.get('file_path', '')}\0{' '.join(str(issue.get('title', '')).lower().split())}"
+    return hashlib.sha256(value.encode()).hexdigest()
+
+
 PROMPT = version(ReviewOutput.model_json_schema())
 
 
@@ -52,7 +70,9 @@ class InputBundle:
     coverage: dict[str, object]
 
 
-def exclusion(path: object, patch: object, ignored: list[str]) -> str | None:
+def exclusion(
+    path: object, patch: object, ignored: list[str], per_file: int = MAX_FILE
+) -> str | None:
     if (
         not isinstance(path, str)
         or len(path.encode()) > 4096
@@ -74,7 +94,7 @@ def exclusion(path: object, patch: object, ignored: list[str]) -> str | None:
         return "PATCH_UNAVAILABLE"
     if SECRET.search(patch):
         return "SECRET_SUSPECTED"
-    if len(patch.encode()) > 8192:
+    if len(patch.encode()) > per_file:
         return "PATCH_TOO_LARGE"
     return None
 
@@ -84,6 +104,9 @@ def prepare(
     findings: list[dict[str, object]],
     ignored: list[str],
     total_files: int | None = None,
+    *,
+    per_file: int = MAX_FILE,
+    max_input: int = MAX_INPUT,
 ) -> InputBundle:
     files: list[dict[str, object]] = []
     anchors: dict[str, tuple[str, set[int]]] = {}
@@ -91,7 +114,7 @@ def prepare(
     changes = changes[:100]
     for change in changes:
         path, patch = change.get("filename"), change.get("patch")
-        reason = exclusion(path, patch, ignored)
+        reason = exclusion(path, patch, ignored, per_file)
         if reason or len(files) >= 8:
             excluded.append(
                 {
@@ -123,7 +146,10 @@ def prepare(
         trial = json.dumps(
             {"files": [*files, item], "static_findings": findings}, ensure_ascii=False
         )
-        if len(trial.encode()) > MAX_INPUT:
+        if len(json.dumps(item, ensure_ascii=False).encode()) > per_file:
+            excluded.append({"file_path": path, "reason": "PATCH_TOO_LARGE"})
+            continue
+        if len(trial.encode()) > max_input:
             excluded.append({"file_path": path, "reason": "INPUT_LIMIT"})
             continue
         files.append(item)
@@ -131,7 +157,7 @@ def prepare(
     if not files:
         raise ValueError("NO_SAFE_CONTEXT")
     payload = json.dumps({"files": files, "static_findings": findings}, ensure_ascii=False)
-    if SECRET.search(payload) or len(payload.encode()) > MAX_INPUT:
+    if SECRET.search(payload) or len(payload.encode()) > max_input:
         raise ValueError("UNSAFE_CONTEXT")
     coverage: dict[str, object] = {
         "files": [
@@ -144,12 +170,38 @@ def prepare(
     return InputBundle(payload, anchors, len(excluded), coverage)
 
 
+def result_summary(issues: list[dict[str, object]], questions: list[dict[str, object]]) -> str:
+    """Describe accepted items without a second, potentially contradictory model assessment."""
+    if not issues and not questions:
+        return (
+            "제공된 코드 범위에서 지적할 항목을 찾지 못했어요. "
+            "검토 범위와 확인하지 못한 내용을 함께 살펴보세요."
+        )
+    counts = []
+    if issues:
+        counts.append(f"개선 제안 {len(issues)}건")
+    if questions:
+        counts.append(f"추가 확인 {len(questions)}건")
+    parts = [" · ".join(counts) + "이 있어요."]
+    priority = {"ERROR": 0, "WARNING": 1, "INFO": 2}
+    remaining = 3
+    for label, items in (("먼저 검토할 제안", issues), ("추가 확인할 내용", questions)):
+        selected = sorted(items, key=lambda i: priority[str(i["severity"])])[:remaining]
+        if selected:
+            parts.append(
+                label + ": " + " / ".join(" ".join(str(i["title"]).split()) for i in selected)
+            )
+            remaining -= len(selected)
+    return "\n".join(parts)
+
+
 def validate_result(raw: str, bundle: InputBundle) -> dict[str, object]:
     if len(raw.encode()) > 24000 or SECRET.search(raw):
         raise ValueError("INVALID_OUTPUT")
     output = ReviewOutput.model_validate_json(raw)
     files = {f["file_id"]: f for f in json.loads(bundle.payload)["files"]}
-    issues = []
+    issues: list[dict[str, object]] = []
+    questions: list[dict[str, object]] = []
     for issue in output.issues:
         if issue.basis == "NEEDS_CONTEXT" and issue.severity == "ERROR":
             raise ValueError("UNSUPPORTED_SEVERITY")
@@ -171,13 +223,19 @@ def validate_result(raw: str, bundle: InputBundle) -> dict[str, object]:
             raise ValueError("INCONSISTENT_EVIDENCE_BASIS")
         if not issue.trigger.strip() or not issue.consequence.strip():
             raise ValueError("EMPTY_EVIDENCE")
-        issues.append({**issue.model_dump(exclude={"file_id"}), "file_path": anchor[0]})
+        entry = {**issue.model_dump(exclude={"file_id"}), "file_path": anchor[0]}
+        entry["key"] = issue_key(entry)
+        (issues if issue.basis == "SUPPORTED" else questions).append(entry)
     return {
-        "summary": output.summary,
+        "summary": result_summary(issues, questions),
         "issues": issues,
+        "questions": questions,
+        "classification": "SUPPORTED_FINDINGS_AND_CONTEXT_QUESTIONS",
         "limitations": output.limitations,
         "reviewed_files": len(bundle.anchors),
         "omitted_files": bundle.omitted,
         "coverage": bundle.coverage,
-        "scope": "제공된 HEAD 변경·주변 줄만 검토. 삭제 줄·전체 파일·의존성 및 실행 결과는 미검증.",
+        "scope": (
+            "고정 HEAD의 제공 줄과 제한된 관련 문맥만 검토. 전체 호출 경로·실행 결과는 미검증."
+        ),
     }

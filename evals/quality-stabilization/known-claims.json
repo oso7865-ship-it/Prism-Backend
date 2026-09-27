@@ -1,0 +1,134 @@
+[
+  {
+    "id": "typescript-guarded-null",
+    "path": "src/accountLabel.ts",
+    "patch": "@@ -0,0 +1,4 @@\n+import { requireUser } from './accountStore';\n+export function label(value: number) {\n+  return requireUser(value).name;\n+}",
+    "files": {
+      "src/accountLabel.ts": "import { requireUser } from './accountStore';\nexport function label(value: number) {\n  return requireUser(value).name;\n}",
+      "src/accountStore.ts": "// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\n// Unrelated account module documentation\nexport function requireUser(value: number) {\n  if (value === 0) throw new Error('missing');\n  return {name: 'Ada'};\n}",
+      "src/accountCache.ts": "export function accountTelemetry(value: number) { return String(value); }",
+      "src/accountMetrics.ts": "export function accountTelemetry(value: number) { return String(value); }",
+      "src/accountPolicy.ts": "export function accountTelemetry(value: number) { return String(value); }"
+    },
+    "required_context": {
+      "path": "src/accountStore.ts",
+      "lines": [
+        101,
+        102,
+        103,
+        104
+      ]
+    },
+    "expected_lines": [],
+    "rubric": "Do not invent missing caller contracts. Trace the supplied helper return/throw into the changed operation. JS/TS negative array length raises RangeError; do not claim Python exceptions there.",
+    "draft": {
+      "summary": "개선 제안 1건이 있어요.\n먼저 검토할 제안: value가 0일 때 label 호출이 예외로 실패합니다",
+      "issues": [
+        {
+          "line": 3,
+          "severity": "WARNING",
+          "basis": "SUPPORTED",
+          "evidence_lines": [
+            3
+          ],
+          "trigger": "label(0)을 호출하는 경우",
+          "consequence": "requireUser가 'missing' 예외를 던져 label 호출이 실패하고 name을 반환하지 못합니다.",
+          "assumptions": [],
+          "title": "value가 0일 때 label 호출이 예외로 실패합니다",
+          "evidence": "f1:3은 requireUser(value).name을 반환합니다. c2:102는 value가 0이면 예외를 던집니다.",
+          "suggestion": "value가 0인 경우의 반환값 또는 오류 처리 방침을 정하고, label에서 그 경로를 명시적으로 처리하세요.",
+          "file_id": "f1"
+        }
+      ],
+      "limitations": "제공된 변경 파일과 관련 구현만 검토했으며 호출부와 테스트는 제공되지 않아 실행 검증은 하지 않았습니다."
+    },
+    "draft_provenance": {
+      "run": "final-regression-v3",
+      "id": "typescript-guarded-null",
+      "repeat": 3
+    }
+  },
+  {
+    "id": "js-short-circuit-bug",
+    "path": "size.js",
+    "patch": "@@ -0,0 +1,4 @@\n+export function size(values) {\n+  if (values === null && values.length === 0) return 0;\n+  return values.length;\n+}",
+    "expected_lines": [
+      2
+    ],
+    "draft": {
+      "summary": "개선 제안 1건이 있어요.\n먼저 검토할 제안: null 검사에서 곧바로 null을 역참조해 예외가 발생합니다",
+      "issues": [
+        {
+          "line": 2,
+          "severity": "ERROR",
+          "basis": "SUPPORTED",
+          "evidence_lines": [
+            2,
+            3
+          ],
+          "trigger": "values가 null인 상태에서 size(values)를 호출할 때",
+          "consequence": "values === null이 참이므로 &&의 오른쪽 피연산자 values.length가 평가되어 TypeError가 발생합니다. 또한 null이 아닌 빈 배열은 2줄의 조건이 거짓이 되어 3줄에서 0이 아닌 length를 반환하므로 빈 입력 처리 의도도 달성되지 않습니다.",
+          "assumptions": [],
+          "title": "null 검사에서 곧바로 null을 역참조해 예외가 발생합니다",
+          "evidence": "2줄은 values === null일 때 values.length를 평가하고, 3줄도 values.length를 그대로 사용합니다.",
+          "suggestion": "null과 빈 배열을 각각 처리하도록 조건을 분리하세요. 예를 들어 null이면 0을 반환하고, 그렇지 않으면 values.length를 반환하도록 작성하면 두 경로 모두 안전합니다.",
+          "file_id": "f1"
+        }
+      ],
+      "limitations": "제공된 함수 한 개만 검토했으며 호출부와 테스트 실행은 확인하지 않았습니다."
+    },
+    "draft_provenance": {
+      "run": "final-boundaries",
+      "id": "js-short-circuit-bug",
+      "repeat": 1
+    }
+  },
+  {
+    "id": "requests-6074-explicit-false",
+    "path": "ca_settings.py",
+    "patch": "@@ -0,0 +1,5 @@\n+def choose_verification(env: dict[str, str], verify: bool = True):\n+    # This configuration resolver must preserve an explicit False choice.\n+    if verify:\n+        verify = env.get(\"APP_CA_BUNDLE\") or env.get(\"CURL_CA_BUNDLE\") or verify\n+    return verify",
+    "expected_lines": [],
+    "expected_locations": [],
+    "provenance": {
+      "url": "https://github.com/psf/requests/pull/6074",
+      "base_sha": "5e749546a26ce62e53d0a14ae1455f8b066fe19f",
+      "head_sha": "79c4a017fe341fb989d3a7876cf4e44b87601b58",
+      "source_path": "requests/sessions.py",
+      "evidence": "PR diff and test_env_cert_bundles parametrized empty/missing/explicit-path values"
+    },
+    "kind": "public-pr-derived-minimal-reproduction",
+    "label_review": "agent-inspected-upstream-diff-and-tests; independent-human-signoff-pending",
+    "rubric": {
+      "required_behavior": "No defect in resolver honoring explicitFalse.",
+      "counterexample": "Do not turn a documented caller choice into a fabricated resolver defect.",
+      "reject": "wrong secondary consequence, duplicate defect, missing-contract question without visible concern"
+    },
+    "draft": {
+      "summary": "개선 제안 1건이 있어요.\n먼저 검토할 제안: 빈 문자열 환경 변수 값이 무시됩니다",
+      "issues": [
+        {
+          "line": 4,
+          "severity": "INFO",
+          "basis": "SUPPORTED",
+          "evidence_lines": [
+            3,
+            4
+          ],
+          "trigger": "verify가 True이고 env[\"APP_CA_BUNDLE\"] 또는 env[\"CURL_CA_BUNDLE\"]이 빈 문자열(\"\")일 때",
+          "consequence": "or 연산이 빈 문자열을 거짓으로 평가하므로 해당 환경 변수 값이 무시되고 다음 후보나 원래 verify(True)가 반환됩니다. 빈 문자열을 명시적 설정으로 의도했다면 그 설정이 조용히 사라집니다.",
+          "assumptions": [],
+          "title": "빈 문자열 환경 변수 값이 무시됩니다",
+          "evidence": "3줄에서 verify가 True일 때만 4줄이 실행되고, 4줄은 or 체인으로 값을 선택하므로 빈 문자열은 선택되지 않습니다.",
+          "suggestion": "빈 문자열을 유효한 설정으로 취급해야 한다면 or 대신 키 존재 여부를 확인하는 방식(예: 키가 있으면 그 값을 사용)으로 바꾸고, 빈 문자열을 무효로 볼 것인지 주석으로 명확히 하세요.",
+          "file_id": "f1"
+        }
+      ],
+      "limitations": "제공된 변경·관련 코드 범위에서 AI가 근거를 다시 검토했어요. 전체 호출 경로와 실행 결과는 확인하지 않았으며 잘못된 판단이나 누락이 있을 수 있어요."
+    },
+    "draft_provenance": {
+      "run": "evidence-gold-contracts",
+      "id": "requests-6074-explicit-false",
+      "repeat": 3
+    }
+  }
+]

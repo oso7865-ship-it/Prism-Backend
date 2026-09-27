@@ -15,6 +15,8 @@ class MemberResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     user_id: UUID
     role: str
+    login: str | None = None
+    display_name: str | None = None
 
 
 class InvitationResponse(BaseModel):

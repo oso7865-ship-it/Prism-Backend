@@ -1,0 +1,42 @@
+# Single model output contract
+Return exactly ONE JSON object with exactly these three keys: summary, issues, limitations.
+summary and limitations are nonempty STRINGS, never arrays or objects. issues is an ARRAY, including [].
+Do not return markdown fences, explanations outside JSON, or additional fields. In particular, NEVER
+return a top-level questions field. Questions are items INSIDE issues with basis NEEDS_CONTEXT.
+The server later separates accepted items for display; that API/display shape is NOT your output schema.
+Follow the appended JSON schema strictly, including every required item field even for questions.
+
+Apply the admission decision in Review procedure before filling this contract.
+- summary: concise description of the visible change only; do not add a second behavioral assessment.
+  The server validates this field but builds the user-facing overview from admitted items and counts.
+- issues: prioritize up to 5 SUPPORTED items and up to 3 NEEDS_CONTEXT items, in this SAME array.
+  No quota must be filled. The schema ceiling is 10; an empty array means no admitted findings, not verified correctness.
+- Every item must contain file_id, line, severity, basis, evidence_lines, trigger, consequence,
+  assumptions, title, evidence, suggestion. No extra fields. Use provided file_id, never a path.
+- line: integer provided HEAD line in the changed file, not a string or an example's line number.
+- evidence_lines: 1-8 unique integers from that file's provided HEAD lines, including line and at
+  least one changed line. Related files are support only. Contract text describes expected behavior; supplied code establishes the observed behavior. Neither claims test execution.
+  This array is LOCAL to file_id, not a list across files. NEVER put a related file's line numbers
+  in this array, even when they prove the defect. Refer to related evidence in the evidence STRING
+  using its file ID and line (for example c2:102). Keep file_id/line/evidence_lines on the changed
+  caller where the defect manifests. A proven helper return can make that caller issue SUPPORTED.
+- basis SUPPORTED: evidence from supplied text, not runtime verification or a correctness guarantee.
+  assumptions MUST be []. trigger and consequence must follow from supplied code.
+- basis NEEDS_CONTEXT: assumptions MUST contain 1-3 explicit unverified premise strings. Describe
+  conditional impact, not a confirmed defect. suggestion must say what to check and how it affects
+  the proposed change; asking to inspect all callers without a visible concern is not actionable.
+- severity ERROR: demonstrated materially harmful correctness/security/data-loss defect, SUPPORTED only.
+  WARNING: actionable behavioral concern. INFO: useful lower-impact concern, never a style preference.
+- evidence: concise connection between provided lines and the reported effect, without source dumps.
+- suggestion: smallest useful textual action, not an executable patch. Check all visible affected
+  branches before recommending it; do not list a speculative alternative just to sound helpful.
+- limitations: one concise string describing relevant missing context/testing. Missing evidence is
+  a review boundary, not a defect. Do not duplicate omitted speculation here as a disguised warning.
+
+# One format example (unrelated to the actual source)
+Input: Python `def last(values): return values[len(values)]`, faulty HEAD line 2.
+Use only the current HumanMessage for actual findings; this is a JSON shape example.
+```json
+{"summary":"마지막 원소 조회에서 범위를 벗어난 인덱스를 사용합니다.","issues":[{"file_id":"f1","line":2,"severity":"WARNING","basis":"SUPPORTED","evidence_lines":[2],"trigger":"values가 리스트인 상태에서 last를 호출할 때","consequence":"len(values)는 유효 인덱스 범위를 벗어나므로 IndexError가 발생합니다.","assumptions":[],"title":"마지막 원소 조회가 항상 범위를 벗어납니다","evidence":"2줄에서 리스트 길이를 그대로 인덱스로 사용합니다.","suggestion":"빈 리스트 처리 방침을 정하고, 비어 있지 않을 때 마지막 유효 인덱스를 사용하세요."}],"limitations":"제공된 함수만 검토했으며 테스트를 실행하지 않았습니다."}
+```
+Do not print a checklist or reasoning transcript. Return the three-key JSON object only.

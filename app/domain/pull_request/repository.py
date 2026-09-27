@@ -9,6 +9,23 @@ from app.domain.pull_request.models import PullRequest, PullRequestSyncRun
 from app.shared.github.client import GitHubFailure
 
 
+async def latest(
+    s: AsyncSession, wid: UUID, rid: UUID, generation: int
+) -> PullRequestSyncRun | None:
+    result = await s.scalars(
+        select(PullRequestSyncRun)
+        .where(
+            PullRequestSyncRun.workspace_id == wid,
+            PullRequestSyncRun.repository_connection_id == rid,
+            PullRequestSyncRun.connection_generation == generation,
+            PullRequestSyncRun.mode.in_(("RECENT", "PAGE")),
+        )
+        .order_by(PullRequestSyncRun.created_at.desc(), PullRequestSyncRun.id.desc())
+        .limit(1)
+    )
+    return result.one_or_none()
+
+
 async def active(s: AsyncSession, rid: UUID) -> PullRequestSyncRun | None:
     return (
         await s.scalars(

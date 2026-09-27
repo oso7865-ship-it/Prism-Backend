@@ -69,6 +69,22 @@ def db():
         with engine.begin() as connection:
             with Operations.context(MigrationContext.configure(connection)):
                 migration.upgrade()
+        spec = importlib.util.spec_from_file_location(
+            "feedback_migration", "migrations/versions/0007_review_feedback.py"
+        )
+        migration = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(migration)
+        with engine.begin() as connection:
+            with Operations.context(MigrationContext.configure(connection)):
+                migration.upgrade()
+        spec = importlib.util.spec_from_file_location(
+            "verification_migration", "migrations/versions/0008_review_verification.py"
+        )
+        migration = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(migration)
+        with engine.begin() as connection:
+            with Operations.context(MigrationContext.configure(connection)):
+                migration.upgrade()
         yield engine
     finally:
         engine.dispose()

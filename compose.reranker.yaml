@@ -1,0 +1,17 @@
+name: prism-reranker
+services:
+  reranker:
+    build: ./tools/reranker
+    image: prism-reranker:local
+    ports:
+      - "127.0.0.1:8091:8091"
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,noexec,nosuid
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 768m
+    cpus: 2.0
+    pids_limit: 64
+    logging:
+      driver: none

@@ -196,7 +196,7 @@ def test_connect_sync_and_scoped_queries(db, app_settings):
             == 409
         )
     catalog = inspect(db)
-    assert len(catalog.get_table_names()) == 16
+    assert len(catalog.get_table_names()) == 17
     assert all(not catalog.get_foreign_keys(t) for t in catalog.get_table_names())
 
 
@@ -405,9 +405,9 @@ def test_new_schema_matches_metadata_and_roundtrip(db):
     with db.begin() as conn:
         with Operations.context(MigrationContext.configure(conn)):
             migration.downgrade()
-            assert len(inspect(conn).get_table_names()) == 11  # remaining domain tables
+            assert len(inspect(conn).get_table_names()) == 12  # includes review feedback
             migration.upgrade()
-            assert len(inspect(conn).get_table_names()) == 16
+            assert len(inspect(conn).get_table_names()) == 17
 
 
 def test_retry_exhaustion_and_atomic_failure(db, app_settings):

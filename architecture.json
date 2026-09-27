@@ -1,5 +1,10 @@
 {
   "repository": "https://github.com/oso7865-ship-it/Prism-Architecture.git",
-  "revision": "c9275e62bb0efba3e42910e3dbcfe3b77f21409b",
-  "logical_path_prefix": "backend/"
+  "revision": "2c4b743d55a2624cbb84f99525dcff238116043a",
+  "logical_path_prefix": "backend/",
+  "documentation": {
+    "archive_path": "records/backend",
+    "manifest": "records/manifest.json",
+    "restore_command": "node scripts/restore-docs.mjs <Prism-Architecture clone path>"
+  }
 }

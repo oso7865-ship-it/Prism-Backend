@@ -106,7 +106,7 @@ def test_review_success_failure_cancel_and_tenant(analysis_setup, db):
 async def boundary_scenario(settings, wid, aid, owner):
     engine = build_engine(settings.database_url.get_secret_value())
     provider = FakeProvider()
-    enabled = settings.model_copy(update={"ai_enabled": True, "ai_daily_limit": 2})
+    enabled = settings.model_copy(update={"ai_enabled": True, "ai_daily_limit": 30})
     service = ReviewService(engine, enabled)
     try:
         with pytest.raises(AppException, match="AI"):
@@ -142,8 +142,16 @@ async def boundary_scenario(settings, wid, aid, owner):
                     .where(RepositoryConnection.id == second.repository_connection_id)
                     .values(connection_generation=second.connection_generation)
                 )
+            previous = second
+            # Two failed runs and 28 canceled runs exhaust the team's daily allowance.
+            # Creating/canceling runs does not call the paid model.
+            for _ in range(28):
+                previous = await service.start(owner, wid, aid, True, previous.id)
+                await service.cancel(owner, wid, previous.id)
+            assert len(await service.history(owner, wid, aid)) == 30
+            assert provider.calls == 0
             with pytest.raises(AppException) as failure:
-                await service.start(owner, wid, aid, True, second.id)
+                await service.start(owner, wid, aid, True, previous.id)
             assert failure.value.code == "AI_DAILY_LIMIT"
             async with transaction(engine) as s:
                 assert (await s.get(AnalysisRun, aid)).status == "COMPLETED"

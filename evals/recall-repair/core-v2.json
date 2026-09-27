@@ -1,0 +1,138 @@
+[
+  {
+    "id": "length-before",
+    "path": "length.py",
+    "patch": "@@ -1,10 +1,11 @@\n def content_length(body: str | bytes) -> int:\n+    return len(body)\n \n def prepare(body: str | bytes):\n     wire = body.encode(\"utf-8\") if isinstance(body, str) else body\n     return {\"Content-Length\": content_length(body), \"body\": wire}\n \n def test_protocol_length():\n     for body in [\"\", \"abc\", \"한글\", b\"abc\", \"한글\".encode(\"utf-8\")]:\n         request = prepare(body)\n         assert request[\"Content-Length\"] == len(request[\"body\"])",
+    "expected_locations": [
+      [
+        2,
+        2
+      ]
+    ],
+    "expected_lines": [],
+    "contract": "Content-Length must equal transmitted UTF-8 byte count, including non-ASCII strings; bytes must not be encoded again.",
+    "kind": "contract-preserving-public-pr-reproduction",
+    "label_review": "agent-oracle-and-source-inspected; independent-human-review-pending",
+    "provenance": {
+      "url": "https://github.com/psf/requests/pull/6589",
+      "base_sha": "7a13c041dbef42f9f3feb14110f02626f6892e9a",
+      "head_sha": "3fd309a5c14e4cfbd96bea6c8e71b4958fe090bb",
+      "preserved": "Content-Length consumer, UTF-8 wire, str/bytes tests",
+      "transformation": "handwritten minimal behavior reproduction; not original whole PR"
+    },
+    "rubric": {
+      "required_behavior": "Content-Length must equal transmitted UTF-8 byte count, including non-ASCII strings; bytes must not be encoded again.",
+      "reject": "unreachable trigger, wrong effect, invented contract, duplicate or generic question"
+    }
+  },
+  {
+    "id": "length-after",
+    "path": "length.py",
+    "patch": "@@ -1,10 +1,11 @@\n def content_length(body: str | bytes) -> int:\n+    return len(body.encode(\"utf-8\") if isinstance(body, str) else body)\n \n def prepare(body: str | bytes):\n     wire = body.encode(\"utf-8\") if isinstance(body, str) else body\n     return {\"Content-Length\": content_length(body), \"body\": wire}\n \n def test_protocol_length():\n     for body in [\"\", \"abc\", \"한글\", b\"abc\", \"한글\".encode(\"utf-8\")]:\n         request = prepare(body)\n         assert request[\"Content-Length\"] == len(request[\"body\"])",
+    "expected_locations": [],
+    "expected_lines": [],
+    "contract": "Content-Length must equal transmitted UTF-8 byte count, including non-ASCII strings; bytes must not be encoded again.",
+    "kind": "contract-preserving-public-pr-reproduction",
+    "label_review": "agent-oracle-and-source-inspected; independent-human-review-pending",
+    "provenance": {
+      "url": "https://github.com/psf/requests/pull/6589",
+      "base_sha": "7a13c041dbef42f9f3feb14110f02626f6892e9a",
+      "head_sha": "3fd309a5c14e4cfbd96bea6c8e71b4958fe090bb",
+      "preserved": "Content-Length consumer, UTF-8 wire, str/bytes tests",
+      "transformation": "handwritten minimal behavior reproduction; not original whole PR"
+    },
+    "rubric": {
+      "required_behavior": "Content-Length must equal transmitted UTF-8 byte count, including non-ASCII strings; bytes must not be encoded again.",
+      "reject": "unreachable trigger, wrong effect, invented contract, duplicate or generic question"
+    }
+  },
+  {
+    "id": "ca-before",
+    "path": "settings.py",
+    "patch": "@@ -1,17 +1,18 @@\n def merge_setting(request_value, session_value):\n     if session_value is None:\n         return request_value\n     if request_value is None:\n         return session_value\n     return request_value\n \n def environment_settings(env: dict[str, str], verify=True, session_verify=True):\n     if verify is True or verify is None:\n+        verify = env.get(\"REQUESTS_CA_BUNDLE\") or env.get(\"CURL_CA_BUNDLE\")\n     return merge_setting(verify, session_verify)\n \n def test_environment_contract():\n     assert environment_settings({}, True) is True\n     assert environment_settings({\"CURL_CA_BUNDLE\": \"\"}, True) is True\n     assert environment_settings({\"REQUESTS_CA_BUNDLE\": \"\", \"CURL_CA_BUNDLE\": \"\"}, True) is True\n     assert environment_settings({\"REQUESTS_CA_BUNDLE\": \"/ca.pem\"}, True) == \"/ca.pem\"\n     assert environment_settings({\"CURL_CA_BUNDLE\": \"/ca.pem\"}, False) is False",
+    "expected_locations": [
+      [
+        10,
+        10
+      ]
+    ],
+    "expected_lines": [],
+    "contract": "An empty CURL_CA_BUNDLE must preserve explicit verification True. Missing values may become None but session merge restores True. Explicit False and nonempty paths remain valid.",
+    "kind": "contract-preserving-public-pr-reproduction",
+    "label_review": "agent-oracle-and-source-inspected; independent-human-review-pending",
+    "provenance": {
+      "url": "https://github.com/psf/requests/pull/6074",
+      "base_sha": "5e749546a26ce62e53d0a14ae1455f8b066fe19f",
+      "head_sha": "79c4a017fe341fb989d3a7876cf4e44b87601b58",
+      "preserved": "True/None guard, non-mapping setting merge, empty versus missing env, explicit False",
+      "transformation": "handwritten non-mapping branch; proxy/dict merging outside this contract"
+    },
+    "rubric": {
+      "required_behavior": "An empty CURL_CA_BUNDLE must preserve explicit verification True. Missing values may become None but session merge restores True. Explicit False and nonempty paths remain valid.",
+      "reject": "unreachable trigger, wrong effect, invented contract, duplicate or generic question"
+    }
+  },
+  {
+    "id": "ca-after",
+    "path": "settings.py",
+    "patch": "@@ -1,17 +1,18 @@\n def merge_setting(request_value, session_value):\n     if session_value is None:\n         return request_value\n     if request_value is None:\n         return session_value\n     return request_value\n \n def environment_settings(env: dict[str, str], verify=True, session_verify=True):\n     if verify is True or verify is None:\n+        verify = env.get(\"REQUESTS_CA_BUNDLE\") or env.get(\"CURL_CA_BUNDLE\") or verify\n     return merge_setting(verify, session_verify)\n \n def test_environment_contract():\n     assert environment_settings({}, True) is True\n     assert environment_settings({\"CURL_CA_BUNDLE\": \"\"}, True) is True\n     assert environment_settings({\"REQUESTS_CA_BUNDLE\": \"\", \"CURL_CA_BUNDLE\": \"\"}, True) is True\n     assert environment_settings({\"REQUESTS_CA_BUNDLE\": \"/ca.pem\"}, True) == \"/ca.pem\"\n     assert environment_settings({\"CURL_CA_BUNDLE\": \"/ca.pem\"}, False) is False",
+    "expected_locations": [],
+    "expected_lines": [],
+    "contract": "An empty CURL_CA_BUNDLE must preserve explicit verification True. Missing values may become None but session merge restores True. Explicit False and nonempty paths remain valid.",
+    "kind": "contract-preserving-public-pr-reproduction",
+    "label_review": "agent-oracle-and-source-inspected; independent-human-review-pending",
+    "provenance": {
+      "url": "https://github.com/psf/requests/pull/6074",
+      "base_sha": "5e749546a26ce62e53d0a14ae1455f8b066fe19f",
+      "head_sha": "79c4a017fe341fb989d3a7876cf4e44b87601b58",
+      "preserved": "True/None guard, non-mapping setting merge, empty versus missing env, explicit False",
+      "transformation": "handwritten non-mapping branch; proxy/dict merging outside this contract"
+    },
+    "rubric": {
+      "required_behavior": "An empty CURL_CA_BUNDLE must preserve explicit verification True. Missing values may become None but session merge restores True. Explicit False and nonempty paths remain valid.",
+      "reject": "unreachable trigger, wrong effect, invented contract, duplicate or generic question"
+    }
+  },
+  {
+    "id": "length-bytes-normal",
+    "path": "length.py",
+    "patch": "@@ -1,9 +1,10 @@\n def content_length(body: bytes) -> int:\n+    return len(body)\n \n def prepare(body: bytes):\n     return {\"Content-Length\": content_length(body), \"body\": body}\n \n def test_bytes_contract():\n     body = \"한글\".encode(\"utf-8\")\n     request = prepare(body)\n     assert request[\"Content-Length\"] == len(body)",
+    "expected_locations": [],
+    "expected_lines": [],
+    "contract": "Only bytes accepted and sent unchanged; len(bytes) already counts bytes.",
+    "kind": "contract-preserving-public-pr-reproduction",
+    "label_review": "agent-oracle-and-source-inspected; independent-human-review-pending",
+    "provenance": {
+      "url": "https://github.com/psf/requests/pull/6589",
+      "base_sha": "7a13c041dbef42f9f3feb14110f02626f6892e9a",
+      "head_sha": "3fd309a5c14e4cfbd96bea6c8e71b4958fe090bb",
+      "preserved": "Content-Length consumer, UTF-8 wire, str/bytes tests",
+      "transformation": "handwritten minimal behavior reproduction; not original whole PR"
+    },
+    "rubric": {
+      "required_behavior": "Only bytes accepted and sent unchanged; len(bytes) already counts bytes.",
+      "reject": "unreachable trigger, wrong effect, invented contract, duplicate or generic question"
+    }
+  },
+  {
+    "id": "ca-explicit-false-normal",
+    "path": "settings.py",
+    "patch": "@@ -1,19 +1,21 @@\n def merge_setting(request_value, session_value):\n     if session_value is None:\n         return request_value\n     if request_value is None:\n         return session_value\n     return request_value\n \n def environment_settings(env: dict[str, str], verify=True, session_verify=True):\n+    if verify is True or verify is None:\n+        verify = env.get(\"REQUESTS_CA_BUNDLE\") or env.get(\"CURL_CA_BUNDLE\") or verify\n     return merge_setting(verify, session_verify)\n \n def test_environment_contract():\n     assert environment_settings({}, True) is True\n     assert environment_settings({\"CURL_CA_BUNDLE\": \"\"}, True) is True\n     assert environment_settings({\"REQUESTS_CA_BUNDLE\": \"\", \"CURL_CA_BUNDLE\": \"\"}, True) is True\n     assert environment_settings({\"REQUESTS_CA_BUNDLE\": \"/ca.pem\"}, True) == \"/ca.pem\"\n     assert environment_settings({\"CURL_CA_BUNDLE\": \"/ca.pem\"}, False) is False\n \n def test_explicit_disable():\n     assert environment_settings({\"CURL_CA_BUNDLE\": \"/ca.pem\"}, False) is False",
+    "expected_locations": [],
+    "expected_lines": [],
+    "contract": "The resolver must preserve an explicit False choice and accept CA path strings; do not invent a bool-only return contract.",
+    "kind": "contract-preserving-public-pr-reproduction",
+    "label_review": "agent-oracle-and-source-inspected; independent-human-review-pending",
+    "provenance": {
+      "url": "https://github.com/psf/requests/pull/6074",
+      "base_sha": "5e749546a26ce62e53d0a14ae1455f8b066fe19f",
+      "head_sha": "79c4a017fe341fb989d3a7876cf4e44b87601b58",
+      "preserved": "True/None guard, non-mapping setting merge, empty versus missing env, explicit False",
+      "transformation": "handwritten non-mapping branch; proxy/dict merging outside this contract"
+    },
+    "rubric": {
+      "required_behavior": "The resolver must preserve an explicit False choice and accept CA path strings; do not invent a bool-only return contract.",
+      "reject": "unreachable trigger, wrong effect, invented contract, duplicate or generic question"
+    }
+  }
+]

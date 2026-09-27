@@ -1,0 +1,164 @@
+[
+  {
+    "id": "py-dict-bug",
+    "path": "src/tags.py",
+    "patch": "@@ -0,0 +1,3 @@\n+def tags(key, value, entries={}):\n+    entries[key] = value\n+    return entries",
+    "expected_lines": [
+      1
+    ]
+  },
+  {
+    "id": "py-dict-safe",
+    "path": "src/tags.py",
+    "patch": "@@ -0,0 +1,5 @@\n+def tags(key, value, entries=None):\n+    if entries is None:\n+        entries = {}\n+    entries[key] = value\n+    return entries",
+    "expected_lines": []
+  },
+  {
+    "id": "java-null-guard-safe",
+    "path": "src/Lengths.java",
+    "patch": "@@ -0,0 +1,7 @@\n+import java.util.List;\n+class Lengths {\n+  static int length(List<String> values) {\n+    if (values == null || values.isEmpty()) return 0;\n+    return values.size();\n+  }\n+}",
+    "expected_lines": []
+  },
+  {
+    "id": "java-null-guard-bug",
+    "path": "src/Lengths.java",
+    "patch": "@@ -0,0 +1,7 @@\n+import java.util.List;\n+class Lengths {\n+  static int length(List<String> values) {\n+    if (values == null && values.isEmpty()) return 0;\n+    return values.size();\n+  }\n+}",
+    "expected_lines": [
+      4
+    ]
+  },
+  {
+    "id": "js-map-safe",
+    "path": "src/doubled.js",
+    "patch": "@@ -0,0 +1,3 @@\n+export function doubled(values) {\n+  return values.map(value => value * 2);\n+}",
+    "expected_lines": []
+  },
+  {
+    "id": "js-map-bug",
+    "path": "src/doubled.js",
+    "patch": "@@ -0,0 +1,3 @@\n+export function doubled(values) {\n+  return values.map(value => { value * 2; });\n+}",
+    "expected_lines": [
+      2
+    ]
+  },
+  {
+    "id": "ts-promise-safe",
+    "path": "src/permit.ts",
+    "patch": "@@ -0,0 +1,5 @@\n+import { check } from \"./policy.ts\";\n+export async function permit(): Promise<boolean> {\n+  if (!await check()) return false;\n+  return true;\n+}",
+    "expected_lines": [],
+    "files": {
+      "src/permit.ts": "import { check } from \"./policy.ts\";\nexport async function permit(): Promise<boolean> {\n  if (!await check()) return false;\n  return true;\n}",
+      "src/policy.ts": "export async function check(): Promise<boolean> {\n  return false;\n}"
+    },
+    "required_context": {
+      "path": "src/policy.ts",
+      "lines": [
+        1,
+        2,
+        3
+      ]
+    }
+  },
+  {
+    "id": "ts-promise-bug",
+    "path": "src/permit.ts",
+    "patch": "@@ -0,0 +1,5 @@\n+import { check } from \"./policy.ts\";\n+export async function permit(): Promise<boolean> {\n+  if (!check()) return false;\n+  return true;\n+}",
+    "expected_lines": [
+      3
+    ],
+    "files": {
+      "src/permit.ts": "import { check } from \"./policy.ts\";\nexport async function permit(): Promise<boolean> {\n  if (!check()) return false;\n  return true;\n}",
+      "src/policy.ts": "export async function check(): Promise<boolean> {\n  return false;\n}"
+    },
+    "required_context": {
+      "path": "src/policy.ts",
+      "lines": [
+        1,
+        2,
+        3
+      ]
+    }
+  },
+  {
+    "id": "py-sequence-safe",
+    "path": "src/first.py",
+    "patch": "@@ -0,0 +1,4 @@\n+from storage import first_value\n+\n+def title(index: int) -> str:\n+    return first_value(index).upper()",
+    "expected_lines": [],
+    "files": {
+      "src/first.py": "from storage import first_value\n\ndef title(index: int) -> str:\n    return first_value(index).upper()",
+      "src/storage.py": "def first_value(index: int) -> str:\n    if index < 0:\n        raise ValueError(\"negative\")\n    return \"first\""
+    },
+    "required_context": {
+      "path": "src/storage.py",
+      "lines": [
+        1,
+        2,
+        3,
+        4
+      ]
+    }
+  },
+  {
+    "id": "py-sequence-bug",
+    "path": "src/first.py",
+    "patch": "@@ -0,0 +1,4 @@\n+from storage import first_value\n+\n+def title(index: int) -> str:\n+    return first_value(index).upper()",
+    "expected_lines": [
+      4
+    ],
+    "files": {
+      "src/first.py": "from storage import first_value\n\ndef title(index: int) -> str:\n    return first_value(index).upper()",
+      "src/storage.py": "def first_value(index: int) -> str | None:\n    if index < 0:\n        return None\n    return \"first\""
+    },
+    "required_context": {
+      "path": "src/storage.py",
+      "lines": [
+        1,
+        2,
+        3,
+        4
+      ]
+    }
+  },
+  {
+    "id": "java-capacity-safe",
+    "path": "src/Buffer.java",
+    "patch": "@@ -0,0 +1,5 @@\n+class Buffer {\n+  static byte[] allocate(int size) {\n+    return new byte[Capacity.value(size)];\n+  }\n+}",
+    "expected_lines": [],
+    "files": {
+      "src/Buffer.java": "class Buffer {\n  static byte[] allocate(int size) {\n    return new byte[Capacity.value(size)];\n  }\n}",
+      "src/Capacity.java": "class Capacity {\n  static int value(int size) {\n    return Math.max(0, size);\n  }\n}"
+    },
+    "required_context": {
+      "path": "src/Capacity.java",
+      "lines": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    }
+  },
+  {
+    "id": "java-capacity-bug",
+    "path": "src/Buffer.java",
+    "patch": "@@ -0,0 +1,5 @@\n+class Buffer {\n+  static byte[] allocate(int size) {\n+    return new byte[Capacity.value(size)];\n+  }\n+}",
+    "expected_lines": [
+      3
+    ],
+    "files": {
+      "src/Buffer.java": "class Buffer {\n  static byte[] allocate(int size) {\n    return new byte[Capacity.value(size)];\n  }\n}",
+      "src/Capacity.java": "class Capacity {\n  static int value(int size) {\n    return -1;\n  }\n}"
+    },
+    "required_context": {
+      "path": "src/Capacity.java",
+      "lines": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    }
+  }
+]

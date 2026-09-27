@@ -1,0 +1,16 @@
+{
+  "prompt_version": "rh1-d634ca5b77229914",
+  "system_sha256": "ecf2cdd16183bed842b262118d0ac41c2be34ef7be8cbaed9dfc7b1cb660178d",
+  "purpose": "read-only frozen trusted baseline for Python draft-only paired evaluation",
+  "files": {
+    "baseline-checks.prompt": "703ce13b04afd53e47ac855818f8cfa5b8249a6e5cfe37f03b583608ce95daa3",
+    "baseline-core.prompt": "8c6960536e6a2b7f8b1310e99c52be2fef9cfe52d0ba9b267a9593f0e123c4bb",
+    "baseline-java.prompt": "8d51bbb0c63e97ae04a75db5a54beaaa787ec5551fb1521d3a456f91ea1471c5",
+    "baseline-javascript.prompt": "a38cb14b841eee440ef4c5e9fbb3bac59e85d0edf5d00267afeeb753da0911fa",
+    "baseline-output.prompt": "dcd0e35f65de4129c858518136af17bd4ba38a038783a4dbc9d94b184e73e3ad",
+    "baseline-python.prompt": "9feab7c02beb87d19555cc5fa04460e324cd0caf077f9c48826b8d650e9c6766",
+    "baseline-system.txt": "e44354f99422e3b0071c699e79c256978674d33c742885a74214b2769862e18c",
+    "baseline-typescript.prompt": "e702e1a722a2143250a96b19af156df0c394aad5c3a208d6fa2bf0296755a7c8",
+    "baseline-verification.prompt": "439d9a9b4b01f128fbfffeafe9b9ef2d3021c5fa22044e5252a67c59dcd9402e"
+  }
+}

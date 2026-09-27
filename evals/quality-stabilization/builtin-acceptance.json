@@ -1,0 +1,86 @@
+[
+  {
+    "id": "py-int-safe",
+    "path": "parse.py",
+    "patch": "@@ -0,0 +1,2 @@\n+def parse():\n+    return int(\"12\")",
+    "expected_lines": []
+  },
+  {
+    "id": "py-int-bug",
+    "path": "parse.py",
+    "patch": "@@ -0,0 +1,2 @@\n+def parse():\n+    return int(\"twelve\")",
+    "expected_lines": [
+      2
+    ]
+  },
+  {
+    "id": "py-min-safe",
+    "path": "smallest.py",
+    "patch": "@@ -0,0 +1,2 @@\n+def smallest():\n+    return min([2, 1])",
+    "expected_lines": []
+  },
+  {
+    "id": "py-min-bug",
+    "path": "smallest.py",
+    "patch": "@@ -0,0 +1,2 @@\n+def smallest():\n+    return min([])",
+    "expected_lines": [
+      2
+    ]
+  },
+  {
+    "id": "js-json-safe",
+    "path": "parse.js",
+    "patch": "@@ -0,0 +1,3 @@\n+export function parse() {\n+  return JSON.parse('{\"a\":1}');\n+}",
+    "expected_lines": []
+  },
+  {
+    "id": "js-json-bug",
+    "path": "parse.js",
+    "patch": "@@ -0,0 +1,3 @@\n+export function parse() {\n+  return JSON.parse('{oops}');\n+}",
+    "expected_lines": [
+      2
+    ]
+  },
+  {
+    "id": "ts-date-safe",
+    "path": "date.ts",
+    "patch": "@@ -0,0 +1,3 @@\n+export function date(): string {\n+  return new Date(\"2026-01-01T00:00:00Z\").toISOString();\n+}",
+    "expected_lines": []
+  },
+  {
+    "id": "ts-date-bug",
+    "path": "date.ts",
+    "patch": "@@ -0,0 +1,3 @@\n+export function date(): string {\n+  return new Date(\"not-a-date\").toISOString();\n+}",
+    "expected_lines": [
+      2
+    ]
+  },
+  {
+    "id": "java-int-safe",
+    "path": "Parse.java",
+    "patch": "@@ -0,0 +1,5 @@\n+class Parse {\n+  static int parse() {\n+    return Integer.parseInt(\"12\");\n+  }\n+}",
+    "expected_lines": []
+  },
+  {
+    "id": "java-int-bug",
+    "path": "Parse.java",
+    "patch": "@@ -0,0 +1,5 @@\n+class Parse {\n+  static int parse() {\n+    return Integer.parseInt(\"twelve\");\n+  }\n+}",
+    "expected_lines": [
+      3
+    ]
+  },
+  {
+    "id": "java-substring-safe",
+    "path": "Prefix.java",
+    "patch": "@@ -0,0 +1,5 @@\n+class Prefix {\n+  static String prefix() {\n+    return \"ab\".substring(0, 2);\n+  }\n+}",
+    "expected_lines": []
+  },
+  {
+    "id": "java-substring-bug",
+    "path": "Prefix.java",
+    "patch": "@@ -0,0 +1,5 @@\n+class Prefix {\n+  static String prefix() {\n+    return \"ab\".substring(0, 9);\n+  }\n+}",
+    "expected_lines": [
+      3
+    ]
+  }
+]

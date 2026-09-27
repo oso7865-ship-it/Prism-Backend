@@ -6,7 +6,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_deepseek import ChatDeepSeek
 from langsmith import tracing_context
 
-from app.domain.review.harness import compose
+from app.domain.review.harness import compose, compose_verification
 from app.domain.review.policy import ReviewOutput
 from app.shared.config.settings import Settings
 
@@ -16,6 +16,8 @@ class Provider(Protocol):
 
     async def review(self, payload: str) -> tuple[str, int, int]: ...
 
+    async def verify(self, payload: str) -> tuple[str, int, int]: ...
+
 
 class DeepSeekProvider:
     def __init__(self, settings: Settings) -> None:
@@ -23,9 +25,15 @@ class DeepSeekProvider:
         self.model: str = settings.deepseek_model
 
     async def review(self, payload: str) -> tuple[str, int, int]:
+        system, _ = compose(payload, ReviewOutput.model_json_schema())
+        return await self.invoke(system, payload)
+
+    async def verify(self, payload: str) -> tuple[str, int, int]:
+        return await self.invoke(compose_verification(payload), payload)
+
+    async def invoke(self, system: str, payload: str) -> tuple[str, int, int]:
         if not self.settings.ai_enabled or not self.settings.deepseek_api_key:
             raise ValueError("AI_DISABLED")
-        system, _ = compose(payload, ReviewOutput.model_json_schema())
         # No environment proxy, redirects, retry, streaming, tools or external traces.
         async with httpx.AsyncClient(trust_env=False, follow_redirects=False, timeout=60) as http:
             model = ChatDeepSeek(

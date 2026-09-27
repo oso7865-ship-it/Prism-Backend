@@ -9,3 +9,5 @@
 !migrations/**
 **/__pycache__
 **/*.pyc
+**/*.md
+app/domain/review/harness/system.txt

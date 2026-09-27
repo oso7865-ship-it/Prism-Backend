@@ -14,6 +14,7 @@ from app.shared.config.settings import Settings
 
 SCHEMA = ReviewOutput.model_json_schema()
 CASES = json.loads(Path("evals/review-harness/cases.json").read_text(encoding="utf-8"))
+CASES += json.loads(Path("evals/review-harness/experience-cases.json").read_text(encoding="utf-8"))
 
 
 def payload(*languages):
@@ -112,6 +113,7 @@ def test_provider_actually_uses_harness_and_keeps_code_in_human_message(monkeypa
             captured["settings"] = kwargs
 
         def bind(self, **kwargs):
+            captured["binding"] = kwargs
             return self
 
         async def ainvoke(self, messages, config):
@@ -133,5 +135,6 @@ def test_provider_actually_uses_harness_and_keeps_code_in_human_message(monkeypa
     assert system.type == "system" and system.content == expected
     assert human.type == "human" and human.content == data
     assert captured["settings"]["max_retries"] == 0
+    assert captured["binding"]["response_format"] == {"type": "json_object"}
     assert captured["config"] == {"callbacks": []}
     assert result[1:] == (100, 20)
