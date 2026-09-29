@@ -119,7 +119,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          test -n "$AWS_ROLE_ARN" && test -n "$EC2_INSTANCE_ID"
+          test -n "$AWS_ROLE_ARN"
+          test -n "$EC2_INSTANCE_ID"
           test "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq '.object.sha')" = "$GITHUB_SHA"
       - uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5
         with:
