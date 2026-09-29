@@ -1,0 +1,12 @@
+{
+  "enabled": false,
+  "image_repository": "ghcr.io/oso7865-ship-it/prism-backend",
+  "runtime_env": "/home/ubuntu/.config/prism/runtime.env",
+  "database_ca": "/etc/prism/certs/rds-global-bundle.pem",
+  "compose_file": "/opt/prism-deploy/compose.ec2.yaml",
+  "docker_config": "/root/.docker",
+  "state_dir": "/var/lib/prism-deploy",
+  "readiness_url": "https://api-prismquest.p-e.kr/health/ready",
+  "migration_policy": "unchanged",
+  "backup_restore_verified_at": null
+}

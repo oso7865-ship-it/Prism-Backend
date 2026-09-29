@@ -1,5 +1,8 @@
 name: backend-ci
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -30,14 +33,107 @@ jobs:
       - run: uv sync --locked
       - run: uv run ruff check app tests migrations
       - run: uv run ruff format --check app tests migrations
+      - run: uv run ruff check deployment scripts/dispatch_ec2.py scripts/check_private_package.py
+      - run: uv run ruff format --check deployment scripts/dispatch_ec2.py scripts/check_private_package.py
       - run: uv run mypy app
       - run: uv run alembic upgrade head
       - run: uv run alembic downgrade base
       - run: uv run alembic upgrade head
       - run: uv run alembic check
       - run: uv run pytest -q
-      - run: docker build -t prism-predeploy:local .
+      - run: >-
+          docker build -t prism-predeploy:local
+          --label org.opencontainers.image.source=https://github.com/oso7865-ship-it/Prism-Backend
+          --label org.opencontainers.image.revision="$GITHUB_SHA" .
       - run: uv run python scripts/check_container.py --output /tmp/prism-container-smoke.json
       - run: uv run python scripts/check_ec2.py
+      - run: python3 -m unittest discover -s deployment/tests -v
       - run: node scripts/check-repository.mjs
       - run: node --test scripts/repository-tools.test.mjs
+
+  publish:
+    needs: validate
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.image.outputs.image }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Require private package visibility
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/check_private_package.py --allow-missing
+      - name: Build and verify the release image without a public artifact
+        run: |
+          set -euo pipefail
+          docker build -t prism-predeploy:local \
+            --label org.opencontainers.image.source=https://github.com/oso7865-ship-it/Prism-Backend \
+            --label org.opencontainers.image.revision="$GITHUB_SHA" .
+          python3 scripts/check_container.py --output /tmp/prism-release-smoke.json
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish tested image to private GHCR package
+        id: image
+        env:
+          IMAGE_REPOSITORY: ghcr.io/oso7865-ship-it/prism-backend
+        run: |
+          set -euo pipefail
+          test "$(docker image inspect prism-predeploy:local --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}')" = "$GITHUB_SHA"
+          docker tag prism-predeploy:local "$IMAGE_REPOSITORY:$GITHUB_SHA"
+          docker push "$IMAGE_REPOSITORY:$GITHUB_SHA"
+          image=$(docker image inspect "$IMAGE_REPOSITORY:$GITHUB_SHA" --format '{{index .RepoDigests 0}}')
+          [[ "$image" =~ ^ghcr\.io/oso7865-ship-it/prism-backend@sha256:[0-9a-f]{64}$ ]]
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+      - name: Verify published package is private
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/check_private_package.py
+
+  deploy:
+    needs: publish
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment:
+      name: production
+      url: https://api-prismquest.p-e.kr
+    concurrency:
+      group: backend-production
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Require deployment settings and current main
+        env:
+          AWS_ROLE_ARN: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          EC2_INSTANCE_ID: ${{ vars.EC2_INSTANCE_ID }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test -n "$AWS_ROLE_ARN" && test -n "$EC2_INSTANCE_ID"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq '.object.sha')" = "$GITHUB_SHA"
+      - uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ap-northeast-2
+          role-session-name: prism-${{ github.run_id }}
+          allowed-account-ids: '152025328159'
+      - name: Deploy and wait for EC2 health result
+        env:
+          PRISM_IMAGE: ${{ needs.publish.outputs.image }}
+          PRISM_EC2_INSTANCE_ID: ${{ vars.EC2_INSTANCE_ID }}
+          PRISM_SSM_DOCUMENT: PrismDeployBackend
+        run: python3 scripts/dispatch_ec2.py

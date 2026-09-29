@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "2.2",
+  "description": "Deploy one immutable PRism backend image using the installed root-managed runner.",
+  "parameters": {
+    "Image": {
+      "type": "String", "interpolationType": "ENV_VAR",
+      "allowedPattern": "^ghcr\\.io/oso7865-ship-it/prism-backend@sha256:[0-9a-f]{64}$"
+    },
+    "Revision": {
+      "type": "String", "interpolationType": "ENV_VAR",
+      "allowedPattern": "^[0-9a-f]{40}$"
+    },
+    "Sequence": {
+      "type": "String", "interpolationType": "ENV_VAR",
+      "allowedPattern": "^[1-9][0-9]{0,14}$"
+    }
+  },
+  "mainSteps": [{
+    "action": "aws:runShellScript", "name": "DeployPrism",
+    "precondition": {"StringEquals": ["platformType", "Linux"]},
+    "inputs": {
+      "timeoutSeconds": "1200",
+      "runCommand": [
+        "set -eu",
+          "/usr/bin/python3 /opt/prism-deploy/deploy_ec2.py --image \"$SSM_Image\" --revision \"$SSM_Revision\" --sequence \"$SSM_Sequence\""
+      ]
+    }
+  }]
+}
