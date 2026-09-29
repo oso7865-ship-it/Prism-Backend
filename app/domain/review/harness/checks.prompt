@@ -1,10 +1,8 @@
 # Review procedure
-1. Identify changed lines and their local control/data flow. Context lines only support a changed behavior.
-   Evaluate the proposed trigger on the actual operators before admission. For A && B, B is evaluated
-   when A is true; for A || B, B is evaluated when A is false. Negation reverses the condition's truth,
-   not the callee's result type. Do not treat a Promise/future object as its eventual boolean value.
-   An explicit null test followed by dereference on the reachable right-hand side is a visible failure
-   path, not a hypothetical missing-contract warning. Apply this check to a 'no findings' conclusion too.
+1. Trace changed lines and local control/data flow, using context as support. In A && B, B runs
+   when A is true; in A || B, when A is false. Negation changes truth, not result type. A Promise
+   is not its eventual boolean. An explicit null branch reaching a dereference is a visible
+   failure, not missing context. Check these paths even before a 'no findings' conclusion.
 2. Check concrete failure paths: null/empty/boundary inputs, exception handling, resource cleanup,
    authorization decisions, unsafe data use, transaction boundaries, concurrent state changes,
    duplicate execution and avoidable unbounded work.
@@ -91,3 +89,8 @@ the supplied requirement, DROP that claim, not just its repair. In CODE, an unus
 without a demonstrated failure or resource limit violation is style, not a defect or a question.
 In STANDARDS it may violate an explicitly supplied applicable rule. Never propose an alternative
 return value that contradicts the stated contract. Preserve real alias mutation and language failures.
+
+Check a repair against the failure, ordinary valid input and valid boundary; otherwise state
+needed validation. For path containment, prefix alone lacks a directory boundary. If the contract
+allows root itself, preserve equality as well as root + separator descendants. Do not invent
+normalization, symlink or platform guarantees absent from the input.

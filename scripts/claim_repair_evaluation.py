@@ -164,13 +164,24 @@ class Evaluation:
             if result
             else None
         )
+        metrics = grade(case, normalized)
+        # Preserve the historical strict primary-line score, but also record causal
+        # evidence anchors: the visible write can be primary while the alias is evidence.
+        evidence_hit = bool(normalized) and any(
+            item["basis"] == "SUPPORTED"
+            and item["file_id"] == "f1"
+            and bool(set(item.get("evidence_lines", [])) & set(case["expected_lines"]))
+            for item in normalized["issues"]
+        )
+        metrics["evidence_location_hit"] = evidence_hit
+        metrics["evidence_miss"] = not case["fixed"] and not evidence_hit
         save(
             path,
             {
                 "case": case["id"],
                 "repeat": repeat,
                 "arm": self.arm,
-                "metrics": grade(case, normalized),
+                "metrics": metrics,
                 "result": result,
                 "error": error,
                 "recovered": recovered,

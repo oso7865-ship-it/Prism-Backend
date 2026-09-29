@@ -107,11 +107,20 @@ def index_document(content: str) -> list[dict[str, object]]:
                 }
             )
 
-    fenced = False
+    fence = ""
     for line in content.splitlines():
-        if line.lstrip().startswith(("```", "~~~")):
-            fenced = not fenced
-        heading = re.match(r"^#{1,6}\s+(.+)$", line) if not fenced else None
+        marker = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
+        if fence:
+            if (
+                marker
+                and marker[1][0] == fence[0]
+                and len(marker[1]) >= len(fence)
+                and not marker[2].strip()
+            ):
+                fence = ""
+        elif marker and (marker[1][0] != "`" or "`" not in marker[2]):
+            fence = marker[1]
+        heading = re.match(r"^#{1,6}\s+(.+)$", line) if not fence else None
         if heading:
             flush()
             title, lines = heading[1][:160], []

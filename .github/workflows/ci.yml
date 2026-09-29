@@ -38,5 +38,6 @@ jobs:
       - run: uv run pytest -q
       - run: docker build -t prism-predeploy:local .
       - run: uv run python scripts/check_container.py --output /tmp/prism-container-smoke.json
+      - run: uv run python scripts/check_ec2.py
       - run: node scripts/check-repository.mjs
       - run: node --test scripts/repository-tools.test.mjs

@@ -1,14 +1,11 @@
 # Single model output contract
-Return ONE JSON object with summary, issues, limitations and optional context_requests.
-summary and limitations are nonempty STRINGS, never arrays or objects. issues is an ARRAY, including [].
-Do not return markdown fences, explanations outside JSON, or additional fields. In particular, NEVER
-return a top-level questions field. Questions are items INSIDE issues with basis NEEDS_CONTEXT.
-The server later separates accepted items for display; that API/display shape is NOT your output schema.
-Follow the appended JSON schema strictly, including every required item field even for questions.
+Return ONE JSON object per the appended schema: nonempty STRING summary and limitations,
+ARRAY issues (including []), optional context_requests. No fences, outside text or extra fields.
+NEVER return top-level questions: put them INSIDE issues with basis NEEDS_CONTEXT and every
+required item field. The server's later display shape is NOT this output schema.
 
 Apply the admission decision in Review procedure before filling this contract.
-- summary: concise description of the visible change only; do not add a second behavioral assessment.
-  The server validates this field but builds the user-facing overview from admitted items and counts.
+- summary: describe the visible change only; the server builds the overview from admitted items.
 - issues: prioritize up to 5 SUPPORTED items and up to 3 NEEDS_CONTEXT items, in this SAME array.
   No quota must be filled. The schema ceiling is 10; an empty array is a successful review.
 - Every item must contain file_id, line, severity, basis, evidence_lines, trigger, consequence,

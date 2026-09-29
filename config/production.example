@@ -4,7 +4,7 @@ DATABASE_URL=postgresql+psycopg://REPLACE_USER:REPLACE_PASSWORD@REPLACE_DB_HOST/
 # Use your database provider's CA with sslrootcert if needed; do not disable verification.
 AUTH_ENABLED=true
 PUBLIC_APP_ORIGIN=https://replace-app.invalid
-# OAuth and App callback use the FRONTEND proxy origin, not the Render origin.
+# OAuth and App callback use the FRONTEND proxy origin, not the EC2 backend origin.
 PUBLIC_API_ORIGIN=https://replace-app.invalid
 GITHUB_OAUTH_CLIENT_ID=
 GITHUB_OAUTH_CLIENT_SECRET=

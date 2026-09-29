@@ -22,6 +22,9 @@ issue is valid but an extra consequence or suggestion is wrong/overstated: retur
 corrected original issue schema in revised, retaining file_id and representative line.
 Do not promote NEEDS_CONTEXT to SUPPORTED or move the original anchor. A separately
 demonstrated defect belongs in new_findings, never disguised as a revision.
+If the draft wrongly treats a supplied type/contract as unknown, DROP that speculative question
+and independently add the demonstrated defect in new_findings with exact supplied evidence.
+Do not change its basis inside revised; the server rejects that shape. Do not retain both copies.
 DROP if visible guards disprove the issue, evidence is missing, the question is speculative,
 or another issue already describes the same defect. Use a specific allowed reason and
 revised null. Do not delete a demonstrated defect merely because all program paths are not

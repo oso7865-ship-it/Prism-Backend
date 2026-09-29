@@ -1,0 +1,41 @@
+name: prism
+services:
+  api:
+    image: ${PRISM_IMAGE:?Set an immutable registry image with @sha256 digest}
+    env_file:
+      - path: ${PRISM_ENV_FILE:?Set the absolute path of the private runtime env file}
+        format: raw
+    environment:
+      PORT: "8000"
+      PGSSLROOTCERT: /run/prism/postgres-ca.pem
+    volumes:
+      - type: bind
+        source: ${PRISM_DB_CA_FILE:?Set the absolute path of the database CA PEM file}
+        target: /run/prism/postgres-ca.pem
+        read_only: true
+        bind:
+          create_host_path: false
+    ports:
+      - "127.0.0.1:8000:8000"
+    init: true
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777,noexec,nosuid
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 1g
+    cpus: "1.0"
+    pids_limit: 128
+    stop_grace_period: 45s
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready',timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "3"

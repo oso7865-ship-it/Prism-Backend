@@ -61,6 +61,19 @@ def test_index_markdown_fences_and_unicode_and_separate_sections():
     assert sections[0]["terms"]
 
 
+@pytest.mark.parametrize("inner", ["```", "~~~", "```` not a closing fence"])
+def test_nested_or_mismatched_fences_do_not_create_false_document_sections(inner):
+    source = f"# Rules\n````markdown\n{inner}\n# code, not a heading\n````\n## Next\nreal rule"
+    sections = index_document(source)
+    assert [s["heading"] for s in sections] == ["Rules", "Next"]
+    assert "# code, not a heading" in sections[0]["text"]
+
+
+def test_longer_matching_closing_fence_restores_headings():
+    sections = index_document("# Rules\n~~~python\n# code\n~~~~\n# Next\nreal rule")
+    assert [s["heading"] for s in sections] == ["Rules", "Next"]
+
+
 @pytest.mark.parametrize(
     "changes",
     [

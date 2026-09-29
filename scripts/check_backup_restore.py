@@ -3,6 +3,7 @@
 No development/production data is read or backed up. Raw DB errors stay in memory.
 """
 
+import argparse
 import hashlib
 import json
 import re
@@ -31,9 +32,12 @@ def sql(statement):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
     assert DATABASE.endswith("_test")
     assert re.fullmatch(r"backup_drill_[0-9a-f]{32}", SCHEMA)
-    report = Path("reports/2026-09-27_backup-restore.json")
+    report = args.output
     with report.open("x", encoding="utf-8") as output:
         output.write('{"status":"STARTED"}\n')
     created = False
