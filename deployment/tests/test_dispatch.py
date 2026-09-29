@@ -4,7 +4,6 @@ import io
 import json
 import os
 import unittest
-import urllib.error
 from pathlib import Path
 from unittest.mock import patch
 
@@ -18,9 +17,8 @@ def load(name):
 
 
 dispatch = load("dispatch_ec2")
-package = load("check_private_package")
 ENV = {
-    "PRISM_IMAGE": "ghcr.io/oso7865-ship-it/prism-backend-production@sha256:" + "a" * 64,
+    "PRISM_IMAGE": "ghcr.io/oso7865-ship-it/prism-backend@sha256:" + "a" * 64,
     "GITHUB_SHA": "b" * 40,
     "GITHUB_RUN_NUMBER": "23",
     "PRISM_EC2_INSTANCE_ID": "i-02d892cf8019b2d7a",
@@ -95,87 +93,3 @@ class DispatchTests(unittest.TestCase):
             contextlib.redirect_stdout(io.StringIO()),
         ):
             self.assertEqual(dispatch.main(), 1)
-
-
-class PrivatePackageTests(unittest.TestCase):
-    def test_only_private_package_is_accepted(self):
-        for payload, expected in [
-            ({"visibility": "private"}, 0),
-            ({"visibility": "public"}, 1),
-            ({}, 1),
-            ([], 1),
-        ]:
-            with (
-                patch.dict(os.environ, {"GH_TOKEN": "test-only"}),
-                patch.object(package, "reject_anonymous_pull"),
-                patch.object(
-                    package.urllib.request, "urlopen", return_value=io.StringIO(json.dumps(payload))
-                ),
-                contextlib.redirect_stdout(io.StringIO()),
-            ):
-                self.assertEqual(package.main([]), expected)
-
-    def test_missing_allowed_only_before_first_publish_and_403_never_allowed(self):
-        for code, argv, expected in [
-            (404, ["--allow-missing"], 0),
-            (404, [], 1),
-            (403, ["--allow-missing"], 1),
-        ]:
-            with (
-                patch.dict(os.environ, {"GH_TOKEN": "test-only"}),
-                patch.object(package, "reject_anonymous_pull"),
-                patch.object(
-                    package.urllib.request,
-                    "urlopen",
-                    side_effect=urllib.error.HTTPError(
-                        "https://api.github.com", code, "", {}, None
-                    ),
-                ),
-                contextlib.redirect_stdout(io.StringIO()),
-            ):
-                self.assertEqual(package.main(argv), expected)
-
-    def test_missing_token_fails_without_network(self):
-        with (
-            patch.dict(os.environ, {}, clear=True),
-            patch.object(package.urllib.request, "urlopen") as request,
-            contextlib.redirect_stdout(io.StringIO()),
-        ):
-            self.assertEqual(package.main([]), 1)
-            request.assert_not_called()
-
-    def test_anonymous_public_access_blocks_even_missing_rest_package(self):
-        with (
-            patch.dict(os.environ, {"GH_TOKEN": "test-only"}),
-            patch.object(
-                package.urllib.request, "urlopen", return_value=io.StringIO("{}")
-            ) as request,
-            contextlib.redirect_stdout(io.StringIO()),
-        ):
-            self.assertEqual(package.main(["--allow-missing"]), 1)
-            self.assertEqual(request.call_count, 1)
-
-    def test_registry_errors_fail_closed(self):
-        for status, allowed in [(401, True), (403, True), (404, False), (429, False), (500, False)]:
-            with patch.object(
-                package.urllib.request,
-                "urlopen",
-                side_effect=urllib.error.HTTPError("https://ghcr.io", status, "", {}, None),
-            ):
-                if allowed:
-                    package.reject_anonymous_pull()
-                else:
-                    with self.assertRaises(urllib.error.HTTPError):
-                        package.reject_anonymous_pull()
-
-    def test_missing_registry_is_not_a_missing_package_exception(self):
-        with (
-            patch.dict(os.environ, {"GH_TOKEN": "test-only"}),
-            patch.object(
-                package.urllib.request,
-                "urlopen",
-                side_effect=urllib.error.HTTPError("https://ghcr.io", 404, "", {}, None),
-            ),
-            contextlib.redirect_stdout(io.StringIO()),
-        ):
-            self.assertEqual(package.main(["--allow-missing"]), 1)

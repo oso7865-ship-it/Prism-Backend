@@ -4,7 +4,7 @@
   "parameters": {
     "Image": {
       "type": "String", "interpolationType": "ENV_VAR",
-      "allowedPattern": "^ghcr\\.io/oso7865-ship-it/prism-backend-production@sha256:[0-9a-f]{64}$"
+      "allowedPattern": "^ghcr\\.io/oso7865-ship-it/prism-backend@sha256:[0-9a-f]{64}$"
     },
     "Revision": {
       "type": "String", "interpolationType": "ENV_VAR",
