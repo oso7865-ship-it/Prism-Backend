@@ -1,6 +1,6 @@
 {
   "enabled": false,
-  "image_repository": "ghcr.io/oso7865-ship-it/prism-backend",
+  "image_repository": "ghcr.io/oso7865-ship-it/prism-backend-production",
   "runtime_env": "/home/ubuntu/.config/prism/runtime.env",
   "database_ca": "/etc/prism/certs/rds-global-bundle.pem",
   "compose_file": "/opt/prism-deploy/compose.ec2.yaml",

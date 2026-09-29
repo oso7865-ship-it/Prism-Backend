@@ -14,7 +14,7 @@ from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 
-REPOSITORY = "ghcr.io/oso7865-ship-it/prism-backend"
+REPOSITORY = "ghcr.io/oso7865-ship-it/prism-backend-production"
 SOURCE = "https://github.com/oso7865-ship-it/Prism-Backend"
 SCHEMA_QUERY = """
 import json

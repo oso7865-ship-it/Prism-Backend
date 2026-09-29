@@ -31,7 +31,9 @@ def main():
     document = os.environ.get("PRISM_SSM_DOCUMENT", "")
     expected = {
         "image": bool(
-            re.fullmatch(r"ghcr\.io/oso7865-ship-it/prism-backend@sha256:[0-9a-f]{64}", image)
+            re.fullmatch(
+                r"ghcr\.io/oso7865-ship-it/prism-backend-production@sha256:[0-9a-f]{64}", image
+            )
         ),
         "revision": bool(re.fullmatch(r"[0-9a-f]{40}", revision)),
         "sequence": bool(re.fullmatch(r"[1-9][0-9]{0,14}", sequence)),

@@ -84,14 +84,14 @@ jobs:
       - name: Publish tested image to private GHCR package
         id: image
         env:
-          IMAGE_REPOSITORY: ghcr.io/oso7865-ship-it/prism-backend
+          IMAGE_REPOSITORY: ghcr.io/oso7865-ship-it/prism-backend-production
         run: |
           set -euo pipefail
           test "$(docker image inspect prism-predeploy:local --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}')" = "$GITHUB_SHA"
           docker tag prism-predeploy:local "$IMAGE_REPOSITORY:$GITHUB_SHA"
           docker push "$IMAGE_REPOSITORY:$GITHUB_SHA"
           image=$(docker image inspect "$IMAGE_REPOSITORY:$GITHUB_SHA" --format '{{index .RepoDigests 0}}')
-          [[ "$image" =~ ^ghcr\.io/oso7865-ship-it/prism-backend@sha256:[0-9a-f]{64}$ ]]
+          [[ "$image" =~ ^ghcr\.io/oso7865-ship-it/prism-backend-production@sha256:[0-9a-f]{64}$ ]]
           echo "image=$image" >> "$GITHUB_OUTPUT"
       - name: Verify published package is private
         env:
