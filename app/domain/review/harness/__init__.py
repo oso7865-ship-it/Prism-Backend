@@ -5,9 +5,20 @@ import json
 from functools import lru_cache
 from importlib.resources import files
 
+from app.domain.review.empty_schema import FileCheck
 from app.domain.review.verification import VerificationOutput
 
-MODULES = ("core", "checks", "output", "java", "python", "javascript", "typescript", "verification")
+MODULES = (
+    "core",
+    "checks",
+    "output",
+    "java",
+    "python",
+    "javascript",
+    "typescript",
+    "verification",
+    "empty_review",
+)
 LANGUAGES = {
     "java": "java",
     "py": "python",
@@ -17,7 +28,7 @@ LANGUAGES = {
     "tsx": "typescript",
 }
 MAX_SYSTEM_BYTES = 24576
-COMPOSITION_REVISION = "selection-2-verifier-1"
+COMPOSITION_REVISION = "selection-2-verifier-1-empty-recheck-1"
 
 
 @lru_cache(maxsize=1)
@@ -33,6 +44,7 @@ def version(schema: dict[str, object]) -> str:
             "documents": documents(),
             "schema": schema,
             "verification_schema": VerificationOutput.model_json_schema(),
+            "empty_file_check_schema": FileCheck.model_json_schema(),
         },
         sort_keys=True,
         ensure_ascii=False,
@@ -63,6 +75,16 @@ def compose_verification(payload: str) -> str:
     languages = sorted({LANGUAGES[f["language"]] for f in context["files"]})
     text = "\n\n".join(documents()[n] for n in ["core", "checks", *languages, "verification"])
     text += "\n\nVerification JSON schema: " + json.dumps(VerificationOutput.model_json_schema())
+    if len(text.encode()) > MAX_SYSTEM_BYTES:
+        raise ValueError("HARNESS_TOO_LARGE")
+    return text
+
+
+def compose_empty_review(payload: str, schema: dict[str, object]) -> str:
+    data = json.loads(payload)
+    languages = sorted({LANGUAGES[f["language"]] for f in data["files"]})
+    text = "\n\n".join(documents()[n] for n in ["core", "checks", *languages, "empty_review"])
+    text += "\n\nJSON schema: " + json.dumps(schema, ensure_ascii=False)
     if len(text.encode()) > MAX_SYSTEM_BYTES:
         raise ValueError("HARNESS_TOO_LARGE")
     return text

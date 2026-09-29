@@ -1,7 +1,7 @@
 from typing import Annotated, Literal, cast
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.ext.asyncio import AsyncEngine
 
@@ -88,9 +88,25 @@ def review_router(
 
     @router.get("/reviews/{rid}/source/{key}")
     async def source_excerpt(
-        wid: UUID, rid: UUID, key: str, p: Annotated[CurrentPrincipal, principal]
+        wid: UUID,
+        rid: UUID,
+        key: str,
+        p: Annotated[CurrentPrincipal, principal],
+        line: Annotated[int | None, Query(ge=1, le=200_000)] = None,
     ) -> dict[str, object]:
-        return await excerpt(service.ready(), github, p.user_id, wid, rid, key)
+        return await excerpt(service.ready(), github, p.user_id, wid, rid, key, line)
+
+    @router.get("/reviews/{rid}/source-files/{file_id}")
+    async def source_file(
+        wid: UUID,
+        rid: UUID,
+        file_id: str,
+        p: Annotated[CurrentPrincipal, principal],
+        line: Annotated[int, Query(ge=1, le=200_000)] = 1,
+    ) -> dict[str, object]:
+        return await excerpt(
+            service.ready(), github, p.user_id, wid, rid, file_id, line, by_file=True
+        )
 
     @router.post("/analyses/{aid}/reviews", status_code=202)
     async def start(

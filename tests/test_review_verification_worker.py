@@ -25,7 +25,8 @@ from app.shared.jobs.store import claim
 @pytest.mark.parametrize(
     "mode", ["keep", "drop", "invalid", "timeout", "cancel", "revoke", "expire"]
 )
-def test_verification_is_reserved_fenced_and_never_replayed(analysis_setup, mode):
+@pytest.mark.parametrize("empty", [False, True])
+def test_verification_is_reserved_fenced_and_never_replayed(analysis_setup, mode, empty):
     data = analysis_setup
     analysis = start(data)
     asyncio.run(execute(data[1]), loop_factory=loop_factory)
@@ -60,7 +61,25 @@ def test_verification_is_reserved_fenced_and_never_replayed(analysis_setup, mode
                                 .where(Job.id == item.id)
                                 .values(lease_until=datetime.now(UTC) - timedelta(seconds=1))
                             )
-                return json.dumps(output([2])), 100, 40
+                return json.dumps(output([] if empty else [2])), 100, 40
+
+            async def recheck_empty(self, payload):
+                assert empty
+                await self.verify(payload)
+                data = output([2] if mode == "keep" else [])
+                data["file_checks"] = (
+                    []
+                    if mode == "invalid"
+                    else [
+                        {
+                            "file_id": "f1",
+                            "line": 2,
+                            "outcome": "FINDING" if mode == "keep" else "NO_FINDING",
+                            "observation": "변경 조건을 재검토했습니다.",
+                        }
+                    ]
+                )
+                return json.dumps(data), 120, 30
 
             async def verify(self, payload):
                 self.calls.append("verify")

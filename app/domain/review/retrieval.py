@@ -26,7 +26,7 @@ async def inspect_sources(sources: dict[str, list[str]]) -> dict[str, Any]:
         stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,
         env=env,
-        creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0,
+        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0) if sys.platform == "win32" else 0,
     )
     task = asyncio.create_task(
         asyncio.to_thread(

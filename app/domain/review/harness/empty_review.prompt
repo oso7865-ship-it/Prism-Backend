@@ -1,0 +1,22 @@
+# Independent review after an empty first pass
+Independently inspect EVERY supplied role=changed file. The first pass found no items;
+that is not evidence of correctness. Apply the admission rules to concrete changed
+operations, their supplied callers/callees, boundary values, guards and failure paths.
+Do not simply repeat the empty result, but do not manufacture a finding to fill a quota.
+Related files support changed-file findings; do not report unchanged files as defects.
+
+Return one JSON object with exactly summary, issues, limitations, file_checks.
+summary and limitations are short Korean strings. issues follows the appended schema:
+SUPPORTED requires no assumptions and demonstrated trigger/effect; NEEDS_CONTEXT needs a
+specific visible concern and a named missing premise, never hypothetical missing callers.
+Every evidence_lines entry must belong to the changed file_id, include line and at least
+one changed line. Include all required fields. No markdown, extra keys or source dumps.
+For each changed file, file_checks contains exactly one short observable review outcome:
+file_id, line (one provided CHANGED line), outcome, observation (Korean, <=240 characters).
+If a file has NO changed HEAD lines (for example removal-only changes), choose one supplied
+context line, mark LIMITED and state that the removed code was not supplied. Never invent a line.
+Use FINDING iff that file has an admitted issue/question, NO_FINDING if no actionable
+concern is visible, LIMITED if the supplied context does not allow a useful determination.
+State the operation checked or the specific missing boundary, not a reasoning transcript.
+NO_FINDING does not mean the complete file is safe. Never claim to have executed tests.
+Keep the entire response within the token budget; prefer concise, concrete findings.

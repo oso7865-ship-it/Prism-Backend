@@ -12,6 +12,8 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
+from app.domain.review.empty_review import validate_empty_review
+from app.domain.review.harness import documents
 from app.domain.review.policy import POLICY, PROMPT, Issue, ReviewOutput, prepare, validate_result
 from app.domain.review.provider import DeepSeekProvider
 from app.domain.review.verification import (
@@ -22,6 +24,7 @@ from app.domain.review.verification import (
 from app.shared.config.settings import Settings
 from scripts.evaluate_context_retrieval import build, error_details
 from scripts.evaluation_thinking_provider import EvaluationThinkingProvider
+from scripts.quality_reasoning_provider import HybridQualityProvider, ReasoningQualityProvider
 from scripts.recall_evaluation import (
     DiagnosticProvider,
     FrozenBaselineProvider,
@@ -136,6 +139,10 @@ async def run(
     verify_drafts=False,
     baseline=False,
     diagnose=False,
+    recheck_empty=False,
+    reasoning_quality=False,
+    quality_effort="high",
+    hybrid=False,
 ):
     if not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,79}", name):
         raise ValueError("INVALID_RUN_NAME")
@@ -144,6 +151,12 @@ async def run(
         raise ValueError("UNIQUE_CASES_REQUIRED")
     if verify_drafts and (not verify or any(not c.get("draft") for c in cases)):
         raise ValueError("VALIDATED_DRAFTS_REQUIRED")
+    if recheck_empty and (not verify or baseline or diagnose or thinking or verify_drafts):
+        raise ValueError("PRODUCT_VERIFICATION_REQUIRED")
+    if reasoning_quality and (baseline or diagnose or thinking):
+        raise ValueError("COMPARISON_MODES_ARE_SEPARATE")
+    if hybrid and (baseline or diagnose or thinking or reasoning_quality):
+        raise ValueError("COMPARISON_MODES_ARE_SEPARATE")
     total = len(cases) * repeats * (2 if verify and not verify_drafts else 1)
     if thinking and verify:
         raise ValueError("COMPARISON_MODES_ARE_SEPARATE")
@@ -183,7 +196,11 @@ async def run(
                     raise ValueError("NONEMPTY_DRAFT_REQUIRED")
             bundles.append((case, bundle, metadata))
         provider_type = (
-            FrozenBaselineProvider
+            HybridQualityProvider
+            if hybrid
+            else ReasoningQualityProvider
+            if reasoning_quality
+            else FrozenBaselineProvider
             if baseline
             else DiagnosticProvider
             if diagnose
@@ -192,15 +209,35 @@ async def run(
             else DeepSeekProvider
         )
         provider = provider_type(Settings())
+        if reasoning_quality:
+            if quality_effort not in {"low", "high"}:
+                raise ValueError("INVALID_QUALITY_EFFORT")
+            provider.reasoning_effort = quality_effort
         record = {
             "started_at": datetime.now(UTC).isoformat(),
             "model": provider.model,
-            "mode": "evaluation-thinking-low" if thinking else "product-non-thinking",
+            "checker_model": "deepseek-v4-pro" if hybrid else provider.model,
+            "hybrid_profile": hybrid,
+            "mode": "evaluation-flash-pro-hybrid"
+            if hybrid
+            else "evaluation-thinking-" + quality_effort
+            if reasoning_quality
+            else "evaluation-thinking-low"
+            if thinking
+            else "product-non-thinking",
             "verification_enabled": verify,
             "verification_only": verify_drafts,
-            "max_output_tokens": 4096 if thinking else 2000,
+            "empty_recheck_enabled": recheck_empty,
+            "max_output_tokens": 8192 if reasoning_quality else 4096 if thinking else 2000,
+            "checker_max_output_tokens": 8192 if hybrid or reasoning_quality else 2000,
+            "checker_reasoning_effort": "low"
+            if hybrid
+            else quality_effort
+            if reasoning_quality
+            else None,
             "timeout_seconds": 90 if thinking else 60,
             "prompt_version": PROMPT,
+            "trusted_harness_documents": documents(),
             "prompt_profile": "frozen-baseline"
             if baseline
             else "diagnostic"
@@ -227,6 +264,7 @@ async def run(
                     "app/domain/review/context_plan.py",
                     "app/domain/review/verification.py",
                     "scripts/evaluation_thinking_provider.py",
+                    "scripts/quality_reasoning_provider.py",
                     "scripts/recall_evaluation.py",
                     "scripts/stabilize_review_quality.py",
                 )
@@ -291,6 +329,9 @@ async def run(
                         )
                         continue
                     result = validate_result(raw, bundle)
+                    if verify:
+                        item["draft_result"] = result
+                        item["draft_grade"] = grade(case, result)
                     if verify and (result["issues"] or result["questions"]):
                         item["draft_result"] = result
                         item["draft_grade"] = grade(case, result)
@@ -312,6 +353,16 @@ async def run(
                             {"index": d.index, "action": d.action, "reason": d.reason}
                             for d in VerificationOutput.model_validate_json(checked).decisions
                         ]
+                    elif recheck_empty:
+                        usage["attempts"].append({**attempt, "phase": "empty_recheck"})
+                        save(usage_path, usage)
+                        stage = "empty_recheck_provider"
+                        checked, extra_in, extra_out = await provider.recheck_empty(bundle.payload)
+                        item.update(
+                            input_tokens=incoming + extra_in, output_tokens=outgoing + extra_out
+                        )
+                        stage = "empty_recheck_validation"
+                        result = validate_empty_review(checked, bundle)
                     if case.get("rubric"):
                         item["semantic_review"] = {
                             "status": "PENDING_MANUAL",
@@ -375,6 +426,11 @@ if __name__ == "__main__":
     parser.add_argument("--verify-drafts", action="store_true")
     parser.add_argument("--baseline", action="store_true")
     parser.add_argument("--diagnose", action="store_true")
+    parser.add_argument("--recheck-empty", action="store_true")
+    parser.add_argument("--root", type=Path, default=ROOT)
+    parser.add_argument("--reasoning-quality", action="store_true")
+    parser.add_argument("--quality-effort", choices=["low", "high"], default="high")
+    parser.add_argument("--hybrid", action="store_true")
     args = parser.parse_args()
     asyncio.run(
         run(
@@ -382,10 +438,15 @@ if __name__ == "__main__":
             args.name,
             args.repeats,
             args.allow_paid_calls,
+            root=args.root,
             thinking=args.evaluation_thinking,
             verify=args.verify,
             verify_drafts=args.verify_drafts,
             baseline=args.baseline,
             diagnose=args.diagnose,
+            recheck_empty=args.recheck_empty,
+            reasoning_quality=args.reasoning_quality,
+            quality_effort=args.quality_effort,
+            hybrid=args.hybrid,
         )
     )

@@ -8,6 +8,7 @@ from app.domain.review.policy import prepare, validate_result
 from app.shared.config.settings import Settings
 from scripts import evaluation_thinking_provider as thinking_provider
 from scripts import stabilize_review_quality as evaluation
+from scripts.quality_reasoning_provider import HybridQualityProvider, ReasoningQualityProvider
 
 
 @pytest.mark.anyio
@@ -58,6 +59,62 @@ def test_gold_location_score_uses_ranges_and_rejects_duplicates_without_claiming
     }
     result["issues"] *= 2
     assert not evaluation.grade(case, result)["passed"]
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize("fails", [False, True])
+async def test_empty_recheck_matches_product_and_reserves_before_second_call(
+    tmp_path, monkeypatch, fails
+):
+    corpus = tmp_path / "cases.json"
+    corpus.write_text(
+        json.dumps(
+            [{"id": "one", "path": "a.py", "patch": "@@ -0,0 +1 @@\n+x=1", "expected_lines": []}]
+        )
+    )
+
+    class Provider:
+        model = "test"
+
+        def __init__(self, settings):
+            pass
+
+        async def review(self, payload):
+            return json.dumps({"summary": "ok", "issues": [], "limitations": "scope"}), 10, 5
+
+        async def recheck_empty(self, payload):
+            attempts = json.loads((tmp_path / "usage.json").read_text())["attempts"]
+            assert len(attempts) == 2 and attempts[-1]["phase"] == "empty_recheck"
+            if fails:
+                raise TimeoutError("private input")
+            return (
+                json.dumps(
+                    {
+                        "summary": "ok",
+                        "issues": [],
+                        "limitations": "scope",
+                        "file_checks": [
+                            {
+                                "file_id": "f1",
+                                "line": 1,
+                                "outcome": "NO_FINDING",
+                                "observation": "constant assignment",
+                            }
+                        ],
+                    }
+                ),
+                20,
+                10,
+            )
+
+    monkeypatch.setattr(evaluation, "DeepSeekProvider", Provider)
+    record = await evaluation.run(corpus, "empty", 1, 2, tmp_path, verify=True, recheck_empty=True)
+    assert record["summary"]["attempts"] == 2
+    assert record["summary"]["validated"] == (0 if fails else 1)
+    assert record["summary"]["input_tokens"] == (10 if fails else 30)
+    assert "private input" not in json.dumps(record)
+    if not fails:
+        assert record["cases"][0]["result"]["verification"]["status"] == "EMPTY_RECHECKED"
 
 
 @pytest.mark.anyio
@@ -112,6 +169,44 @@ def test_schema_diagnostics_strip_values_and_unknown_field_names():
     assert detail["error_code"] == "SCHEMA_VALIDATION"
     assert "private" not in json.dumps(detail)
     assert any(i["location"] == ["<unknown-field>"] for i in detail["fields"])
+
+
+@pytest.mark.anyio
+async def test_experimental_profiles_keep_stage_models_and_do_not_read_reasoning(monkeypatch):
+    captured = []
+
+    class Response(SimpleNamespace):
+        @property
+        def additional_kwargs(self):
+            raise AssertionError("Reasoning must not be accessed or persisted")
+
+    class Chat:
+        def __init__(self, **kwargs):
+            self.settings = kwargs
+
+        def bind(self, **kwargs):
+            captured.append((self.settings, kwargs))
+            return self
+
+        async def ainvoke(self, messages, config):
+            return Response(
+                content="{}", usage_metadata={}, response_metadata={"finish_reason": "stop"}
+            )
+
+    monkeypatch.setattr("app.domain.review.provider.ChatDeepSeek", Chat)
+    settings = Settings(_env_file=None, ai_enabled=False).model_copy(
+        update={"ai_enabled": True, "deepseek_api_key": SecretStr("test-only-not-a-key")}
+    )
+    hybrid = HybridQualityProvider(settings)
+    await hybrid.invoke("instructions", "data")
+    await hybrid.checker().invoke("instructions", "data")
+    assert captured[0][0]["model_name"] == "deepseek-flash"
+    assert captured[0][1]["extra_body"]["thinking"]["type"] == "disabled"
+    assert captured[1][0]["model_name"] == "deepseek-v4-pro"
+    assert captured[1][1]["extra_body"]["reasoning_effort"] == "low"
+    assert captured[1][0]["max_tokens"] == 8192
+    assert all(s["max_retries"] == 0 and s["timeout"] == 60 for s, _ in captured)
+    assert ReasoningQualityProvider.reasoning_effort == "high"
 
 
 def test_anchor_diagnostics_distinguish_cross_file_lines_without_source():

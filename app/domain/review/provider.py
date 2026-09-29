@@ -6,7 +6,8 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_deepseek import ChatDeepSeek
 from langsmith import tracing_context
 
-from app.domain.review.harness import compose, compose_verification
+from app.domain.review.empty_review import EmptyReviewOutput
+from app.domain.review.harness import compose, compose_empty_review, compose_verification
 from app.domain.review.policy import ReviewOutput
 from app.shared.config.settings import Settings
 
@@ -18,8 +19,14 @@ class Provider(Protocol):
 
     async def verify(self, payload: str) -> tuple[str, int, int]: ...
 
+    async def recheck_empty(self, payload: str) -> tuple[str, int, int]: ...
+
 
 class DeepSeekProvider:
+    # Runtime defaults; evaluation subclasses can compare bounded inference profiles.
+    reasoning_effort: str | None = None
+    max_output_tokens = 2000
+
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self.model: str = settings.deepseek_model
@@ -31,6 +38,11 @@ class DeepSeekProvider:
     async def verify(self, payload: str) -> tuple[str, int, int]:
         return await self.invoke(compose_verification(payload), payload)
 
+    async def recheck_empty(self, payload: str) -> tuple[str, int, int]:
+        return await self.invoke(
+            compose_empty_review(payload, EmptyReviewOutput.model_json_schema()), payload
+        )
+
     async def invoke(self, system: str, payload: str) -> tuple[str, int, int]:
         if not self.settings.ai_enabled or not self.settings.deepseek_api_key:
             raise ValueError("AI_DISABLED")
@@ -41,13 +53,17 @@ class DeepSeekProvider:
                 api_key=self.settings.deepseek_api_key,
                 api_base="https://api.deepseek.com",
                 temperature=0,
-                max_tokens=2000,
+                max_tokens=self.max_output_tokens,
                 timeout=60,
                 max_retries=0,
                 http_async_client=http,
             ).bind(
                 response_format={"type": "json_object"},
-                extra_body={"thinking": {"type": "disabled"}},
+                extra_body=(
+                    {"thinking": {"type": "enabled"}, "reasoning_effort": self.reasoning_effort}
+                    if self.reasoning_effort
+                    else {"thinking": {"type": "disabled"}}
+                ),
             )
             with tracing_context(enabled=False):
                 async with asyncio.timeout(60):

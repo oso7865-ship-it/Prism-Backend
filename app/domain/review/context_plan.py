@@ -88,9 +88,28 @@ def pool_for(
     per_group: list[list[tuple[str, int]]],
     sources: dict[str, list[str]],
     metadata: dict[str, Any],
+    changed: set[str] | None = None,
 ) -> list[Candidate]:
+    # A callee can live outside the diff in another changed file. Those files are
+    # already safely fetched; do not exclude them merely because they have a diff.
+    changed_paths = changed if changed is not None else {q.path for q in groups}
     pools = [
-        candidates([(q.path, 100), *paths], sources, metadata, set(q.identifiers), set(q.calls), i)
+        candidates(
+            [
+                (q.path, 100),
+                *[
+                    (path, 90)
+                    for path in sorted(changed_paths - {q.path})
+                    if any(s[2] in q.calls for s in metadata.get(path, {}).get("spans", []))
+                ],
+                *paths,
+            ],
+            sources,
+            metadata,
+            set(q.identifiers),
+            set(q.calls),
+            i,
+        )
         for i, (q, paths) in enumerate(zip(groups, per_group, strict=True))
     ]
     merged: dict[tuple[str, tuple[int, ...]], Candidate] = {}

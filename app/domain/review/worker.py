@@ -10,6 +10,7 @@ from app.domain.pull_request.api import analysis_snapshot
 from app.domain.repository.api import RepositoryAccess
 from app.domain.review.context import repository_path
 from app.domain.review.context_selection import enrich
+from app.domain.review.empty_review import validate_empty_review
 from app.domain.review.feedback import prior_feedback
 from app.domain.review.harness import compose
 from app.domain.review.policy import (
@@ -141,12 +142,13 @@ class ReviewWorker:
                     result = validate_result(revised, bundle)
                     result["verification"] = verification
                 else:
-                    result["verification"] = {
-                        "status": "NO_CANDIDATES",
-                        "kept": 0,
-                        "revised": 0,
-                        "dropped": 0,
-                    }
+                    await verify()
+                    if not await self.reserve(c, 1, incoming, outgoing):
+                        return
+                    checked, extra_in, extra_out = await self.provider.recheck_empty(bundle.payload)
+                    incoming += extra_in
+                    outgoing += extra_out
+                    result = validate_empty_review(checked, bundle)
                 result["harness"] = harness
                 await self.complete(c, result, incoming=incoming, outgoing=outgoing)
         except TimeoutError:

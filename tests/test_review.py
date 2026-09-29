@@ -31,6 +31,31 @@ class FakeProvider:
     calls = 0
     fail = False
 
+    async def recheck_empty(self, payload):
+        self.calls += 1
+        checks = [
+            {
+                "file_id": f["file_id"],
+                "line": next(n["line"] for n in f["lines"] if n["changed"]),
+                "outcome": "NO_FINDING",
+                "observation": "변경 연산 확인",
+            }
+            for f in json.loads(payload)["files"]
+            if f.get("role", "changed") == "changed"
+        ]
+        return (
+            json.dumps(
+                {
+                    "summary": "재검토",
+                    "issues": [],
+                    "limitations": "실행 미검증",
+                    "file_checks": checks,
+                }
+            ),
+            120,
+            50,
+        )
+
     async def review(self, payload):
         self.calls += 1
         assert "x.js" not in payload
@@ -70,12 +95,14 @@ async def scenario(settings, wid, aid, owner, other):
                 item = await claim(s, "review-test", ["EXPLAIN_FINDINGS"])
             await worker.execute(item)
             result = await service.get(owner, wid, row.id)
-            assert result.status == "COMPLETED" and result.input_tokens == 100
+            assert result.status == "COMPLETED" and result.input_tokens == 220
+            assert result.result["verification"]["status"] == "EMPTY_RECHECKED"
+            assert result.call_attempts == 2 and result.output_tokens == 90
             assert result.result["coverage"]["files"][0]["file_path"] == "x.js"
             assert result.result["coverage"]["unfetched_files"] == 0
             assert result.result["harness"]["version"] == result.prompt_version
             assert result.result["harness"]["modules"] == ["core", "checks", "output", "javascript"]
-            assert provider.calls == 1
+            assert provider.calls == 2
             again = await service.start(owner, wid, aid, True, row.id)
             await service.cancel(owner, wid, again.id)
             assert (await service.get(owner, wid, again.id)).status == "CANCELED"
@@ -86,7 +113,7 @@ async def scenario(settings, wid, aid, owner, other):
             await worker.execute(item)
             result = await service.get(owner, wid, failed.id)
             assert result.status == "FAILED" and result.usage_uncertain
-            assert provider.calls == 2
+            assert provider.calls == 3
     finally:
         await engine.dispose()
 

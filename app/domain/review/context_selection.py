@@ -97,7 +97,7 @@ async def collect(
     related_metadata = await inspect_sources(related)
     sources = {**safe, **related}
     all_metadata = {**metadata, **related_metadata}
-    pool = pool_for(groups, per_group, sources, all_metadata)
+    pool = pool_for(groups, per_group, sources, all_metadata, set(safe))
     orders = [[i for i, c in enumerate(pool) if g in c.groups] for g in range(len(groups))]
     ranking: dict[str, object] = {
         "mode": "rules",

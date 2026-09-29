@@ -102,3 +102,29 @@ def test_utf8_json_budget_rejects_oversized_diff_before_enrichment():
         [],
     )
     assert bundle.coverage["excluded"][0]["reason"] == "PATCH_TOO_LARGE"
+
+
+def test_direct_callee_outside_hunk_in_another_changed_file_is_preserved():
+    main = "from helpers import require_user\ndef label(x):\n    return require_user(x).name"
+    helper = "def require_user(x):\n    if x is None: raise ValueError()\n    return x\n"
+    helper += "\n" * 110 + "def count(x):\n    return len(x)"
+    changes = [
+        {"filename": "main.py", "patch": "@@ -3 +3 @@\n+    return require_user(x).name"},
+        {"filename": "helpers.py", "patch": "@@ -115 +115 @@\n+    return len(x)"},
+    ]
+    bundle = asyncio.run(
+        enrich(
+            prepare(changes, [], []),
+            SyntheticGitHub({"main.py": main, "helpers.py": helper}),
+            "none",
+            "/repos/a/b",
+            "b" * 40,
+            [],
+        )
+    )
+    rows = provided(bundle, "helpers.py")
+    assert rows[2].strip() == "if x is None: raise ValueError()"
+    assert rows[115] == "    return len(x)"
+    assert len(bundle.payload.encode()) <= 49152
+    assert all(f["role"] == "changed" for f in bundle.coverage["files"])
+    assert bundle.coverage["retrieval"]["protected_missing"] == 0

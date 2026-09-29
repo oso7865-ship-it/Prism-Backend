@@ -50,7 +50,10 @@ def test_feedback_permissions_persistence_and_latest_sync(analysis_setup, db, mo
                 status="COMPLETED",
                 consented_at=datetime.now(UTC),
                 finished_at=datetime.now(UTC),
-                result={"issues": [item]},
+                result={
+                    "issues": [item],
+                    "coverage": {"files": [{"file_id": "f1", "file_path": "x.js"}]},
+                },
             )
         )
     url = f"/api/v1/workspaces/{wid}/reviews/{review_id}"
@@ -75,7 +78,7 @@ def test_feedback_permissions_persistence_and_latest_sync(analysis_setup, db, mo
     with Session(db) as s:
         assert len(s.scalars(select(ReviewFeedback)).all()) == 1
     other = {"Authorization": "Bearer " + encode_access(users[1][0], KEY)}
-    for path in ("/feedback", "/source/" + key):
+    for path in ("/feedback", "/source/" + key, "/source-files/f1"):
         assert c.get(url + path, headers=other).status_code == 404
         assert c.get(url + path).status_code == 401
     assert c.put(url + "/feedback/" + key, headers=other, json={"state": "OPEN"}).status_code == 404
@@ -105,6 +108,50 @@ def test_feedback_permissions_persistence_and_latest_sync(analysis_setup, db, mo
     assert response.json()["head_sha"] == "b" * 40
     assert response.json()["lines"][0] == "var x = 1;"
     assert "no-store" in response.headers["cache-control"]
+    file_url = url + "/source-files/f1"
+    assert c.get(file_url, headers=headers).json()["lines"] == response.json()["lines"]
+    assert c.get(url + "/source-files/not-allowed", headers=headers).status_code == 404
+    for invalid_line in (0, -1, 200001, "no"):
+        assert c.get(file_url, headers=headers, params={"line": invalid_line}).status_code == 422
+    assert c.get(file_url, headers=headers, params={"line": 999}).status_code == 422
+    from app.domain.review import source_view
+
+    async def long_file(*args):
+        return ["a" * 400 if i == 80 else f"line {i + 1}" for i in range(165)]
+
+    with monkeypatch.context() as patch:
+        patch.setattr(source_view, "source", long_file)
+        page = c.get(file_url, headers=headers, params={"line": 81}).json()
+        assert page["start_line"] == 81 and page["total_lines"] == 165
+        assert len(page["lines"]) == 80 and len(page["lines"][0]) == 300
+        assert page["truncated"]
+        last = c.get(file_url, headers=headers, params={"line": 161}).json()
+        assert last["lines"][-1] == "line 165" and len(last["lines"]) == 5
+    with Session(db) as s, s.begin():
+        # Reviewed files remain readable when there are no findings.
+        s.execute(
+            update(ReviewRun)
+            .where(ReviewRun.id == review_id)
+            .values(
+                result={
+                    "issues": [],
+                    "questions": [],
+                    "coverage": {"files": [{"file_id": "f1", "file_path": "x.js"}]},
+                }
+            )
+        )
+    assert c.get(file_url, headers=headers).status_code == 200
+    with Session(db) as s, s.begin():
+        s.execute(
+            update(ReviewRun)
+            .where(ReviewRun.id == review_id)
+            .values(
+                result={
+                    "issues": [item],
+                    "coverage": {"files": [{"file_id": "f1", "file_path": "x.js"}]},
+                }
+            )
+        )
 
     async def previous():
         engine = build_engine(settings.database_url.get_secret_value())
@@ -138,6 +185,7 @@ def test_feedback_permissions_persistence_and_latest_sync(analysis_setup, db, mo
     assert rejected.status_code == 409 and "var x" not in rejected.text
     assert c.get(latest, headers=headers).json() is None
     assert c.get(url + "/source/" + key, headers=headers).status_code == 409
+    assert c.get(file_url, headers=headers).status_code == 409
 
 
 def test_pinned_related_context_budget_and_secret_rejection():
