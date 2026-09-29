@@ -1,0 +1,131 @@
+{
+  "$defs": {
+    "Issue": {
+      "additionalProperties": false,
+      "properties": {
+        "file_id": {
+          "description": "Changed file containing the reported operation.",
+          "maxLength": 8,
+          "title": "File Id",
+          "type": "string"
+        },
+        "line": {
+          "description": "Provided HEAD line in this item's file_id.",
+          "minimum": 1,
+          "title": "Line",
+          "type": "integer"
+        },
+        "severity": {
+          "enum": [
+            "INFO",
+            "WARNING",
+            "ERROR"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "basis": {
+          "enum": [
+            "SUPPORTED",
+            "NEEDS_CONTEXT"
+          ],
+          "title": "Basis",
+          "type": "string"
+        },
+        "evidence_lines": {
+          "description": "Unique provided lines ONLY in this item's file_id; include line and a changed line. NEVER mix related-file line numbers here. Cite related file IDs/lines in evidence text.",
+          "items": {
+            "type": "integer"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Evidence Lines",
+          "type": "array"
+        },
+        "trigger": {
+          "maxLength": 400,
+          "minLength": 1,
+          "title": "Trigger",
+          "type": "string"
+        },
+        "consequence": {
+          "maxLength": 400,
+          "minLength": 1,
+          "title": "Consequence",
+          "type": "string"
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 3,
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "title": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "evidence": {
+          "maxLength": 800,
+          "minLength": 1,
+          "title": "Evidence",
+          "type": "string"
+        },
+        "suggestion": {
+          "maxLength": 800,
+          "minLength": 1,
+          "title": "Suggestion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "file_id",
+        "line",
+        "severity",
+        "basis",
+        "evidence_lines",
+        "trigger",
+        "consequence",
+        "assumptions",
+        "title",
+        "evidence",
+        "suggestion"
+      ],
+      "title": "Issue",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "summary": {
+      "maxLength": 1600,
+      "minLength": 1,
+      "title": "Summary",
+      "type": "string"
+    },
+    "issues": {
+      "items": {
+        "$ref": "#/$defs/Issue"
+      },
+      "maxItems": 10,
+      "title": "Issues",
+      "type": "array"
+    },
+    "limitations": {
+      "maxLength": 1600,
+      "minLength": 1,
+      "title": "Limitations",
+      "type": "string"
+    }
+  },
+  "required": [
+    "summary",
+    "issues",
+    "limitations"
+  ],
+  "title": "ReviewOutput",
+  "type": "object"
+}

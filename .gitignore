@@ -1,5 +1,6 @@
 .env
 .env.*
+*.env
 .venv/
 __pycache__/
 *.py[cod]
@@ -11,6 +12,7 @@ dist/
 coverage/
 .vscode/
 .idea/
+/audit-artifacts/
 *.log
 
 # Documentation is versioned only in Prism-Architecture (ADR-ARCH-003).

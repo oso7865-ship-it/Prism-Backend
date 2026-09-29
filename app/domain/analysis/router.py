@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -77,9 +77,13 @@ def analysis_router(engine: AsyncEngine | None, auth: AuthAPI, enabled: bool) ->
 
     @router.get("/analyses/{aid}/findings")
     async def findings(
-        wid: UUID, aid: UUID, p: Annotated[CurrentPrincipal, principal], cursor: UUID | None = None
+        wid: UUID,
+        aid: UUID,
+        p: Annotated[CurrentPrincipal, principal],
+        cursor: UUID | None = None,
+        category: Literal["SECURITY"] | None = None,
     ) -> dict[str, object]:
-        rows = await service.results(p.user_id, wid, aid, "findings", cursor)
+        rows = await service.results(p.user_id, wid, aid, "findings", cursor, category)
         return {
             "items": [view(r) for r in rows[:100]],
             "next_cursor": rows[99].id if len(rows) > 100 else None,

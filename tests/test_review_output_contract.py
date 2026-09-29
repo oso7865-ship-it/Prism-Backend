@@ -155,6 +155,8 @@ def test_related_file_proof_does_not_make_cross_file_numeric_anchors_valid():
 
 def test_runtime_format_example_validates_against_the_unchanged_output_schema():
     blocks = re.findall(r"```json\n(.*?)\n```", harness.documents()["output"], re.DOTALL)
-    assert len(blocks) == len(INPUTS)
-    for block, (path, patch) in zip(blocks, INPUTS, strict=True):
+    # One conditional, one empty and one supported runtime format example remain.
+    inputs = [INPUTS[i] for i in (1, 2, 3)]
+    assert len(blocks) == len(inputs)
+    for block, (path, patch) in zip(blocks, inputs, strict=True):
         validate_result(block, prepare([{"filename": path, "patch": patch}], [], []))

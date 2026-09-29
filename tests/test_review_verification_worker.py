@@ -23,10 +23,12 @@ from app.shared.jobs.store import claim
 
 
 @pytest.mark.parametrize(
-    "mode", ["keep", "drop", "invalid", "timeout", "cancel", "revoke", "expire"]
+    "mode", ["keep", "drop", "invalid", "timeout", "cancel", "revoke", "expire", "context_cancel"]
 )
-@pytest.mark.parametrize("empty", [False, True])
-def test_verification_is_reserved_fenced_and_never_replayed(analysis_setup, mode, empty):
+@pytest.mark.parametrize("empty", [False, True, "invalid_draft"])
+def test_verification_is_reserved_fenced_and_never_replayed(
+    analysis_setup, mode, empty, monkeypatch
+):
     data = analysis_setup
     analysis = start(data)
     asyncio.run(execute(data[1]), loop_factory=loop_factory)
@@ -37,6 +39,13 @@ def test_verification_is_reserved_fenced_and_never_replayed(analysis_setup, mode
         service = ReviewService(engine, settings)
         owner, wid = data[6][0][0], UUID(data[2])
         row = await service.start(owner, wid, UUID(analysis["id"]), True, None)
+
+        async def cancel_during_context(bundle, *args):
+            await service.cancel(owner, wid, row.id)
+            return bundle
+
+        if mode == "context_cancel":
+            monkeypatch.setattr("app.domain.review.worker.supplement", cancel_during_context)
 
         class Provider:
             model = "deepseek-flash"
@@ -61,7 +70,18 @@ def test_verification_is_reserved_fenced_and_never_replayed(analysis_setup, mode
                                 .where(Job.id == item.id)
                                 .values(lease_until=datetime.now(UTC) - timedelta(seconds=1))
                             )
-                return json.dumps(output([] if empty else [2])), 100, 40
+                raw = (
+                    "invalid draft"
+                    if empty == "invalid_draft"
+                    else json.dumps(output([] if empty else [2]))
+                )
+                if mode == "context_cancel":
+                    candidate = output([] if empty else [2])
+                    candidate["context_requests"] = [
+                        {"file_id": "f1", "symbol": "helper", "need": "구현"}
+                    ]
+                    raw = json.dumps(candidate)
+                return raw, 100, 40
 
             async def recheck_empty(self, payload):
                 assert empty
@@ -102,7 +122,14 @@ def test_verification_is_reserved_fenced_and_never_replayed(analysis_setup, mode
                         }
                     ]
                 )
-                return json.dumps({"decisions": decisions}), 120, 30
+                checks = [
+                    {
+                        "file_id": "f1",
+                        "outcome": "NO_FINDING" if mode == "drop" else "FINDING",
+                        "observation": "제공 코드 검토",
+                    }
+                ]
+                return json.dumps({"decisions": decisions, "file_checks": checks}), 120, 30
 
         provider = Provider()
         try:
@@ -114,7 +141,7 @@ def test_verification_is_reserved_fenced_and_never_replayed(analysis_setup, mode
                 if mode == "expire":
                     await worker.execute(item, expired=True)
                 result = await service.get(owner, wid, row.id)
-                if mode in {"cancel", "revoke", "expire"}:
+                if mode in {"cancel", "revoke", "expire", "context_cancel"}:
                     assert provider.calls == ["draft"] and result.result is None
                     assert result.status in {"FAILED", "CANCELED"}
                 else:
@@ -126,6 +153,8 @@ def test_verification_is_reserved_fenced_and_never_replayed(analysis_setup, mode
                     else:
                         assert result.status == "COMPLETED" and not result.usage_uncertain
                         assert len(result.result["issues"]) == (0 if mode == "drop" else 1)
+                        if empty == "invalid_draft":
+                            assert result.result["verification"]["status"] == "OUTPUT_RECOVERED"
                 before = list(provider.calls)
                 await worker.execute(item)
                 assert provider.calls == before

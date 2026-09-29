@@ -90,6 +90,7 @@ async def prior_feedback(s: AsyncSession, row: ReviewRun) -> list[dict[str, str]
                 ReviewFeedback.workspace_id == row.workspace_id,
                 ReviewFeedback.user_id == row.requested_by,
                 ReviewRun.pr_id == row.pr_id,
+                ReviewRun.purpose == (row.purpose or "CODE"),
                 ReviewRun.id != row.id,
                 ReviewFeedback.state != "OPEN",
             )

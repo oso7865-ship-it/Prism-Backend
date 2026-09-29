@@ -147,7 +147,13 @@ class AnalysisService:
             )
 
     async def results(
-        self, uid: UUID, wid: UUID, aid: UUID, kind: str, cursor: UUID | None
+        self,
+        uid: UUID,
+        wid: UUID,
+        aid: UUID,
+        kind: str,
+        cursor: UUID | None,
+        category: str | None = None,
     ) -> list[AnalysisFileResult] | list[Finding]:
         async with transaction(self.ready()) as s:
             await authorized(s, uid, wid, aid)
@@ -156,6 +162,8 @@ class AnalysisService:
                 select(model).where(model.workspace_id == wid, model.analysis_id == aid).limit(101)
             )
             if kind == "findings":
+                if category:
+                    query = query.where(Finding.category == category)
                 ranks = {"CRITICAL": 0, "ERROR": 1, "WARNING": 2, "INFO": 3}
                 rank = case(ranks, value=Finding.severity, else_=4)
                 query = query.order_by(rank, model.id)

@@ -1,0 +1,8 @@
+{
+  "sha256": "41976962e2f2f24c68f6bfd61a8cc8b647e45e26d2b8e703c073a543dad3a663",
+  "cases": 36,
+  "development": 20,
+  "holdout": 16,
+  "provenance": "hand-authored synthetic; no customer code",
+  "oracle_review": "agent-authored; trusted reference tests; independent human pending"
+}

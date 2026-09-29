@@ -20,12 +20,19 @@ KEEP only when the full claim is supported (or an actionable NEEDS_CONTEXT quest
 the original admission rules); reason CONFIRMED and revised null. REVISE when the core
 issue is valid but an extra consequence or suggestion is wrong/overstated: return the entire
 corrected original issue schema in revised, retaining file_id and representative line.
-Do not add an unrelated defect, promote NEEDS_CONTEXT to SUPPORTED or move the anchor.
+Do not promote NEEDS_CONTEXT to SUPPORTED or move the original anchor. A separately
+demonstrated defect belongs in new_findings, never disguised as a revision.
 DROP if visible guards disprove the issue, evidence is missing, the question is speculative,
 or another issue already describes the same defect. Use a specific allowed reason and
 revised null. Do not delete a demonstrated defect merely because all program paths are not
 provided. Check duplicate conditions/causes, not titles alone. Empty decisions is valid only
 for an empty draft. Do not emit chain of thought or a free-form explanation.
+
+Check title, trigger, evidence AND suggestion, not only consequence. Wrong branch explanations or
+an alternative repair that changes established successful behavior require REVISE of the whole item.
+review_checks, when present, contains bounded expression counterexamples from the server. Its scope
+does not prove full-function behavior. Check the actual input contract/guards; remove a contradicted
+repair, preserve the demonstrated defect, and prefer a minimal failing-case guard over broad changes.
 
 For KEEP and REVISE, independently write checked_consequence: a short user-facing statement
 of the directly established outcome for the stated trigger. This replaces the draft's
@@ -33,3 +40,25 @@ consequence even on KEEP. Do not copy secondary clauses about other inputs or su
 intent. State what the operation returns/raises/changes for that trigger, preserving explicit
 uncertainty for NEEDS_CONTEXT. No chain of reasoning is requested, only the supported outcome.
 For DROP, checked_consequence must be null.
+Keep checked_consequence to the direct result for the exact trigger. Do not add helper conditions
+from a different branch. A helper explanation, if needed, must match the actual supplied defaults.
+Re-read the supplied contract, not a draft's paraphrase. Preserve or correct contract_quote on REVISE.
+The model output is the object with decisions/new_findings/file_checks only. Do not echo API metadata
+such as type=json_object. Language rules and stated input contracts are not missing assumptions.
+
+After evaluating the draft, independently inspect EVERY supplied changed file for defects
+the draft missed, including when every draft item is dropped. Return new_findings using
+the appended full Issue schema; each must independently satisfy the same admission and
+evidence rules. Do not duplicate a retained/revised cause. An empty list is valid.
+Return file_checks exactly once per changed file, using file_id, outcome and observation.
+Do not choose line: the server owns the representative changed line. Use FINDING iff that
+file has a retained/revised/new issue or question, LIMITED for insufficient/removal-only
+context, otherwise NO_FINDING. A file check is not a proof of safety.
+
+semantic_observations contains bounded server-calculated expression examples. The scope
+is explicit: builtins are assumed, names are illustrative bindings, and this does NOT prove
+that a complete function reaches that expression or that a business contract is violated.
+Use the actual code/contract for admission. For a suggested Python return-expression edit,
+optionally include expression_repair with its exact line, before and after expressions.
+Preserve established successful behavior as well as fixing the failing input. If no concrete
+edit is justified, give a bounded textual suggestion and omit expression_repair.

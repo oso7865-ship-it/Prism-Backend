@@ -20,6 +20,7 @@ from app.domain.review.provider import DeepSeekProvider
 from app.domain.review.reranker import LocalReranker
 from app.domain.review.router import review_router
 from app.domain.review.worker import ReviewWorker
+from app.domain.standards.router import standards_router
 from app.domain.user.router import user_router
 from app.domain.webhook.router import webhook_router
 from app.domain.webhook.service import WebhookWorker
@@ -27,6 +28,7 @@ from app.domain.workspace.router import workspace_router
 from app.domain.workspace.service import WorkspaceService
 from app.shared.config.settings import Settings
 from app.shared.database.engine import build_engine
+from app.shared.exception.body_limit import DocumentBodyLimit
 from app.shared.exception.handlers import register_handlers
 from app.shared.github.client import GitHubClient
 from app.shared.jobs.runner import run as run_jobs
@@ -104,6 +106,7 @@ def create_app(
         openapi_url=None if production else "/openapi.json",
     )
     register_handlers(app)
+    app.add_middleware(DocumentBodyLimit)
 
     @app.middleware("http")
     async def private_api(request: Request, call_next: RequestResponseEndpoint) -> Response:
@@ -128,6 +131,7 @@ def create_app(
     app.include_router(pr_router(engine, AuthAPI(auth), github_app))
     app.include_router(analysis_router(engine, AuthAPI(auth), settings.analysis_runner_enabled))
     app.include_router(review_router(engine, AuthAPI(auth), settings, github_app))
+    app.include_router(standards_router(engine, AuthAPI(auth)))
     app.include_router(
         github_router(ConnectRepository(engine, github_app), AuthAPI(auth), settings)
     )

@@ -8,6 +8,7 @@ from app.domain.auth.models import LoginAttempt, RefreshSession  # noqa: F401
 from app.domain.pull_request.models import PullRequest, PullRequestSyncRun  # noqa: F401
 from app.domain.repository.models import RepositoryConnection, RuleConfigVersion  # noqa: F401
 from app.domain.review.models import ReviewRun  # noqa: F401
+from app.domain.standards.models import StandardDocument, StandardVersion  # noqa: F401
 from app.domain.user.models import User  # noqa: F401
 from app.domain.webhook.models import WebhookDelivery  # noqa: F401
 from app.domain.workspace.models import Invitation, Workspace, WorkspaceMember  # noqa: F401

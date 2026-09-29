@@ -1,0 +1,1490 @@
+[
+  {
+    "id": "44af6707b4e8",
+    "split": "development",
+    "family": "explicit-value",
+    "fixed": false,
+    "path": "settings.py",
+    "source": "def choose(value, default):\n    return value or default",
+    "previous_source": "def choose(value, default):\n    return default if value is None else value",
+    "changed_lines": [
+      2
+    ],
+    "expected_lines": [
+      2
+    ],
+    "contract": "Only None means absent. Preserve all explicitly provided values.",
+    "extra": "",
+    "purpose": "CODE",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "choose('', 'default')"
+      },
+      {
+        "probe_id": "p2",
+        "call": "choose(False, True)"
+      },
+      {
+        "probe_id": "p3",
+        "call": "choose(None, 'default')"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "\"default\"",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "true",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p3",
+        "outcome": "RETURN",
+        "value_json": "\"default\"",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "c12598db7eb6",
+    "split": "development",
+    "family": "explicit-value",
+    "fixed": true,
+    "path": "settings.py",
+    "source": "def choose(value, default):\n    return default if value is None else value",
+    "previous_source": "def choose(value, default):\n    return value or default",
+    "changed_lines": [
+      2
+    ],
+    "expected_lines": [],
+    "contract": "Only None means absent. Preserve all explicitly provided values.",
+    "extra": "",
+    "purpose": "CODE",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "choose('', 'default')"
+      },
+      {
+        "probe_id": "p2",
+        "call": "choose(False, True)"
+      },
+      {
+        "probe_id": "p3",
+        "call": "choose(None, 'default')"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "\"\"",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "false",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p3",
+        "outcome": "RETURN",
+        "value_json": "\"default\"",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "6a3397085914",
+    "split": "development",
+    "family": "utf8-length",
+    "fixed": false,
+    "path": "wire.py",
+    "source": "def wire_size(body):\n    return len(body)",
+    "previous_source": "def wire_size(body):\n    return len(body.encode('utf-8') if isinstance(body, str) else body)",
+    "changed_lines": [
+      2
+    ],
+    "expected_lines": [
+      2
+    ],
+    "contract": "Accept str or bytes; return the number of bytes sent on the wire using UTF-8.",
+    "extra": "",
+    "purpose": "CODE",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "wire_size('한글')"
+      },
+      {
+        "probe_id": "p2",
+        "call": "wire_size(b'AB')"
+      },
+      {
+        "probe_id": "p3",
+        "call": "wire_size('')"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "2",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "2",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p3",
+        "outcome": "RETURN",
+        "value_json": "0",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "411a32119068",
+    "split": "development",
+    "family": "utf8-length",
+    "fixed": true,
+    "path": "wire.py",
+    "source": "def wire_size(body):\n    return len(body.encode('utf-8') if isinstance(body, str) else body)",
+    "previous_source": "def wire_size(body):\n    return len(body)",
+    "changed_lines": [
+      2
+    ],
+    "expected_lines": [],
+    "contract": "Accept str or bytes; return the number of bytes sent on the wire using UTF-8.",
+    "extra": "",
+    "purpose": "CODE",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "wire_size('한글')"
+      },
+      {
+        "probe_id": "p2",
+        "call": "wire_size(b'AB')"
+      },
+      {
+        "probe_id": "p3",
+        "call": "wire_size('')"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "6",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "2",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p3",
+        "outcome": "RETURN",
+        "value_json": "0",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "4c612348a604",
+    "split": "development",
+    "family": "zero-step",
+    "fixed": false,
+    "path": "indices.py",
+    "source": "def indices(n):\n    return list(range(0, n, n))",
+    "previous_source": "def indices(n):\n    return list(range(0, n, max(n, 1)))",
+    "changed_lines": [
+      2
+    ],
+    "expected_lines": [
+      2
+    ],
+    "contract": "n is a nonnegative int. Return [] for n=0 and [0] for a positive n.",
+    "extra": "",
+    "purpose": "CODE",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "indices(0)"
+      },
+      {
+        "probe_id": "p2",
+        "call": "indices(3)"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RAISE",
+        "value_json": null,
+        "exception_type": "ValueError"
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "[0]",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "5e22872c605b",
+    "split": "development",
+    "family": "zero-step",
+    "fixed": true,
+    "path": "indices.py",
+    "source": "def indices(n):\n    return list(range(0, n, max(n, 1)))",
+    "previous_source": "def indices(n):\n    return list(range(0, n, n))",
+    "changed_lines": [
+      2
+    ],
+    "expected_lines": [],
+    "contract": "n is a nonnegative int. Return [] for n=0 and [0] for a positive n.",
+    "extra": "",
+    "purpose": "CODE",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "indices(0)"
+      },
+      {
+        "probe_id": "p2",
+        "call": "indices(3)"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "[]",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "[0]",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "aa5d6b234f6b",
+    "split": "development",
+    "family": "mutable-default",
+    "fixed": false,
+    "path": "collector.py",
+    "source": "def collect(item, bucket=[]):\n    bucket.append(item)\n    return bucket",
+    "previous_source": "def collect(item, bucket=None):\n    if bucket is None:\n        bucket = []\n    bucket.append(item)\n    return bucket",
+    "changed_lines": [
+      1,
+      2,
+      3
+    ],
+    "expected_lines": [
+      1,
+      2,
+      3
+    ],
+    "contract": "Each omitted-bucket call gets a fresh bucket. Explicit buckets are modified in place.",
+    "extra": "",
+    "purpose": "CODE",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "Fresh module: copy collect(1), then copy collect(2); return the two snapshots."
+      },
+      {
+        "probe_id": "p2",
+        "call": "Fresh module: collect(3, [9])"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "[[1], [1, 2]]",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "[9, 3]",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "be9f4577979e",
+    "split": "development",
+    "family": "mutable-default",
+    "fixed": true,
+    "path": "collector.py",
+    "source": "def collect(item, bucket=None):\n    if bucket is None:\n        bucket = []\n    bucket.append(item)\n    return bucket",
+    "previous_source": "def collect(item, bucket=[]):\n    bucket.append(item)\n    return bucket",
+    "changed_lines": [
+      1,
+      2,
+      3
+    ],
+    "expected_lines": [],
+    "contract": "Each omitted-bucket call gets a fresh bucket. Explicit buckets are modified in place.",
+    "extra": "",
+    "purpose": "CODE",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "Fresh module: copy collect(1), then copy collect(2); return the two snapshots."
+      },
+      {
+        "probe_id": "p2",
+        "call": "Fresh module: collect(3, [9])"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "[[1], [2]]",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "[9, 3]",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "2cdf3efa43ff",
+    "split": "development",
+    "family": "int-overflow",
+    "fixed": false,
+    "path": "Price.java",
+    "source": "class Price {\n  static long total(int amount, int count) {\n    return amount * count;\n  }\n}",
+    "previous_source": "class Price {\n  static long total(int amount, int count) {\n    return (long) amount * count;\n  }\n}",
+    "changed_lines": [
+      3
+    ],
+    "expected_lines": [
+      3
+    ],
+    "contract": "Both inputs are nonnegative int values; the exact product fits in long and must be preserved.",
+    "extra": "",
+    "purpose": "CODE",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "Price.total(50000, 50000)"
+      },
+      {
+        "probe_id": "p2",
+        "call": "Price.total(2, 3)"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "-1794967296",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "6",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "0add10c208ec",
+    "split": "development",
+    "family": "int-overflow",
+    "fixed": true,
+    "path": "Price.java",
+    "source": "class Price {\n  static long total(int amount, int count) {\n    return (long) amount * count;\n  }\n}",
+    "previous_source": "class Price {\n  static long total(int amount, int count) {\n    return amount * count;\n  }\n}",
+    "changed_lines": [
+      3
+    ],
+    "expected_lines": [],
+    "contract": "Both inputs are nonnegative int values; the exact product fits in long and must be preserved.",
+    "extra": "",
+    "purpose": "CODE",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "Price.total(50000, 50000)"
+      },
+      {
+        "probe_id": "p2",
+        "call": "Price.total(2, 3)"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "2500000000",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "6",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "90900a02e0f4",
+    "split": "development",
+    "family": "null-branch",
+    "fixed": false,
+    "path": "Display.java",
+    "source": "class Display {\n  static String name(String name) {\n    return name == null ? name.trim() : \"\";\n  }\n}",
+    "previous_source": "class Display {\n  static String name(String name) {\n    return name == null ? \"\" : name.trim();\n  }\n}",
+    "changed_lines": [
+      3
+    ],
+    "expected_lines": [
+      3
+    ],
+    "contract": "A null name is displayed as empty; otherwise strip surrounding whitespace.",
+    "extra": "",
+    "purpose": "CODE",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "Display.name(null)"
+      },
+      {
+        "probe_id": "p2",
+        "call": "Display.name(\" Ada \")"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RAISE",
+        "value_json": null,
+        "exception_type": "NullPointerException"
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "\"\"",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "cd210310faa4",
+    "split": "development",
+    "family": "null-branch",
+    "fixed": true,
+    "path": "Display.java",
+    "source": "class Display {\n  static String name(String name) {\n    return name == null ? \"\" : name.trim();\n  }\n}",
+    "previous_source": "class Display {\n  static String name(String name) {\n    return name == null ? name.trim() : \"\";\n  }\n}",
+    "changed_lines": [
+      3
+    ],
+    "expected_lines": [],
+    "contract": "A null name is displayed as empty; otherwise strip surrounding whitespace.",
+    "extra": "",
+    "purpose": "CODE",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "Display.name(null)"
+      },
+      {
+        "probe_id": "p2",
+        "call": "Display.name(\" Ada \")"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "\"\"",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "\"Ada\"",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "b07fc52f42ca",
+    "split": "development",
+    "family": "zero-count",
+    "fixed": false,
+    "path": "limits.js",
+    "source": "function limit(count) {\n  return count || 10;\n}",
+    "previous_source": "function limit(count) {\n  return count ?? 10;\n}",
+    "changed_lines": [
+      2
+    ],
+    "expected_lines": [
+      2
+    ],
+    "contract": "Use default 10 only for null or undefined; zero is a valid configured limit.",
+    "extra": "",
+    "purpose": "CODE",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "limit(0)"
+      },
+      {
+        "probe_id": "p2",
+        "call": "limit(null)"
+      },
+      {
+        "probe_id": "p3",
+        "call": "limit(5)"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "10",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "10",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p3",
+        "outcome": "RETURN",
+        "value_json": "5",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "d9318706b943",
+    "split": "development",
+    "family": "zero-count",
+    "fixed": true,
+    "path": "limits.js",
+    "source": "function limit(count) {\n  return count ?? 10;\n}",
+    "previous_source": "function limit(count) {\n  return count || 10;\n}",
+    "changed_lines": [
+      2
+    ],
+    "expected_lines": [],
+    "contract": "Use default 10 only for null or undefined; zero is a valid configured limit.",
+    "extra": "",
+    "purpose": "CODE",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "limit(0)"
+      },
+      {
+        "probe_id": "p2",
+        "call": "limit(null)"
+      },
+      {
+        "probe_id": "p3",
+        "call": "limit(5)"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "0",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "10",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p3",
+        "outcome": "RETURN",
+        "value_json": "5",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "1bcaee84937b",
+    "split": "development",
+    "family": "ownership",
+    "fixed": false,
+    "path": "invoice.ts",
+    "source": "function invoice(id: number, actor: string) {\n  const item = load(id);\n  return item.amount;\n}",
+    "previous_source": "function invoice(id: number, actor: string) {\n  const item = load(id);\n  if (item.owner !== actor) throw new Error(\"denied\");\n  return item.amount;\n}",
+    "changed_lines": [
+      2,
+      3,
+      4
+    ],
+    "expected_lines": [
+      2,
+      3,
+      4
+    ],
+    "contract": "Return the amount only to its owner; throw Error for other actors. id=7 exists.",
+    "extra": "function load(id: number) { return {owner: \"alice\", amount: 40}; }",
+    "purpose": "SECURITY",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "invoice(7, \"bob\")"
+      },
+      {
+        "probe_id": "p2",
+        "call": "invoice(7, \"alice\")"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "40",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "40",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "3a35091fd0ff",
+    "split": "development",
+    "family": "ownership",
+    "fixed": true,
+    "path": "invoice.ts",
+    "source": "function invoice(id: number, actor: string) {\n  const item = load(id);\n  if (item.owner !== actor) throw new Error(\"denied\");\n  return item.amount;\n}",
+    "previous_source": "function invoice(id: number, actor: string) {\n  const item = load(id);\n  return item.amount;\n}",
+    "changed_lines": [
+      2,
+      3,
+      4
+    ],
+    "expected_lines": [],
+    "contract": "Return the amount only to its owner; throw Error for other actors. id=7 exists.",
+    "extra": "function load(id: number) { return {owner: \"alice\", amount: 40}; }",
+    "purpose": "SECURITY",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "invoice(7, \"bob\")"
+      },
+      {
+        "probe_id": "p2",
+        "call": "invoice(7, \"alice\")"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RAISE",
+        "value_json": null,
+        "exception_type": "Error"
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "40",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "0c543f7d32dd",
+    "split": "development",
+    "family": "path-boundary",
+    "fixed": false,
+    "path": "paths.py",
+    "source": "def permitted(root, resolved):\n    return resolved.startswith(root)",
+    "previous_source": "def permitted(root, resolved):\n    return resolved == root or resolved.startswith(root + '/')",
+    "changed_lines": [
+      2
+    ],
+    "expected_lines": [
+      2
+    ],
+    "contract": "Inputs are canonical absolute POSIX paths without symlinks or trailing slash. Only root and its descendants are allowed.",
+    "extra": "",
+    "purpose": "SECURITY",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "permitted('/srv/app', '/srv/application/key')"
+      },
+      {
+        "probe_id": "p2",
+        "call": "permitted('/srv/app', '/srv/app/file')"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "true",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "true",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "cd1f9cff7b9c",
+    "split": "development",
+    "family": "path-boundary",
+    "fixed": true,
+    "path": "paths.py",
+    "source": "def permitted(root, resolved):\n    return resolved == root or resolved.startswith(root + '/')",
+    "previous_source": "def permitted(root, resolved):\n    return resolved.startswith(root)",
+    "changed_lines": [
+      2
+    ],
+    "expected_lines": [],
+    "contract": "Inputs are canonical absolute POSIX paths without symlinks or trailing slash. Only root and its descendants are allowed.",
+    "extra": "",
+    "purpose": "SECURITY",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "permitted('/srv/app', '/srv/application/key')"
+      },
+      {
+        "probe_id": "p2",
+        "call": "permitted('/srv/app', '/srv/app/file')"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "false",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "true",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "7c4f2f03b3b5",
+    "split": "development",
+    "family": "logging-standard",
+    "fixed": false,
+    "path": "app/service.py",
+    "source": "def save(record, logger):\n    print('saved')\n    return record",
+    "previous_source": "def save(record, logger):\n    logger.info('saved')\n    return record",
+    "changed_lines": [
+      2
+    ],
+    "expected_lines": [
+      2
+    ],
+    "contract": "record is any value. logger.info exists and has no return value or side effects beyond logging.",
+    "extra": "",
+    "purpose": "STANDARDS",
+    "document": "# 로깅\n애플리케이션에서는 print 대신 주입된 logger.info로 기록한다.",
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "save(7, logger), observe return value only"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "7",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "ff6c59d6fbc8",
+    "split": "development",
+    "family": "logging-standard",
+    "fixed": true,
+    "path": "app/service.py",
+    "source": "def save(record, logger):\n    logger.info('saved')\n    return record",
+    "previous_source": "def save(record, logger):\n    print('saved')\n    return record",
+    "changed_lines": [
+      2
+    ],
+    "expected_lines": [],
+    "contract": "record is any value. logger.info exists and has no return value or side effects beyond logging.",
+    "extra": "",
+    "purpose": "STANDARDS",
+    "document": "# 로깅\n애플리케이션에서는 print 대신 주입된 logger.info로 기록한다.",
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "save(7, logger), observe return value only"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "7",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "9e475996deba",
+    "split": "holdout",
+    "family": "empty-mean",
+    "fixed": false,
+    "path": "mean.py",
+    "source": "def mean(values):\n    return sum(values) / len(values)",
+    "previous_source": "def mean(values):\n    return sum(values) / len(values) if values else 0.0",
+    "changed_lines": [
+      2
+    ],
+    "expected_lines": [
+      2
+    ],
+    "contract": "Finite numeric lists only. Empty input has mean 0.0 by this API contract.",
+    "extra": "",
+    "purpose": "CODE",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "mean([])"
+      },
+      {
+        "probe_id": "p2",
+        "call": "mean([2, 4])"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RAISE",
+        "value_json": null,
+        "exception_type": "ZeroDivisionError"
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "3.0",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "81c556ef32df",
+    "split": "holdout",
+    "family": "empty-mean",
+    "fixed": true,
+    "path": "mean.py",
+    "source": "def mean(values):\n    return sum(values) / len(values) if values else 0.0",
+    "previous_source": "def mean(values):\n    return sum(values) / len(values)",
+    "changed_lines": [
+      2
+    ],
+    "expected_lines": [],
+    "contract": "Finite numeric lists only. Empty input has mean 0.0 by this API contract.",
+    "extra": "",
+    "purpose": "CODE",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "mean([])"
+      },
+      {
+        "probe_id": "p2",
+        "call": "mean([2, 4])"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "0.0",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "3.0",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "4d95d35835a5",
+    "split": "holdout",
+    "family": "late-binding",
+    "fixed": false,
+    "path": "callbacks.py",
+    "source": "def callbacks():\n    return [lambda: i for i in range(3)]",
+    "previous_source": "def callbacks():\n    return [lambda i=i: i for i in range(3)]",
+    "changed_lines": [
+      2
+    ],
+    "expected_lines": [
+      2
+    ],
+    "contract": "Each callback returns the index captured when it was created.",
+    "extra": "",
+    "purpose": "CODE",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "[fn() for fn in callbacks()]"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "[2, 2, 2]",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "b97e39c6de2b",
+    "split": "holdout",
+    "family": "late-binding",
+    "fixed": true,
+    "path": "callbacks.py",
+    "source": "def callbacks():\n    return [lambda i=i: i for i in range(3)]",
+    "previous_source": "def callbacks():\n    return [lambda: i for i in range(3)]",
+    "changed_lines": [
+      2
+    ],
+    "expected_lines": [],
+    "contract": "Each callback returns the index captured when it was created.",
+    "extra": "",
+    "purpose": "CODE",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "[fn() for fn in callbacks()]"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "[0, 1, 2]",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "0c47bb65c1ee",
+    "split": "holdout",
+    "family": "nested-copy",
+    "fixed": false,
+    "path": "options.py",
+    "source": "def adjust(base):\n    result = base.copy()\n    result['nested']['limit'] = 9\n    return base['nested']['limit']",
+    "previous_source": "def adjust(base):\n    result = {**base, 'nested': base['nested'].copy()}\n    result['nested']['limit'] = 9\n    return base['nested']['limit']",
+    "changed_lines": [
+      2
+    ],
+    "expected_lines": [
+      2
+    ],
+    "contract": "base has a nested dictionary. Preserve the caller's base without mutation.",
+    "extra": "",
+    "purpose": "CODE",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "adjust({'nested': {'limit': 1}})"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "9",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "898c474a9d7d",
+    "split": "holdout",
+    "family": "nested-copy",
+    "fixed": true,
+    "path": "options.py",
+    "source": "def adjust(base):\n    result = {**base, 'nested': base['nested'].copy()}\n    result['nested']['limit'] = 9\n    return base['nested']['limit']",
+    "previous_source": "def adjust(base):\n    result = base.copy()\n    result['nested']['limit'] = 9\n    return base['nested']['limit']",
+    "changed_lines": [
+      2
+    ],
+    "expected_lines": [],
+    "contract": "base has a nested dictionary. Preserve the caller's base without mutation.",
+    "extra": "",
+    "purpose": "CODE",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "adjust({'nested': {'limit': 1}})"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "1",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "65d1d2fad0d4",
+    "split": "holdout",
+    "family": "comparator-overflow",
+    "fixed": false,
+    "path": "Order.java",
+    "source": "class Order {\n  static int compare(int left, int right) {\n    return left - right;\n  }\n}",
+    "previous_source": "class Order {\n  static int compare(int left, int right) {\n    return Integer.compare(left, right);\n  }\n}",
+    "changed_lines": [
+      3
+    ],
+    "expected_lines": [
+      3
+    ],
+    "contract": "A comparator must have negative sign when left < right, zero on equality, positive otherwise.",
+    "extra": "",
+    "purpose": "CODE",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "Integer.signum(Order.compare(Integer.MIN_VALUE, 1))"
+      },
+      {
+        "probe_id": "p2",
+        "call": "Integer.signum(Order.compare(3, 3))"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "1",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "0",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "0e12161a3613",
+    "split": "holdout",
+    "family": "comparator-overflow",
+    "fixed": true,
+    "path": "Order.java",
+    "source": "class Order {\n  static int compare(int left, int right) {\n    return Integer.compare(left, right);\n  }\n}",
+    "previous_source": "class Order {\n  static int compare(int left, int right) {\n    return left - right;\n  }\n}",
+    "changed_lines": [
+      3
+    ],
+    "expected_lines": [],
+    "contract": "A comparator must have negative sign when left < right, zero on equality, positive otherwise.",
+    "extra": "",
+    "purpose": "CODE",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "Integer.signum(Order.compare(Integer.MIN_VALUE, 1))"
+      },
+      {
+        "probe_id": "p2",
+        "call": "Integer.signum(Order.compare(3, 3))"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "-1",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "0",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "0d5e36006ab7",
+    "split": "holdout",
+    "family": "async-guard",
+    "fixed": false,
+    "path": "access.js",
+    "source": "async function access(check) {\n  if (check()) return 'allowed';\n  return 'denied';\n}",
+    "previous_source": "async function access(check) {\n  if (await check()) return 'allowed';\n  return 'denied';\n}",
+    "changed_lines": [
+      2
+    ],
+    "expected_lines": [
+      2
+    ],
+    "contract": "check is async and resolves to a boolean. Allow only when it resolves true.",
+    "extra": "",
+    "purpose": "SECURITY",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "await access(async () => false)"
+      },
+      {
+        "probe_id": "p2",
+        "call": "await access(async () => true)"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "\"allowed\"",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "\"allowed\"",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "2eda524faeac",
+    "split": "holdout",
+    "family": "async-guard",
+    "fixed": true,
+    "path": "access.js",
+    "source": "async function access(check) {\n  if (await check()) return 'allowed';\n  return 'denied';\n}",
+    "previous_source": "async function access(check) {\n  if (check()) return 'allowed';\n  return 'denied';\n}",
+    "changed_lines": [
+      2
+    ],
+    "expected_lines": [],
+    "contract": "check is async and resolves to a boolean. Allow only when it resolves true.",
+    "extra": "",
+    "purpose": "SECURITY",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "await access(async () => false)"
+      },
+      {
+        "probe_id": "p2",
+        "call": "await access(async () => true)"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "\"denied\"",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "\"allowed\"",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "81c5bd8c7f71",
+    "split": "holdout",
+    "family": "optional-chain",
+    "fixed": false,
+    "path": "profile.ts",
+    "source": "type User = { profile?: { name: string } };\nfunction name(user: User) {\n  return user.profile!.name;\n}",
+    "previous_source": "type User = { profile?: { name: string } };\nfunction name(user: User) {\n  return user.profile?.name ?? 'Unknown';\n}",
+    "changed_lines": [
+      3
+    ],
+    "expected_lines": [
+      3
+    ],
+    "contract": "user exists. Missing profile must display Unknown; an existing empty name is preserved.",
+    "extra": "",
+    "purpose": "CODE",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "name({})"
+      },
+      {
+        "probe_id": "p2",
+        "call": "name({profile: {name: \"\"}})"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RAISE",
+        "value_json": null,
+        "exception_type": "TypeError"
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "\"\"",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "6197edcf876e",
+    "split": "holdout",
+    "family": "optional-chain",
+    "fixed": true,
+    "path": "profile.ts",
+    "source": "type User = { profile?: { name: string } };\nfunction name(user: User) {\n  return user.profile?.name ?? 'Unknown';\n}",
+    "previous_source": "type User = { profile?: { name: string } };\nfunction name(user: User) {\n  return user.profile!.name;\n}",
+    "changed_lines": [
+      3
+    ],
+    "expected_lines": [],
+    "contract": "user exists. Missing profile must display Unknown; an existing empty name is preserved.",
+    "extra": "",
+    "purpose": "CODE",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "name({})"
+      },
+      {
+        "probe_id": "p2",
+        "call": "name({profile: {name: \"\"}})"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "\"Unknown\"",
+        "exception_type": null
+      },
+      {
+        "probe_id": "p2",
+        "outcome": "RETURN",
+        "value_json": "\"\"",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "a8961f6d5e20",
+    "split": "holdout",
+    "family": "sql-binding",
+    "fixed": false,
+    "path": "query.py",
+    "source": "def query(user_id):\n    return ('SELECT name FROM users WHERE id = ' + user_id, ())",
+    "previous_source": "def query(user_id):\n    return ('SELECT name FROM users WHERE id = %s', (user_id,))",
+    "changed_lines": [
+      2
+    ],
+    "expected_lines": [
+      2
+    ],
+    "contract": "Caller passes the returned SQL and parameter tuple directly to a DB-API driver using %s placeholders. user_id is untrusted text.",
+    "extra": "",
+    "purpose": "SECURITY",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "query('0 OR 1=1'), JSON encode the returned tuple as an array"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "[\"SELECT name FROM users WHERE id = 0 OR 1=1\", []]",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "52ccbd6a57a5",
+    "split": "holdout",
+    "family": "sql-binding",
+    "fixed": true,
+    "path": "query.py",
+    "source": "def query(user_id):\n    return ('SELECT name FROM users WHERE id = %s', (user_id,))",
+    "previous_source": "def query(user_id):\n    return ('SELECT name FROM users WHERE id = ' + user_id, ())",
+    "changed_lines": [
+      2
+    ],
+    "expected_lines": [],
+    "contract": "Caller passes the returned SQL and parameter tuple directly to a DB-API driver using %s placeholders. user_id is untrusted text.",
+    "extra": "",
+    "purpose": "SECURITY",
+    "document": null,
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "query('0 OR 1=1'), JSON encode the returned tuple as an array"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "[\"SELECT name FROM users WHERE id = %s\", [\"0 OR 1=1\"]]",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "62086f7d4408",
+    "split": "holdout",
+    "family": "error-standard",
+    "fixed": false,
+    "path": "app/handler.py",
+    "source": "def handle(operation, logger):\n    try:\n        return operation()\n    except ValueError:\n        return None",
+    "previous_source": "def handle(operation, logger):\n    try:\n        return operation()\n    except ValueError:\n        logger.error('failed')\n        raise",
+    "changed_lines": [
+      4,
+      5
+    ],
+    "expected_lines": [
+      4,
+      5
+    ],
+    "contract": "operation raises ValueError for the supplied probe; logger.error returns normally.",
+    "extra": "",
+    "purpose": "STANDARDS",
+    "document": "# 오류 처리\n입력 오류는 호출자가 처리하도록 기록한 뒤 같은 예외를 다시 던진다. 실패를 정상 반환으로 숨기지 않는다.",
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "handle(operation, logger) with operation raising ValueError"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RETURN",
+        "value_json": "null",
+        "exception_type": null
+      }
+    ]
+  },
+  {
+    "id": "4a8d6ea4762d",
+    "split": "holdout",
+    "family": "error-standard",
+    "fixed": true,
+    "path": "app/handler.py",
+    "source": "def handle(operation, logger):\n    try:\n        return operation()\n    except ValueError:\n        logger.error('failed')\n        raise",
+    "previous_source": "def handle(operation, logger):\n    try:\n        return operation()\n    except ValueError:\n        return None",
+    "changed_lines": [
+      4,
+      5,
+      6
+    ],
+    "expected_lines": [],
+    "contract": "operation raises ValueError for the supplied probe; logger.error returns normally.",
+    "extra": "",
+    "purpose": "STANDARDS",
+    "document": "# 오류 처리\n입력 오류는 호출자가 처리하도록 기록한 뒤 같은 예외를 다시 던진다. 실패를 정상 반환으로 숨기지 않는다.",
+    "probes": [
+      {
+        "probe_id": "p1",
+        "call": "handle(operation, logger) with operation raising ValueError"
+      }
+    ],
+    "oracle": [
+      {
+        "probe_id": "p1",
+        "outcome": "RAISE",
+        "value_json": null,
+        "exception_type": "ValueError"
+      }
+    ]
+  }
+]

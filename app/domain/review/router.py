@@ -17,6 +17,7 @@ from app.shared.github.client import GitHubClient
 
 class StartReview(BaseModel):
     model_config = ConfigDict(extra="forbid")
+    purpose: Literal["CODE", "SECURITY", "STANDARDS"] = "CODE"
     consent: Literal[True]
     rerun_of: UUID | None = None
 
@@ -34,7 +35,7 @@ def view(row: ReviewRun) -> dict[str, object]:
             "id analysis_id head_sha model prompt_version policy_version generation status "
             "requested_by created_at started_at finished_at call_attempts"
             " input_tokens output_tokens "
-            "usage_uncertain error_code result"
+            "usage_uncertain error_code result purpose standard_versions"
         ).split()
     }
     if row.result:
@@ -112,14 +113,19 @@ def review_router(
     async def start(
         wid: UUID, aid: UUID, body: StartReview, p: Annotated[CurrentPrincipal, principal]
     ) -> dict[str, object]:
-        return view(await service.start(p.user_id, wid, aid, body.consent, body.rerun_of))
+        return view(
+            await service.start(p.user_id, wid, aid, body.consent, body.rerun_of, body.purpose)
+        )
 
     @router.get("/analyses/{aid}/reviews")
     async def history(
-        wid: UUID, aid: UUID, p: Annotated[CurrentPrincipal, principal]
+        wid: UUID,
+        aid: UUID,
+        p: Annotated[CurrentPrincipal, principal],
+        purpose: Literal["CODE", "SECURITY", "STANDARDS"] = "CODE",
     ) -> dict[str, object]:
         return {
-            "items": [view(r) for r in await service.history(p.user_id, wid, aid)],
+            "items": [view(r) for r in await service.history(p.user_id, wid, aid, purpose)],
             "enabled": settings.ai_enabled,
             "model": settings.deepseek_model,
             "daily_limit": settings.ai_daily_limit,

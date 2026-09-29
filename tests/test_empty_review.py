@@ -51,6 +51,30 @@ def test_legitimate_empty_result_remains_empty_with_visible_scope():
     assert "return a[len(a)]" not in system
 
 
+def test_valid_consumer_evidence_is_not_rejected_by_redundant_file_check_location():
+    context = prepare(
+        [
+            {
+                "filename": "length.py",
+                "patch": "@@ -1,6 +1,6 @@\n def length(body):\n+    return len(body)\n \n"
+                " def prepare(body):\n     wire = body.encode('utf-8')\n"
+                "     return wire, length(body)",
+            }
+        ],
+        [],
+        [],
+    )
+    data = output([6])
+    data["issues"][0]["evidence_lines"] = [2, 6]
+    data["file_checks"] = [
+        {"file_id": "f1", "line": 6, "outcome": "FINDING", "observation": "호출부 확인"}
+    ]
+    result = validate_empty_review(json.dumps(data), context)
+    assert result["issues"][0]["line"] == 6
+    assert result["issues"][0]["evidence_lines"] == [2, 6]
+    assert result["verification"]["file_checks"][0]["line"] == 2
+
+
 def test_removal_only_context_is_a_visible_limit_not_an_impossible_check():
     context = prepare(
         [{"filename": "a.py", "patch": "@@ -1,2 +1 @@\n value = 1\n-old = 2"}], [], []
@@ -80,7 +104,6 @@ def test_removal_only_context_is_a_visible_limit_not_an_impossible_check():
         "duplicate",
         "unknown",
         "wrong_line",
-        "context_line",
         "blank",
         "secret",
         "contradiction",
@@ -98,8 +121,6 @@ def test_empty_recheck_cannot_complete_with_missing_or_invalid_evidence(mode):
         checks[0]["file_id"] = "c1"
     elif mode == "wrong_line":
         checks[0]["line"] = 999
-    elif mode == "context_line":
-        checks[0]["line"] = 1
     elif mode == "blank":
         checks[0]["observation"] = "  "
     elif mode == "secret":

@@ -8,7 +8,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.domain.review.harness import LANGUAGES, MAX_SYSTEM_BYTES
-from app.domain.review.policy import SECRET, InputBundle, ReviewOutput
+from app.domain.review.policy import SECRET, InputBundle
 from app.domain.review.provider import DeepSeekProvider
 from app.domain.review.verification import VerificationOutput
 
@@ -35,7 +35,9 @@ class FrozenBaselineProvider(DeepSeekProvider):
         langs = sorted({LANGUAGES[f["language"]] for f in data["files"]})
         system = "\n\n".join(docs[name] for name in ["core", "checks", "output", *langs])
         system += "\n\nJSON schema: " + json.dumps(
-            ReviewOutput.model_json_schema(), sort_keys=True, ensure_ascii=False
+            json.loads((ROOT / "baseline-schema.json").read_text(encoding="utf-8")),
+            sort_keys=True,
+            ensure_ascii=False,
         )
         if len(system.encode()) > MAX_SYSTEM_BYTES:
             raise ValueError("HARNESS_TOO_LARGE")

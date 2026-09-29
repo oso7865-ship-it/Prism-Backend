@@ -1,22 +1,27 @@
-# Independent review after an empty first pass
-Independently inspect EVERY supplied role=changed file. The first pass found no items;
-that is not evidence of correctness. Apply the admission rules to concrete changed
-operations, their supplied callers/callees, boundary values, guards and failure paths.
-Do not simply repeat the empty result, but do not manufacture a finding to fill a quota.
-Related files support changed-file findings; do not report unchanged files as defects.
+# Independent contract comparison after an empty/invalid first pass
+Recheck EVERY changed file. An empty first pass is neither proof of safety nor a request
+to produce findings. Compare required and observed behavior BEFORE writing an issue.
+In file_checks.observation briefly state the relevant requirement and whether the actual
+return/raise/state change violates it. Then emit only issues established by that comparison.
+For example, if the requirement is to return the original text including whitespace and
+the code returns that text, there is no return defect even if a trim result is discarded.
+If the requirement instead demands trimmed text, the same return is defective. Likewise,
+preserving the caller's state does not require returning a modified local copy.
+Do not replace explicit requirements with a familiar algorithm or a name-based guess.
+For CODE, unused finite calculations and optional cleanup alone are not findings/questions;
+STANDARDS may report them only under an applicable provided rule. Still report demonstrated
+alias mutation, null dereference, bounds failure, rejected valid inputs and unsafe operations.
 
-Return one JSON object with exactly summary, issues, limitations, file_checks.
-summary and limitations are short Korean strings. issues follows the appended schema:
-SUPPORTED requires no assumptions and demonstrated trigger/effect; NEEDS_CONTEXT needs a
-specific visible concern and a named missing premise, never hypothetical missing callers.
-Every evidence_lines entry must belong to the changed file_id, include line and at least
-one changed line. Include all required fields. No markdown, extra keys or source dumps.
-For each changed file, file_checks contains exactly one short observable review outcome:
-file_id, line (one provided CHANGED line), outcome, observation (Korean, <=240 characters).
-If a file has NO changed HEAD lines (for example removal-only changes), choose one supplied
-context line, mark LIMITED and state that the removed code was not supplied. Never invent a line.
-Use FINDING iff that file has an admitted issue/question, NO_FINDING if no actionable
-concern is visible, LIMITED if the supplied context does not allow a useful determination.
-State the operation checked or the specific missing boundary, not a reasoning transcript.
-NO_FINDING does not mean the complete file is safe. Never claim to have executed tests.
-Keep the entire response within the token budget; prefer concise, concrete findings.
+Return exactly file_checks, issues, summary, limitations as one JSON object. No source dumps
+or hidden reasoning. file_checks has one entry per changed file: file_id, outcome, observation
+(Korean, <=240 characters). Omit line; the server selects it. FINDING iff there is an admitted
+issue/question, NO_FINDING otherwise, LIMITED for insufficient/removal-only context. Do not
+claim to have executed tests or checked unprovided code. Related files support changed anchors.
+issues follows the appended schema. SUPPORTED needs a demonstrated trigger/incorrect effect
+and empty assumptions. NEEDS_CONTEXT requires an actionable visible concern plus a specific
+missing premise; unknown callers alone are not concerns. All evidence_lines are provided lines
+of the changed file, including line and a changed line. No changed HEAD lines means LIMITED.
+Language failures do not require an application contract; ordinary valid operations do.
+Server observations are bounded examples, not full-program proof. Optional expression_repair
+must be the exact provided Python return expression and preserve established successful cases.
+Do not suggest a different return when the current return already satisfies the requirement.

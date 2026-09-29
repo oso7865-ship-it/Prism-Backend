@@ -305,7 +305,7 @@ def test_analysis_migration_roundtrip(db):
         migration.downgrade()
         assert "analysis_runs" not in inspect(conn).get_table_names()
         migration.upgrade()
-        assert len(inspect(conn).get_table_names()) == 17
+        assert len(inspect(conn).get_table_names()) == 19
 
 
 @pytest.mark.parametrize("change", ["cancel", "disconnect", "snapshot"])

@@ -1,6 +1,7 @@
 import asyncio
 import json
 from datetime import UTC, datetime
+from typing import cast
 from urllib.parse import quote
 
 from sqlalchemy.ext.asyncio import AsyncEngine
@@ -23,9 +24,15 @@ from app.domain.review.policy import (
     validate_result,
 )
 from app.domain.review.provider import Provider
+from app.domain.review.refinement import add_observations, independent_result, verified_result
 from app.domain.review.reranker import Ranker
+from app.domain.review.security_evidence import scan as security_scan
 from app.domain.review.service import TERMINAL, authorize, error, get_row
-from app.domain.review.verification import apply_verification, verification_payload
+from app.domain.review.supplement import supplement
+from app.domain.review.verification import verification_payload
+from app.domain.standards.api import check_rules
+from app.domain.standards.api import context as standards_context
+from app.domain.standards.api import snapshot as standards_snapshot
 from app.domain.workspace.api import WorkspaceAccess
 from app.shared.database.engine import transaction
 from app.shared.exception.base import AppException
@@ -51,6 +58,7 @@ class ReviewWorker:
             return
         assert c.workspace_id
         incoming = outgoing = 0
+        independent: dict[str, object] | None = None
         try:
             async with transaction(self.engine) as s:
                 await WorkspaceAccess(s).lock_system(c.workspace_id)
@@ -74,6 +82,14 @@ class ReviewWorker:
                 )
                 pr = await analysis_snapshot(s, row.requested_by, row.workspace_id, snap.pr_id)
                 feedback = await prior_feedback(s, row)
+                purpose = row.purpose
+                standards = (
+                    await standards_snapshot(
+                        s, row.workspace_id, snap.repository_id, row.standard_versions
+                    )
+                    if purpose == "STANDARDS"
+                    else []
+                )
                 row.status, row.started_at = "RUNNING", datetime.now(UTC)
             async with asyncio.timeout(150):
                 token = await self.github.installation_token(
@@ -122,49 +138,118 @@ class ReviewWorker:
                 if included:
                     bundle.payload = payload
                 bundle.coverage["prior_feedback_count"] = len(feedback) if included else 0
+                if purpose != "CODE":
+                    context = json.loads(bundle.payload)
+                    context["purpose"] = purpose
+                    if purpose == "STANDARDS":
+                        paths = {fid: path for fid, (path, _) in bundle.anchors.items()}
+                        context["file_paths"] = paths
+                        context["untrusted_standards"] = []
+                        available = (
+                            MAX_INPUT
+                            + 12 * 1024
+                            - len(json.dumps(context, ensure_ascii=False).encode())
+                            - 32
+                        )
+                        if available < 0:
+                            raise ValueError("STANDARDS_REQUIRED_TOO_LARGE")
+                        knowledge = standards_context(
+                            standards, paths, " ".join(paths.values()) + bundle.payload, available
+                        )
+                        if not knowledge["sections"]:
+                            raise error("STANDARDS_NO_MATCH")
+                        context["untrusted_standards"] = knowledge["sections"]
+                        rule_checks = check_rules(standards, paths, context["files"])
+                    bundle.payload = json.dumps(context, ensure_ascii=False)
+                add_observations(bundle)
+                security_evidence = security_scan(bundle.payload) if purpose == "SECURITY" else []
+                independent = independent_result(bundle, security_evidence)
                 await verify()
                 _, harness = compose(bundle.payload, ReviewOutput.model_json_schema())
                 # Commit each call reservation BEFORE external transmission.
                 if not await self.reserve(c, 0):
                     return
                 raw, incoming, outgoing = await self.provider.review(bundle.payload)
-                result = validate_result(raw, bundle)
-                if result["issues"] or result["questions"]:
+                recovered = False
+                try:
+                    result = validate_result(raw, bundle)
+                    requests = ReviewOutput.model_validate_json(raw).context_requests
+                except ValueError:
+                    # Discard invalid output, never forward it or label an empty draft successful.
+                    recovered, requests, result = True, [], None
+                await verify()
+                # Recheck authorization/lease before additional GitHub reads or AI transmission.
+                if not await self.reserve(c, 1, incoming, outgoing):
+                    return
+                if requests:
+                    bundle = await supplement(
+                        bundle,
+                        requests,
+                        self.github,
+                        token,
+                        repository_path(repo.owner_login, repo.repository_name),
+                        snap.head_sha,
+                        ignored,
+                    )
                     await verify()
-                    if not await self.reserve(c, 1, incoming, outgoing):
+                    if not await self.still_authorized(c):
                         return
+                if result and (result["issues"] or result["questions"]):
                     checked, extra_in, extra_out = await self.provider.verify(
                         verification_payload(bundle.payload, raw)
                     )
                     incoming += extra_in
                     outgoing += extra_out
-                    revised, verification = apply_verification(checked, raw)
-                    result = validate_result(revised, bundle)
-                    result["verification"] = verification
+                    result = verified_result(checked, raw, bundle)
                 else:
-                    await verify()
-                    if not await self.reserve(c, 1, incoming, outgoing):
-                        return
                     checked, extra_in, extra_out = await self.provider.recheck_empty(bundle.payload)
                     incoming += extra_in
                     outgoing += extra_out
                     result = validate_empty_review(checked, bundle)
+                    if recovered:
+                        metadata = cast(dict[str, object], result["verification"])
+                        metadata["status"] = "OUTPUT_RECOVERED"
+                if security_evidence:
+                    result["security_evidence"] = [
+                        {**item, "file_path": bundle.anchors[str(item["file_id"])][0]}
+                        for item in security_evidence
+                    ]
                 result["harness"] = harness
+                result["purpose"] = purpose
+                if purpose == "STANDARDS":
+                    result["standards"] = {k: v for k, v in knowledge.items() if k != "sections"}
+                    result["standard_checks"] = rule_checks
+                    result["standard_sources"] = [
+                        {k: v for k, v in section.items() if k != "text"}
+                        for section in cast(list[dict[str, object]], knowledge["sections"])
+                    ]
                 await self.complete(c, result, incoming=incoming, outgoing=outgoing)
         except TimeoutError:
-            await self.complete(c, None, "AI_TIMEOUT", incoming=incoming, outgoing=outgoing)
+            await self.complete(c, independent, "AI_TIMEOUT", incoming=incoming, outgoing=outgoing)
         except (GitHubFailure, AppException) as exc:
-            await self.complete(c, None, exc.code, incoming=incoming, outgoing=outgoing)
+            await self.complete(c, independent, exc.code, incoming=incoming, outgoing=outgoing)
         except ValueError as exc:
             code = (
-                "NO_SAFE_CONTEXT"
-                if str(exc) == "NO_SAFE_CONTEXT"
+                str(exc)
+                if str(exc) in {"NO_SAFE_CONTEXT", "STANDARDS_REQUIRED_TOO_LARGE"}
                 else "AI_CONTEXT_OR_OUTPUT_INVALID"
             )
-            await self.complete(c, None, code, incoming=incoming, outgoing=outgoing)
+            await self.complete(c, independent, code, incoming=incoming, outgoing=outgoing)
         except Exception:
             # Provider exceptions can include keys, inputs or raw outputs. Never persist/log them.
-            await self.complete(c, None, "AI_PROVIDER_FAILED", incoming=incoming, outgoing=outgoing)
+            await self.complete(
+                c, independent, "AI_PROVIDER_FAILED", incoming=incoming, outgoing=outgoing
+            )
+
+    async def still_authorized(self, c: Claim) -> bool:
+        assert c.workspace_id
+        async with transaction(self.engine) as s:
+            await WorkspaceAccess(s).lock_system(c.workspace_id)
+            row = await get_row(s, c.workspace_id, c.aggregate_id)
+            if row.status != "RUNNING" or not await jobs.fence(s, c):
+                return False
+            await authorize(s, row.requested_by, row.workspace_id, row.id, True)
+            return True
 
     async def reserve(self, c: Claim, expected: int, incoming: int = 0, outgoing: int = 0) -> bool:
         assert c.workspace_id

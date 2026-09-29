@@ -1,6 +1,6 @@
 {
   "repository": "https://github.com/oso7865-ship-it/Prism-Architecture.git",
-  "revision": "2c4b743d55a2624cbb84f99525dcff238116043a",
+  "revision": "c8030456189f50d68e3187ec17c5740117d573d3",
   "logical_path_prefix": "backend/",
   "documentation": {
     "archive_path": "records/backend",

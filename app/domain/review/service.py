@@ -9,6 +9,7 @@ from app.domain.analysis.api import require_review_read, review_snapshot
 from app.domain.repository.api import RepositoryAccess
 from app.domain.review.models import ReviewRun
 from app.domain.review.policy import POLICY, PROMPT
+from app.domain.standards.api import snapshot as standards_snapshot
 from app.domain.workspace.api import WorkspaceAccess
 from app.shared.config.settings import Settings
 from app.shared.database.engine import transaction
@@ -43,6 +44,8 @@ async def authorize(
     repo = await RepositoryAccess(s).require(uid, wid, row.repository_connection_id, active=execute)
     if execute and repo.connection_generation != row.connection_generation:
         raise error("ACCESS_REVOKED")
+    if execute and row.purpose == "STANDARDS":
+        await standards_snapshot(s, wid, row.repository_connection_id, row.standard_versions)
     return row
 
 
@@ -56,8 +59,16 @@ class ReviewService:
         return self.engine
 
     async def start(
-        self, uid: UUID, wid: UUID, aid: UUID, consent: bool, rerun: UUID | None
+        self,
+        uid: UUID,
+        wid: UUID,
+        aid: UUID,
+        consent: bool,
+        rerun: UUID | None,
+        purpose: str = "CODE",
     ) -> ReviewRun:
+        if purpose not in {"CODE", "SECURITY", "STANDARDS"}:
+            raise error("INVALID_REVIEW_PURPOSE", ErrorKind.INVALID_INPUT)
         if not self.settings.ai_enabled:
             raise error("AI_DISABLED", ErrorKind.UNAVAILABLE)
         if not consent:
@@ -65,7 +76,13 @@ class ReviewService:
         async with transaction(self.ready()) as s:
             await WorkspaceAccess(s).require_permission(uid, wid, "owner")
             snap = await review_snapshot(s, uid, wid, aid)
+            versions = (
+                [str(d.id) for d in await standards_snapshot(s, wid, snap.repository_id)]
+                if purpose == "STANDARDS"
+                else []
+            )
             conditions = (
+                ReviewRun.purpose == purpose,
                 ReviewRun.workspace_id == wid,
                 ReviewRun.analysis_id == aid,
                 ReviewRun.model == self.settings.deepseek_model,
@@ -75,13 +92,17 @@ class ReviewService:
             generation = 0
             if rerun:
                 previous = await get_row(s, wid, rerun)
-                if previous.analysis_id != aid or previous.status not in TERMINAL:
+                if (
+                    previous.analysis_id != aid
+                    or previous.purpose != purpose
+                    or previous.status not in TERMINAL
+                ):
                     raise error("INVALID_RERUN")
                 generation = (
                     await s.scalar(select(func.max(ReviewRun.generation)).where(*conditions)) or 0
                 ) + 1
             key = hashlib.sha256(
-                f"{wid}:{aid}:{snap.connection_generation}:{self.settings.deepseek_model}:{PROMPT}:{POLICY}:{generation}".encode()
+                f"{wid}:{aid}:{snap.connection_generation}:{self.settings.deepseek_model}:{PROMPT}:{POLICY}:{generation}:{purpose}:{','.join(versions)}".encode()
             ).hexdigest()
             existing = await s.scalar(select(ReviewRun).where(ReviewRun.execution_key == key))
             if existing:
@@ -104,6 +125,8 @@ class ReviewService:
             if (used or 0) >= self.settings.ai_daily_limit:
                 raise error("AI_DAILY_LIMIT")
             row = ReviewRun(
+                purpose=purpose,
+                standard_versions=versions,
                 workspace_id=wid,
                 analysis_id=aid,
                 pr_id=snap.pr_id,
@@ -123,7 +146,9 @@ class ReviewService:
             await enqueue(s, "EXPLAIN_FINDINGS", row.id, wid)
             return row
 
-    async def history(self, uid: UUID, wid: UUID, aid: UUID) -> list[ReviewRun]:
+    async def history(
+        self, uid: UUID, wid: UUID, aid: UUID, purpose: str = "CODE"
+    ) -> list[ReviewRun]:
         async with transaction(self.ready()) as s:
             # Historical results remain readable after disconnect, just like static results.
             await require_review_read(s, uid, wid, aid)
@@ -131,7 +156,11 @@ class ReviewService:
                 (
                     await s.scalars(
                         select(ReviewRun)
-                        .where(ReviewRun.workspace_id == wid, ReviewRun.analysis_id == aid)
+                        .where(
+                            ReviewRun.workspace_id == wid,
+                            ReviewRun.analysis_id == aid,
+                            ReviewRun.purpose == purpose,
+                        )
                         .order_by(ReviewRun.created_at.desc(), ReviewRun.id.desc())
                         .limit(50)
                     )

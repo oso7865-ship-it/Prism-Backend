@@ -85,6 +85,14 @@ def db():
         with engine.begin() as connection:
             with Operations.context(MigrationContext.configure(connection)):
                 migration.upgrade()
+        spec = importlib.util.spec_from_file_location(
+            "standards_migration", "migrations/versions/0009_review_standards.py"
+        )
+        migration = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(migration)
+        with engine.begin() as connection:
+            with Operations.context(MigrationContext.configure(connection)):
+                migration.upgrade()
         yield engine
     finally:
         engine.dispose()

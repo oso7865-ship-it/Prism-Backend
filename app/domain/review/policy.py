@@ -3,54 +3,17 @@ import json
 import re
 from dataclasses import dataclass
 from fnmatch import fnmatchcase
-from typing import Literal, cast
-
-from pydantic import BaseModel, ConfigDict, Field
+from typing import cast
 
 from app.domain.review.harness import version
+from app.domain.review.output_schema import Issue as Issue
+from app.domain.review.output_schema import ReviewOutput as ReviewOutput
+from app.domain.review.semantics import suggestion_check
+from app.shared.content_safety import SECRET as SECRET
 
-POLICY = "BOUNDED_CODE_V4"
+POLICY = "BOUNDED_CODE_V5"
 MAX_FILE = 16384
 MAX_INPUT = 49152
-SECRET = re.compile(
-    "-----BEGIN [A-Z ]*PRIVATE KEY|(?:gh[pousr]_[A-Za-z0-9]{15,}|"
-    "github_pat_[A-Za-z0-9_]{15,}|sk-[A-Za-z0-9_-]{12,}|AKIA[A-Z0"
-    "-9]{16})|(?:password|secret|api[_-]?key|token)\\s*[:=]\\s*[\\\"'"
-    "][^\\\"'\\r\\n]{4,}[\\\"']",
-    re.I,
-)
-
-
-class Issue(BaseModel):
-    model_config = ConfigDict(extra="forbid", strict=True)
-    file_id: str = Field(
-        max_length=8, description="Changed file containing the reported operation."
-    )
-    line: int = Field(ge=1, description="Provided HEAD line in this item's file_id.")
-    severity: Literal["INFO", "WARNING", "ERROR"]
-    basis: Literal["SUPPORTED", "NEEDS_CONTEXT"]
-    evidence_lines: list[int] = Field(
-        min_length=1,
-        max_length=8,
-        description=(
-            "Unique provided lines ONLY in this item's file_id; include line and a changed line. "
-            "NEVER mix related-file line numbers here. "
-            "Cite related file IDs/lines in evidence text."
-        ),
-    )
-    trigger: str = Field(min_length=1, max_length=400)
-    consequence: str = Field(min_length=1, max_length=400)
-    assumptions: list[str] = Field(max_length=3)
-    title: str = Field(min_length=1, max_length=160)
-    evidence: str = Field(min_length=1, max_length=800)
-    suggestion: str = Field(min_length=1, max_length=800)
-
-
-class ReviewOutput(BaseModel):
-    model_config = ConfigDict(extra="forbid", strict=True)
-    summary: str = Field(min_length=1, max_length=1600)
-    issues: list[Issue] = Field(max_length=10)
-    limitations: str = Field(min_length=1, max_length=1600)
 
 
 def issue_key(issue: dict[str, object]) -> str:
@@ -199,7 +162,9 @@ def validate_result(raw: str, bundle: InputBundle) -> dict[str, object]:
     if len(raw.encode()) > 24000 or SECRET.search(raw):
         raise ValueError("INVALID_OUTPUT")
     output = ReviewOutput.model_validate_json(raw)
-    files = {f["file_id"]: f for f in json.loads(bundle.payload)["files"]}
+    context = json.loads(bundle.payload)
+    files = {f["file_id"]: f for f in context["files"]}
+    sections = {str(s["id"]): s for s in context.get("untrusted_standards", [])}
     issues: list[dict[str, object]] = []
     questions: list[dict[str, object]] = []
     for issue in output.issues:
@@ -223,7 +188,46 @@ def validate_result(raw: str, bundle: InputBundle) -> dict[str, object]:
             raise ValueError("INCONSISTENT_EVIDENCE_BASIS")
         if not issue.trigger.strip() or not issue.consequence.strip():
             raise ValueError("EMPTY_EVIDENCE")
-        entry = {**issue.model_dump(exclude={"file_id"}), "file_path": anchor[0]}
+        if context.get("purpose") == "STANDARDS":
+            if not issue.citations or len(set(issue.citations)) != len(issue.citations):
+                raise ValueError("MISSING_STANDARD_CITATION")
+            if any(
+                cid not in sections or issue.file_id not in sections[cid]["file_ids"]
+                for cid in issue.citations
+            ):
+                raise ValueError("INVALID_STANDARD_CITATION")
+        elif issue.citations:
+            raise ValueError("UNEXPECTED_STANDARD_CITATION")
+        if issue.contract_quote:
+            supplied = [str(context.get("behavior_contract", ""))]
+            supplied += [r["code"] for f in files.values() for r in f["lines"]]
+            supplied += [str(s.get("text", "")) for s in sections.values()]
+            if not any(issue.contract_quote in text for text in supplied):
+                raise ValueError("INVALID_CONTRACT_QUOTE")
+        check = suggestion_check(issue, files[issue.file_id])
+        entry = {
+            **issue.model_dump(
+                exclude={"file_id", "citations", "expression_repair", "contract_quote"}
+            ),
+            "file_path": anchor[0],
+            "suggestion_check": check,
+        }
+        if check["status"] == "CHANGES_SUCCESSFUL_SAMPLES":
+            check["withheld"] = True
+            entry["suggestion"] = (
+                "제시된 수정안은 제한된 예시에서 기존 반환값까지 바꾸어 표시하지 않았어요. "
+                "아래 반례와 실제 입력 조건을 확인하고, 문제가 발생하는 조건을 처리하면서 "
+                "유지해야 할 기존 동작을 테스트로 확인해 주세요."
+            )
+        if issue.citations:
+            entry["citations"] = [
+                {
+                    k: v
+                    for k, v in sections[cid].items()
+                    if k not in {"text", "file_ids", "required"}
+                }
+                for cid in issue.citations
+            ]
         entry["key"] = issue_key(entry)
         (issues if issue.basis == "SUPPORTED" else questions).append(entry)
     return {
