@@ -1,19 +1,10 @@
 from datetime import datetime
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-
-class ConnectRequest(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    full_name: str = Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9-]{0,99}/[A-Za-z0-9_.-]{1,100}$")
-
-    @field_validator("full_name")
-    @classmethod
-    def safe_name(cls, value: str) -> str:
-        if value.split("/")[1] in {".", ".."}:
-            raise ValueError("Invalid repository name")
-        return value
+MAX_GITHUB_ID = 9223372036854775807
 
 
 class RepositoryResponse(BaseModel):
@@ -35,3 +26,45 @@ class ConnectStart(BaseModel):
 class AppStatus(BaseModel):
     configured: bool
     installation_url: str | None
+
+
+class CandidateResponse(BaseModel):
+    github_repository_id: int
+    owner_login: str
+    repository_name: str
+    is_private: bool
+    state: Literal["AVAILABLE", "CONNECTED", "ADMIN_REQUIRED", "OTHER_TEAM"]
+
+
+class CandidateListResponse(BaseModel):
+    items: list[CandidateResponse]
+    truncated: bool
+    skipped_installations: int
+    expires_at: datetime
+    installation_url: str | None
+
+
+class SelectRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    github_repository_ids: list[int] = Field(min_length=1, max_length=20)
+
+    @field_validator("github_repository_ids")
+    @classmethod
+    def valid_ids(cls, value: list[int]) -> list[int]:
+        if len(set(value)) != len(value) or any(not 0 < item <= MAX_GITHUB_ID for item in value):
+            raise ValueError("Invalid repository ids")
+        return value
+
+
+class SelectResult(BaseModel):
+    github_repository_id: int
+    owner_login: str | None
+    repository_name: str | None
+    status: Literal[
+        "CONNECTED", "ALREADY_CONNECTED", "ADMIN_REQUIRED", "NOT_IN_LIST", "CONFLICT", "FAILED"
+    ]
+    repository_id: UUID | None = None
+
+
+class SelectResponse(BaseModel):
+    results: list[SelectResult]

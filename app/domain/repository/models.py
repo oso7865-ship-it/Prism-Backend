@@ -71,6 +71,27 @@ class RepositoryConnection(EntityMixin, UpdatedAtMixin, Base):
     last_sync_success_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
+class RepositoryCandidateSet(EntityMixin, Base):
+    """Short-lived list of repositories the user may connect (no tokens stored)."""
+
+    __tablename__ = "repository_candidate_sets"
+    __table_args__ = (
+        UniqueConstraint("workspace_id", "user_id", name="uq_candidate_workspace_user"),
+        Index("ix_candidate_expires_at", "expires_at"),
+        CheckConstraint("expires_at > created_at", name="ck_candidate_expiry"),
+        CheckConstraint(
+            "jsonb_typeof(items) = 'array' AND jsonb_array_length(items) <= 300",
+            name="ck_candidate_items",
+        ),
+    )
+    workspace_id: Mapped[UUID]
+    user_id: Mapped[UUID]
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    truncated: Mapped[bool] = mapped_column(Boolean, server_default=text("false"))
+    skipped_installations: Mapped[int] = mapped_column(Integer, server_default=text("0"))
+    items: Mapped[list[dict[str, object]]] = mapped_column(JSONB)
+
+
 class RuleConfigVersion(EntityMixin, Base):
     __tablename__ = "rule_config_versions"
     __table_args__ = (
