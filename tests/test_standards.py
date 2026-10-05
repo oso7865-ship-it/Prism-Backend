@@ -263,11 +263,11 @@ def test_new_migration_roundtrip_and_preserves_original_review_defaults(db):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     with db.begin() as conn, Operations.context(MigrationContext.configure(conn)):
-        assert len(inspect(conn).get_table_names()) == 19
+        assert len(inspect(conn).get_table_names()) == 20
         module.downgrade()
-        assert len(inspect(conn).get_table_names()) == 17
+        assert len(inspect(conn).get_table_names()) == 18
         module.upgrade()
-        assert len(inspect(conn).get_table_names()) == 19
+        assert len(inspect(conn).get_table_names()) == 20
         assert not inspect(conn).get_foreign_keys("standard_documents")
         assert not inspect(conn).get_foreign_keys("standard_versions")
 

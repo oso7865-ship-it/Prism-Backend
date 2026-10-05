@@ -56,16 +56,22 @@ def provider(request):
         return httpx.Response(200, json={"access_token": "app-user-canary"})
     if path == "/user":
         return httpx.Response(200, json={"id": 100})
-    if path == "/repos/octo/sample":
-        return httpx.Response(200, json=repo)
-    if path == "/repos/octo/sample/installation":
+    if path == "/user/installations":
         return httpx.Response(
             200,
             json={
-                "id": 80,
-                "app_id": 42,
-                "permissions": {"contents": "read", "pull_requests": "read", "issues": "read"},
-                "suspended_at": None,
+                "installations": [
+                    {
+                        "id": 80,
+                        "app_id": 42,
+                        "permissions": {
+                            "contents": "read",
+                            "pull_requests": "read",
+                            "issues": "read",
+                        },
+                        "suspended_at": None,
+                    }
+                ]
             },
         )
     if path == "/user/installations/80/repositories":
@@ -117,18 +123,38 @@ def client(settings, transport=provider):
     )
 
 
-def connect(c, uid):
+def connect_flow(c, uid, wid=None, ids=None):
+    """Button flow: start, GitHub callback, read the list, connect the chosen ones."""
     headers = {"Authorization": "Bearer " + encode_access(uid, KEY)}
-    wid = c.post("/api/v1/workspaces", headers=headers, json={"name": "Repo Team"}).json()["id"]
-    response = c.post(
-        f"/api/v1/workspaces/{wid}/repositories/connect",
-        headers=headers,
-        json={"full_name": "octo/sample"},
-    )
+    if wid is None:
+        wid = c.post("/api/v1/workspaces", headers=headers, json={"name": "Repo Team"}).json()["id"]
+    response = c.post(f"/api/v1/workspaces/{wid}/repositories/connect", headers=headers)
     assert response.status_code == 200, response.text
     state = parse_qs(urlsplit(response.json()["authorization_url"]).query)["state"][0]
-    result = c.get("/api/v1/github-app/callback", params={"code": "test-code", "state": state})
-    return wid, headers, state, result
+    callback = c.get("/api/v1/github-app/callback", params={"code": "test-code", "state": state})
+    selected = None
+    if "repository_result=choose" in callback.headers["location"]:
+        listing = c.get(f"/api/v1/workspaces/{wid}/repositories/candidates", headers=headers)
+        assert listing.status_code == 200, listing.text
+        if ids is None:
+            ids = [
+                item["github_repository_id"]
+                for item in listing.json()["items"]
+                if item["state"] == "AVAILABLE"
+            ]
+        if ids:
+            selected = c.post(
+                f"/api/v1/workspaces/{wid}/repositories/connect-selected",
+                headers=headers,
+                json={"github_repository_ids": ids},
+            )
+            assert selected.status_code == 200, selected.text
+    return wid, headers, state, callback, selected
+
+
+def connect(c, uid):
+    wid, headers, state, callback, _ = connect_flow(c, uid)
+    return wid, headers, state, callback
 
 
 async def run_one(settings, transport=provider):
@@ -148,7 +174,7 @@ def test_connect_sync_and_scoped_queries(db, app_settings):
     u = users(db)
     with client(app_settings) as c:
         wid, h, state, result = connect(c, u[0][0])
-        assert result.headers["location"].endswith("repository_result=connected")
+        assert "repository_result=choose" in result.headers["location"]
         replay = c.get("/api/v1/github-app/callback", params={"code": "test", "state": state})
         assert replay.headers["location"].endswith("repository_result=failed")
         repos = c.get(f"/api/v1/workspaces/{wid}/repositories", headers=h).json()["items"]
@@ -196,7 +222,7 @@ def test_connect_sync_and_scoped_queries(db, app_settings):
             == 409
         )
     catalog = inspect(db)
-    assert len(catalog.get_table_names()) == 19
+    assert len(catalog.get_table_names()) == 20
     assert all(not catalog.get_foreign_keys(t) for t in catalog.get_table_names())
 
 
@@ -209,19 +235,33 @@ def test_untrusted_install_flow_rejected(db, app_settings, failure):
         data = response.json()
         if req.url.path == "/user" and failure == "identity":
             data["id"] = 999
-        if req.url.path == "/repos/octo/sample" and failure == "admin":
-            data["permissions"]["admin"] = False
+        if req.url.path == "/user/installations/80/repositories" and failure == "admin":
+            data["repositories"][0]["permissions"]["admin"] = False
         if req.url.path == "/user/installations/80/repositories" and failure == "not_granted":
             data["repositories"] = []
-        if req.url.path.endswith("/installation") and failure == "suspended":
-            data["suspended_at"] = "2026-09-01T00:00:00Z"
-        if req.url.path.endswith("/installation") and failure == "wrong_app":
-            data["app_id"] = 999
+        if req.url.path == "/user/installations" and failure == "suspended":
+            data["installations"][0]["suspended_at"] = "2026-09-01T00:00:00Z"
+        if req.url.path == "/user/installations" and failure == "wrong_app":
+            data["installations"][0]["app_id"] = 999
         return httpx.Response(response.status_code, json=data)
 
     with client(app_settings, bad) as c:
-        _, _, _, result = connect(c, u[0][0])
-        assert result.headers["location"].endswith("repository_result=failed")
+        wid, h, _, result, selected = connect_flow(c, u[0][0], ids=[300])
+        listing = c.get(f"/api/v1/workspaces/{wid}/repositories/candidates", headers=h)
+        if failure == "identity":
+            assert result.headers["location"].endswith("repository_result=failed")
+            assert listing.status_code == 404 and selected is None
+        else:
+            assert "repository_result=choose" in result.headers["location"]
+            body = listing.json()
+            if failure == "admin":
+                assert [i["state"] for i in body["items"]] == ["ADMIN_REQUIRED"]
+                assert selected.json()["results"][0]["status"] == "ADMIN_REQUIRED"
+            else:
+                assert body["items"] == []
+                assert selected.json()["results"][0]["status"] == "NOT_IN_LIST"
+                skipped = 1 if failure in {"suspended", "wrong_app"} else 0
+                assert body["skipped_installations"] == skipped
     with Session(db) as s:
         assert (
             not s.scalars(select(RepositoryConnection)).all() and not s.scalars(select(Job)).all()
@@ -294,15 +334,28 @@ def test_lease_recovery_and_stale_completion(db, app_settings):
 def test_duplicate_connection_and_binding_tamper(db, app_settings):
     u = users(db)
     with client(app_settings) as c:
-        wid, h, _, result = connect(c, u[0][0])
-        assert result.headers["location"].endswith("connected")
-        _, _, _, result = connect(c, u[0][0])
-        assert result.headers["location"].endswith("failed")
-        start = c.post(
-            f"/api/v1/workspaces/{wid}/repositories/connect",
-            headers=h,
-            json={"full_name": "octo/sample"},
+        wid, h, _, result, first = connect_flow(c, u[0][0])
+        assert "repository_result=choose" in result.headers["location"]
+        assert first.json()["results"][0]["status"] == "CONNECTED"
+        # Another team sees the repository as taken and a forced selection conflicts.
+        other, oh, _, _, skipped = connect_flow(c, u[0][0])
+        assert skipped is None
+        listing = c.get(f"/api/v1/workspaces/{other}/repositories/candidates", headers=oh).json()
+        assert [i["state"] for i in listing["items"]] == ["OTHER_TEAM"]
+        forced = c.post(
+            f"/api/v1/workspaces/{other}/repositories/connect-selected",
+            headers=oh,
+            json={"github_repository_ids": [300]},
         )
+        assert forced.json()["results"][0]["status"] == "CONFLICT"
+        # Selecting it again in the same team reports it as already connected.
+        again = c.post(
+            f"/api/v1/workspaces/{wid}/repositories/connect-selected",
+            headers=h,
+            json={"github_repository_ids": [300]},
+        )
+        assert again.json()["results"][0]["status"] == "ALREADY_CONNECTED"
+        start = c.post(f"/api/v1/workspaces/{wid}/repositories/connect", headers=h)
         state = parse_qs(urlsplit(start.json()["authorization_url"]).query)["state"][0]
         c.cookies.clear()
         assert (
@@ -310,12 +363,19 @@ def test_duplicate_connection_and_binding_tamper(db, app_settings):
             .headers["location"]
             .endswith("failed")
         )
-        for target in ["octo/..", "octo/.", "https://evil.example/a", "octo/sample?x=1"]:
+        for body in [
+            {"github_repository_ids": []},
+            {"github_repository_ids": [300, 300]},
+            {"github_repository_ids": [0]},
+            {"github_repository_ids": list(range(1, 22))},
+            {"github_repository_ids": [300], "full_name": "octo/sample"},
+            {"full_name": "octo/sample"},
+        ]:
             assert (
                 c.post(
-                    f"/api/v1/workspaces/{wid}/repositories/connect",
+                    f"/api/v1/workspaces/{wid}/repositories/connect-selected",
                     headers=h,
-                    json={"full_name": target},
+                    json=body,
                 ).status_code
                 == 422
             )
@@ -373,14 +433,8 @@ def test_disconnect_blocks_queued_sync_and_reconnect_generation(db, app_settings
         with Session(db) as s:
             assert s.scalars(select(PullRequestSyncRun)).one().status == "FAILED"
             assert not s.scalars(select(PullRequest)).all()
-        start = c.post(
-            f"/api/v1/workspaces/{wid}/repositories/connect",
-            headers=h,
-            json={"full_name": "octo/sample"},
-        )
-        state = parse_qs(urlsplit(start.json()["authorization_url"]).query)["state"][0]
-        result = c.get("/api/v1/github-app/callback", params={"state": state, "code": "x"})
-        assert result.headers["location"].endswith("connected")
+        _, _, _, _, again = connect_flow(c, u[0][0], wid=wid)
+        assert again.json()["results"][0]["status"] == "CONNECTED"
         with Session(db) as s:
             repo = s.scalars(select(RepositoryConnection)).one()
             assert str(repo.id) == rid and repo.connection_generation == 2
@@ -405,9 +459,11 @@ def test_new_schema_matches_metadata_and_roundtrip(db):
     with db.begin() as conn:
         with Operations.context(MigrationContext.configure(conn)):
             migration.downgrade()
-            assert len(inspect(conn).get_table_names()) == 14  # feedback + standards
+            assert (
+                len(inspect(conn).get_table_names()) == 15
+            )  # feedback + standards + candidate lists
             migration.upgrade()
-            assert len(inspect(conn).get_table_names()) == 19
+            assert len(inspect(conn).get_table_names()) == 20
 
 
 def test_retry_exhaustion_and_atomic_failure(db, app_settings):
