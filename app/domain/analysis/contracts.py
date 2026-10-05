@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 RULE_SET = "static-1.1.0"
 MAX_FILE = 200 * 1024
-MAX_TOTAL = 2 * 1024 * 1024
+MAX_TOTAL = 3 * 1024 * 1024
 MAX_FILES = 100
 
 

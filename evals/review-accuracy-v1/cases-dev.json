@@ -1,0 +1,1013 @@
+[
+  {
+    "id": "or-default-name-defect",
+    "path": "labels.py",
+    "patch": "@@ -1,6 +1,4 @@\n def label_for(name, fallback):\n     \"\"\"Return the stored name. An empty string is intentional and must be returned\n     unchanged; only a missing name (None) uses the fallback.\"\"\"\n-    if name is None:\n-        return fallback\n-    return name\n+    return name or fallback",
+    "expected_locations": [
+      [
+        4,
+        4
+      ]
+    ],
+    "expected_lines": [],
+    "contract": "An empty string is an intentional name and must be returned unchanged; only None uses the fallback.",
+    "kind": "synthetic-value-semantics",
+    "split": "dev",
+    "category": "OR_DEFAULT",
+    "polarity": "defect",
+    "pair_id": "or-default-name",
+    "language": "py",
+    "oracle": {
+      "line": 4,
+      "probes": [
+        {
+          "inputs": {
+            "name": "",
+            "fallback": "guest"
+          },
+          "actual": "STR:guest",
+          "expected": "EMPTY_STR"
+        },
+        {
+          "inputs": {
+            "name": null,
+            "fallback": "guest"
+          },
+          "actual": "STR:guest",
+          "expected": "STR:guest"
+        }
+      ]
+    },
+    "label_review": "agent-oracle; independent-human-review-pending",
+    "rubric": {
+      "required_behavior": "An empty string is an intentional name and must be returned unchanged; only None uses the fallback.",
+      "reject": "wrong value or exception stated for the trigger, invented contract, unreachable trigger, duplicate or generic question"
+    },
+    "provenance": {
+      "transformation": "handwritten synthetic reproduction; not derived from a real PR",
+      "authored": "2026-10-05"
+    },
+    "semantic": {
+      "trigger_any": [
+        "빈 문자열",
+        "''",
+        "\"\"",
+        "empty string"
+      ],
+      "effect_any": [
+        "fallback",
+        "대체",
+        "기본값",
+        "덮어",
+        "대신"
+      ],
+      "reject_any": [
+        "None을 반환",
+        "None이 반환",
+        "None 반환"
+      ]
+    }
+  },
+  {
+    "id": "or-default-name-clean",
+    "path": "labels.py",
+    "patch": "@@ -1,6 +1,4 @@\n def label_for(name, fallback):\n     \"\"\"Return the stored name. An empty string is intentional and must be returned\n     unchanged; only a missing name (None) uses the fallback.\"\"\"\n-    if name is None:\n-        return fallback\n-    return name\n+    return fallback if name is None else name",
+    "expected_locations": [],
+    "expected_lines": [],
+    "contract": "An empty string is an intentional name and must be returned unchanged; only None uses the fallback.",
+    "kind": "synthetic-value-semantics",
+    "split": "dev",
+    "category": "OR_DEFAULT",
+    "polarity": "clean",
+    "pair_id": "or-default-name",
+    "language": "py",
+    "oracle": {
+      "line": 4,
+      "probes": [
+        {
+          "inputs": {
+            "name": "",
+            "fallback": "guest"
+          },
+          "actual": "EMPTY_STR",
+          "expected": "EMPTY_STR"
+        },
+        {
+          "inputs": {
+            "name": null,
+            "fallback": "guest"
+          },
+          "actual": "STR:guest",
+          "expected": "STR:guest"
+        }
+      ]
+    },
+    "label_review": "agent-oracle; independent-human-review-pending",
+    "rubric": {
+      "required_behavior": "An empty string is an intentional name and must be returned unchanged; only None uses the fallback.",
+      "reject": "wrong value or exception stated for the trigger, invented contract, unreachable trigger, duplicate or generic question"
+    },
+    "provenance": {
+      "transformation": "handwritten synthetic reproduction; not derived from a real PR",
+      "authored": "2026-10-05"
+    }
+  },
+  {
+    "id": "default-arg-notify-defect",
+    "path": "notify.py",
+    "patch": "@@ -1,4 +1,4 @@\n def should_notify(enabled=True, urgent=False):\n     \"\"\"Notify when notifications are enabled, or when the event is urgent.\n     A call without arguments must notify.\"\"\"\n-    return enabled or urgent\n+    return enabled and urgent",
+    "expected_locations": [
+      [
+        4,
+        4
+      ]
+    ],
+    "expected_lines": [],
+    "contract": "Calling should_notify() with no arguments must notify (True); notifications are enabled by default.",
+    "kind": "synthetic-value-semantics",
+    "split": "dev",
+    "category": "DEFAULT_ARG",
+    "polarity": "defect",
+    "pair_id": "default-arg-notify",
+    "language": "py",
+    "oracle": {
+      "line": 4,
+      "probes": [
+        {
+          "inputs": {},
+          "actual": "FALSE",
+          "expected": "TRUE"
+        },
+        {
+          "inputs": {
+            "enabled": false,
+            "urgent": true
+          },
+          "actual": "FALSE",
+          "expected": "TRUE"
+        }
+      ]
+    },
+    "label_review": "agent-oracle; independent-human-review-pending",
+    "rubric": {
+      "required_behavior": "Calling should_notify() with no arguments must notify (True); notifications are enabled by default.",
+      "reject": "wrong value or exception stated for the trigger, invented contract, unreachable trigger, duplicate or generic question"
+    },
+    "provenance": {
+      "transformation": "handwritten synthetic reproduction; not derived from a real PR",
+      "authored": "2026-10-05"
+    },
+    "semantic": {
+      "trigger_any": [
+        "인자 없이",
+        "기본값",
+        "기본 인자",
+        "인자 없는",
+        "기본 호출",
+        "enabled=True"
+      ],
+      "effect_any": [
+        "False",
+        "알림",
+        "반환",
+        "거짓"
+      ],
+      "reject_any": [
+        "None"
+      ]
+    }
+  },
+  {
+    "id": "default-arg-notify-clean",
+    "path": "notify.py",
+    "patch": "@@ -1,4 +1,4 @@\n def should_notify(enabled=True, urgent=False):\n     \"\"\"Notify when notifications are enabled, or when the event is urgent.\n     A call without arguments must notify.\"\"\"\n-    return enabled or urgent\n+    return urgent or enabled",
+    "expected_locations": [],
+    "expected_lines": [],
+    "contract": "Calling should_notify() with no arguments must notify (True); notifications are enabled by default.",
+    "kind": "synthetic-value-semantics",
+    "split": "dev",
+    "category": "DEFAULT_ARG",
+    "polarity": "clean",
+    "pair_id": "default-arg-notify",
+    "language": "py",
+    "oracle": {
+      "line": 4,
+      "probes": [
+        {
+          "inputs": {},
+          "actual": "TRUE",
+          "expected": "TRUE"
+        },
+        {
+          "inputs": {
+            "enabled": false,
+            "urgent": true
+          },
+          "actual": "TRUE",
+          "expected": "TRUE"
+        }
+      ]
+    },
+    "label_review": "agent-oracle; independent-human-review-pending",
+    "rubric": {
+      "required_behavior": "Calling should_notify() with no arguments must notify (True); notifications are enabled by default.",
+      "reject": "wrong value or exception stated for the trigger, invented contract, unreachable trigger, duplicate or generic question"
+    },
+    "provenance": {
+      "transformation": "handwritten synthetic reproduction; not derived from a real PR",
+      "authored": "2026-10-05"
+    }
+  },
+  {
+    "id": "default-arg-retries-defect",
+    "path": "retry.py",
+    "patch": "@@ -1,3 +1,3 @@\n-def retries_left(max_retries=3, used=0):\n+def retries_left(max_retries=3, used=1):\n     \"\"\"Number of retries still available. With default arguments the result is 3.\"\"\"\n     return max_retries - used",
+    "expected_locations": [
+      [
+        1,
+        1
+      ]
+    ],
+    "expected_lines": [],
+    "contract": "With default arguments retries_left() must be 3.",
+    "kind": "synthetic-value-semantics",
+    "split": "dev",
+    "category": "DEFAULT_ARG",
+    "polarity": "defect",
+    "pair_id": "default-arg-retries",
+    "language": "py",
+    "oracle": {
+      "line": 1,
+      "probes": [
+        {
+          "inputs": {},
+          "actual": "INT:2",
+          "expected": "INT:3"
+        }
+      ]
+    },
+    "label_review": "agent-oracle; independent-human-review-pending",
+    "rubric": {
+      "required_behavior": "With default arguments retries_left() must be 3.",
+      "reject": "wrong value or exception stated for the trigger, invented contract, unreachable trigger, duplicate or generic question"
+    },
+    "provenance": {
+      "transformation": "handwritten synthetic reproduction; not derived from a real PR",
+      "authored": "2026-10-05"
+    },
+    "semantic": {
+      "trigger_any": [
+        "기본값",
+        "인자 없이",
+        "기본 인자",
+        "used=1",
+        "used의 기본",
+        "기본 호출"
+      ],
+      "effect_any": [
+        "2",
+        "3",
+        "남은"
+      ],
+      "reject_any": []
+    }
+  },
+  {
+    "id": "default-arg-retries-clean",
+    "path": "retry.py",
+    "patch": "@@ -1,3 +1,3 @@\n-def retries_left(max_retries=3, used=0):\n+def retries_left(max_retries: int = 3, used: int = 0) -> int:\n     \"\"\"Number of retries still available. With default arguments the result is 3.\"\"\"\n     return max_retries - used",
+    "expected_locations": [],
+    "expected_lines": [],
+    "contract": "With default arguments retries_left() must be 3.",
+    "kind": "synthetic-value-semantics",
+    "split": "dev",
+    "category": "DEFAULT_ARG",
+    "polarity": "clean",
+    "pair_id": "default-arg-retries",
+    "language": "py",
+    "oracle": {
+      "line": 1,
+      "probes": [
+        {
+          "inputs": {},
+          "actual": "INT:3",
+          "expected": "INT:3"
+        }
+      ]
+    },
+    "label_review": "agent-oracle; independent-human-review-pending",
+    "rubric": {
+      "required_behavior": "With default arguments retries_left() must be 3.",
+      "reject": "wrong value or exception stated for the trigger, invented contract, unreachable trigger, duplicate or generic question"
+    },
+    "provenance": {
+      "transformation": "handwritten synthetic reproduction; not derived from a real PR",
+      "authored": "2026-10-05"
+    }
+  },
+  {
+    "id": "range-step-offsets-defect",
+    "path": "windows.py",
+    "patch": "@@ -1,8 +1,3 @@\n def window_starts(total, step):\n     \"\"\"Return start offsets 0, step, 2*step ... below total. step is always >= 1.\"\"\"\n-    offsets = []\n-    position = 0\n-    while position < total:\n-        offsets.append(position)\n-        position += step\n-    return offsets\n+    return list(range(0, total, step - 1))",
+    "expected_locations": [
+      [
+        3,
+        3
+      ]
+    ],
+    "expected_lines": [],
+    "contract": "step is always >= 1; the offsets are 0, step, 2*step ... below total.",
+    "kind": "synthetic-value-semantics",
+    "split": "dev",
+    "category": "RANGE_STEP",
+    "polarity": "defect",
+    "pair_id": "range-step-offsets",
+    "language": "py",
+    "oracle": {
+      "line": 3,
+      "probes": [
+        {
+          "inputs": {
+            "total": 5,
+            "step": 1
+          },
+          "actual": "EXC:ValueError",
+          "expected": "LIST:[0, 1, 2, 3, 4]"
+        },
+        {
+          "inputs": {
+            "total": 5,
+            "step": 2
+          },
+          "actual": "LIST:[0, 1, 2, 3, 4]",
+          "expected": "LIST:[0, 2, 4]"
+        }
+      ]
+    },
+    "label_review": "agent-oracle; independent-human-review-pending",
+    "rubric": {
+      "required_behavior": "step is always >= 1; the offsets are 0, step, 2*step ... below total.",
+      "reject": "wrong value or exception stated for the trigger, invented contract, unreachable trigger, duplicate or generic question"
+    },
+    "provenance": {
+      "transformation": "handwritten synthetic reproduction; not derived from a real PR",
+      "authored": "2026-10-05"
+    },
+    "semantic": {
+      "trigger_any": [
+        "step이 1",
+        "step=1",
+        "step == 1",
+        "step 1",
+        "1일 때",
+        "step이 1일"
+      ],
+      "effect_any": [
+        "ValueError",
+        "예외",
+        "step이 0",
+        "step 인자가 0",
+        "0이 되",
+        "step은 0"
+      ],
+      "reject_any": [
+        "빈 리스트"
+      ]
+    }
+  },
+  {
+    "id": "range-step-offsets-clean",
+    "path": "windows.py",
+    "patch": "@@ -1,8 +1,3 @@\n def window_starts(total, step):\n     \"\"\"Return start offsets 0, step, 2*step ... below total. step is always >= 1.\"\"\"\n-    offsets = []\n-    position = 0\n-    while position < total:\n-        offsets.append(position)\n-        position += step\n-    return offsets\n+    return list(range(0, total, step))",
+    "expected_locations": [],
+    "expected_lines": [],
+    "contract": "step is always >= 1; the offsets are 0, step, 2*step ... below total.",
+    "kind": "synthetic-value-semantics",
+    "split": "dev",
+    "category": "RANGE_STEP",
+    "polarity": "clean",
+    "pair_id": "range-step-offsets",
+    "language": "py",
+    "oracle": {
+      "line": 3,
+      "probes": [
+        {
+          "inputs": {
+            "total": 5,
+            "step": 1
+          },
+          "actual": "LIST:[0, 1, 2, 3, 4]",
+          "expected": "LIST:[0, 1, 2, 3, 4]"
+        },
+        {
+          "inputs": {
+            "total": 5,
+            "step": 2
+          },
+          "actual": "LIST:[0, 2, 4]",
+          "expected": "LIST:[0, 2, 4]"
+        }
+      ]
+    },
+    "label_review": "agent-oracle; independent-human-review-pending",
+    "rubric": {
+      "required_behavior": "step is always >= 1; the offsets are 0, step, 2*step ... below total.",
+      "reject": "wrong value or exception stated for the trigger, invented contract, unreachable trigger, duplicate or generic question"
+    },
+    "provenance": {
+      "transformation": "handwritten synthetic reproduction; not derived from a real PR",
+      "authored": "2026-10-05"
+    }
+  },
+  {
+    "id": "dict-get-timeout-defect",
+    "path": "settings.py",
+    "patch": "@@ -1,6 +1,4 @@\n def read_timeout(config):\n     \"\"\"Timeout in seconds. A configured 0 means no timeout and is returned as 0;\n     only a missing key falls back to 30.\"\"\"\n-    if \"timeout\" in config:\n-        return config[\"timeout\"]\n-    return 30\n+    return config.get(\"timeout\") or 30",
+    "expected_locations": [
+      [
+        4,
+        4
+      ]
+    ],
+    "expected_lines": [],
+    "contract": "A configured timeout of 0 means no timeout and must be returned as 0; only a missing key uses 30.",
+    "kind": "synthetic-value-semantics",
+    "split": "dev",
+    "category": "DICT_GET",
+    "polarity": "defect",
+    "pair_id": "dict-get-timeout",
+    "language": "py",
+    "oracle": {
+      "line": 4,
+      "probes": [
+        {
+          "inputs": {
+            "config": {
+              "timeout": 0
+            }
+          },
+          "actual": "INT:30",
+          "expected": "ZERO"
+        },
+        {
+          "inputs": {
+            "config": {}
+          },
+          "actual": "INT:30",
+          "expected": "INT:30"
+        }
+      ]
+    },
+    "label_review": "agent-oracle; independent-human-review-pending",
+    "rubric": {
+      "required_behavior": "A configured timeout of 0 means no timeout and must be returned as 0; only a missing key uses 30.",
+      "reject": "wrong value or exception stated for the trigger, invented contract, unreachable trigger, duplicate or generic question"
+    },
+    "provenance": {
+      "transformation": "handwritten synthetic reproduction; not derived from a real PR",
+      "authored": "2026-10-05"
+    },
+    "semantic": {
+      "trigger_any": [
+        "timeout이 0",
+        "0으로",
+        "0이 설정",
+        "값이 0",
+        "timeout: 0",
+        "0인 경우",
+        "0일 때",
+        "0이면",
+        "0 값"
+      ],
+      "effect_any": [
+        "30"
+      ],
+      "reject_any": []
+    }
+  },
+  {
+    "id": "dict-get-timeout-clean",
+    "path": "settings.py",
+    "patch": "@@ -1,6 +1,4 @@\n def read_timeout(config):\n     \"\"\"Timeout in seconds. A configured 0 means no timeout and is returned as 0;\n     only a missing key falls back to 30.\"\"\"\n-    if \"timeout\" in config:\n-        return config[\"timeout\"]\n-    return 30\n+    return config.get(\"timeout\", 30)",
+    "expected_locations": [],
+    "expected_lines": [],
+    "contract": "A configured timeout of 0 means no timeout and must be returned as 0; only a missing key uses 30.",
+    "kind": "synthetic-value-semantics",
+    "split": "dev",
+    "category": "DICT_GET",
+    "polarity": "clean",
+    "pair_id": "dict-get-timeout",
+    "language": "py",
+    "oracle": {
+      "line": 4,
+      "probes": [
+        {
+          "inputs": {
+            "config": {
+              "timeout": 0
+            }
+          },
+          "actual": "ZERO",
+          "expected": "ZERO"
+        },
+        {
+          "inputs": {
+            "config": {}
+          },
+          "actual": "INT:30",
+          "expected": "INT:30"
+        }
+      ]
+    },
+    "label_review": "agent-oracle; independent-human-review-pending",
+    "rubric": {
+      "required_behavior": "A configured timeout of 0 means no timeout and must be returned as 0; only a missing key uses 30.",
+      "reject": "wrong value or exception stated for the trigger, invented contract, unreachable trigger, duplicate or generic question"
+    },
+    "provenance": {
+      "transformation": "handwritten synthetic reproduction; not derived from a real PR",
+      "authored": "2026-10-05"
+    }
+  },
+  {
+    "id": "none-vs-falsy-items-defect",
+    "path": "inputs.py",
+    "patch": "@@ -1,4 +1,4 @@\n def has_value(items):\n     \"\"\"True when items was provided, even if it is an empty list.\n     Only None means not provided.\"\"\"\n-    return items is not None\n+    return bool(items)",
+    "expected_locations": [
+      [
+        4,
+        4
+      ]
+    ],
+    "expected_lines": [],
+    "contract": "has_value returns True for any list, including an empty list; only None means not provided.",
+    "kind": "synthetic-value-semantics",
+    "split": "dev",
+    "category": "NONE_VS_FALSY",
+    "polarity": "defect",
+    "pair_id": "none-vs-falsy-items",
+    "language": "py",
+    "oracle": {
+      "line": 4,
+      "probes": [
+        {
+          "inputs": {
+            "items": []
+          },
+          "actual": "FALSE",
+          "expected": "TRUE"
+        },
+        {
+          "inputs": {
+            "items": null
+          },
+          "actual": "FALSE",
+          "expected": "FALSE"
+        }
+      ]
+    },
+    "label_review": "agent-oracle; independent-human-review-pending",
+    "rubric": {
+      "required_behavior": "has_value returns True for any list, including an empty list; only None means not provided.",
+      "reject": "wrong value or exception stated for the trigger, invented contract, unreachable trigger, duplicate or generic question"
+    },
+    "provenance": {
+      "transformation": "handwritten synthetic reproduction; not derived from a real PR",
+      "authored": "2026-10-05"
+    },
+    "semantic": {
+      "trigger_any": [
+        "빈 리스트",
+        "[]",
+        "빈 목록",
+        "비어 있는",
+        "빈 배열"
+      ],
+      "effect_any": [
+        "False",
+        "거짓",
+        "제공되지 않은",
+        "없는 것으로"
+      ],
+      "reject_any": [
+        "None이면 True",
+        "None일 때 True"
+      ]
+    }
+  },
+  {
+    "id": "none-vs-falsy-items-clean",
+    "path": "inputs.py",
+    "patch": "@@ -1,4 +1,4 @@\n def has_value(items):\n     \"\"\"True when items was provided, even if it is an empty list.\n     Only None means not provided.\"\"\"\n-    return items is not None\n+    return not (items is None)",
+    "expected_locations": [],
+    "expected_lines": [],
+    "contract": "has_value returns True for any list, including an empty list; only None means not provided.",
+    "kind": "synthetic-value-semantics",
+    "split": "dev",
+    "category": "NONE_VS_FALSY",
+    "polarity": "clean",
+    "pair_id": "none-vs-falsy-items",
+    "language": "py",
+    "oracle": {
+      "line": 4,
+      "probes": [
+        {
+          "inputs": {
+            "items": []
+          },
+          "actual": "TRUE",
+          "expected": "TRUE"
+        },
+        {
+          "inputs": {
+            "items": null
+          },
+          "actual": "FALSE",
+          "expected": "FALSE"
+        }
+      ]
+    },
+    "label_review": "agent-oracle; independent-human-review-pending",
+    "rubric": {
+      "required_behavior": "has_value returns True for any list, including an empty list; only None means not provided.",
+      "reject": "wrong value or exception stated for the trigger, invented contract, unreachable trigger, duplicate or generic question"
+    },
+    "provenance": {
+      "transformation": "handwritten synthetic reproduction; not derived from a real PR",
+      "authored": "2026-10-05"
+    }
+  },
+  {
+    "id": "none-vs-falsy-text-defect",
+    "path": "text.py",
+    "patch": "@@ -1,6 +1,6 @@\n def normalize(text):\n     \"\"\"Strip surrounding whitespace. None stays None and an empty string stays\n     an empty string.\"\"\"\n-    if text is None:\n+    if not text:\n         return None\n     return text.strip()",
+    "expected_locations": [
+      [
+        4,
+        4
+      ]
+    ],
+    "expected_lines": [],
+    "contract": "normalize keeps an empty string as an empty string; only None maps to None.",
+    "kind": "synthetic-value-semantics",
+    "split": "dev",
+    "category": "NONE_VS_FALSY",
+    "polarity": "defect",
+    "pair_id": "none-vs-falsy-text",
+    "language": "py",
+    "oracle": {
+      "line": 4,
+      "probes": [
+        {
+          "inputs": {
+            "text": ""
+          },
+          "actual": "NONE",
+          "expected": "EMPTY_STR"
+        }
+      ]
+    },
+    "label_review": "agent-oracle; independent-human-review-pending",
+    "rubric": {
+      "required_behavior": "normalize keeps an empty string as an empty string; only None maps to None.",
+      "reject": "wrong value or exception stated for the trigger, invented contract, unreachable trigger, duplicate or generic question"
+    },
+    "provenance": {
+      "transformation": "handwritten synthetic reproduction; not derived from a real PR",
+      "authored": "2026-10-05"
+    },
+    "semantic": {
+      "trigger_any": [
+        "빈 문자열",
+        "''",
+        "\"\"",
+        "empty string"
+      ],
+      "effect_any": [
+        "None"
+      ],
+      "reject_any": []
+    }
+  },
+  {
+    "id": "none-vs-falsy-text-clean",
+    "path": "text.py",
+    "patch": "@@ -1,6 +1,4 @@\n def normalize(text):\n     \"\"\"Strip surrounding whitespace. None stays None and an empty string stays\n     an empty string.\"\"\"\n-    if text is None:\n-        return None\n-    return text.strip()\n+    return None if text is None else text.strip()",
+    "expected_locations": [],
+    "expected_lines": [],
+    "contract": "normalize keeps an empty string as an empty string; only None maps to None.",
+    "kind": "synthetic-value-semantics",
+    "split": "dev",
+    "category": "NONE_VS_FALSY",
+    "polarity": "clean",
+    "pair_id": "none-vs-falsy-text",
+    "language": "py",
+    "oracle": {
+      "line": 4,
+      "probes": [
+        {
+          "inputs": {
+            "text": ""
+          },
+          "actual": "EMPTY_STR",
+          "expected": "EMPTY_STR"
+        }
+      ]
+    },
+    "label_review": "agent-oracle; independent-human-review-pending",
+    "rubric": {
+      "required_behavior": "normalize keeps an empty string as an empty string; only None maps to None.",
+      "reject": "wrong value or exception stated for the trigger, invented contract, unreachable trigger, duplicate or generic question"
+    },
+    "provenance": {
+      "transformation": "handwritten synthetic reproduction; not derived from a real PR",
+      "authored": "2026-10-05"
+    }
+  },
+  {
+    "id": "length-fits-defect",
+    "path": "names.py",
+    "patch": "@@ -1,3 +1,3 @@\n def fits(name):\n     \"\"\"A name fits when it has at most 8 characters; exactly 8 is allowed.\"\"\"\n-    return len(name) <= 8\n+    return len(name) < 8",
+    "expected_locations": [
+      [
+        3,
+        3
+      ]
+    ],
+    "expected_lines": [],
+    "contract": "A name with exactly 8 characters fits.",
+    "kind": "synthetic-value-semantics",
+    "split": "dev",
+    "category": "LENGTH_BOUNDARY",
+    "polarity": "defect",
+    "pair_id": "length-fits",
+    "language": "py",
+    "oracle": {
+      "line": 3,
+      "probes": [
+        {
+          "inputs": {
+            "name": "abcdefgh"
+          },
+          "actual": "FALSE",
+          "expected": "TRUE"
+        }
+      ]
+    },
+    "label_review": "agent-oracle; independent-human-review-pending",
+    "rubric": {
+      "required_behavior": "A name with exactly 8 characters fits.",
+      "reject": "wrong value or exception stated for the trigger, invented contract, unreachable trigger, duplicate or generic question"
+    },
+    "provenance": {
+      "transformation": "handwritten synthetic reproduction; not derived from a real PR",
+      "authored": "2026-10-05"
+    },
+    "semantic": {
+      "trigger_any": [
+        "8자",
+        "8글자",
+        "길이가 8",
+        "정확히 8",
+        "== 8",
+        "8 문자",
+        "8개 문자",
+        "8인"
+      ],
+      "effect_any": [
+        "False",
+        "거부",
+        "허용되지",
+        "실패",
+        "거짓",
+        "맞지 않"
+      ],
+      "reject_any": []
+    }
+  },
+  {
+    "id": "length-fits-clean",
+    "path": "names.py",
+    "patch": "@@ -1,3 +1,3 @@\n def fits(name):\n     \"\"\"A name fits when it has at most 8 characters; exactly 8 is allowed.\"\"\"\n-    return len(name) <= 8\n+    return not len(name) > 8",
+    "expected_locations": [],
+    "expected_lines": [],
+    "contract": "A name with exactly 8 characters fits.",
+    "kind": "synthetic-value-semantics",
+    "split": "dev",
+    "category": "LENGTH_BOUNDARY",
+    "polarity": "clean",
+    "pair_id": "length-fits",
+    "language": "py",
+    "oracle": {
+      "line": 3,
+      "probes": [
+        {
+          "inputs": {
+            "name": "abcdefgh"
+          },
+          "actual": "TRUE",
+          "expected": "TRUE"
+        }
+      ]
+    },
+    "label_review": "agent-oracle; independent-human-review-pending",
+    "rubric": {
+      "required_behavior": "A name with exactly 8 characters fits.",
+      "reject": "wrong value or exception stated for the trigger, invented contract, unreachable trigger, duplicate or generic question"
+    },
+    "provenance": {
+      "transformation": "handwritten synthetic reproduction; not derived from a real PR",
+      "authored": "2026-10-05"
+    }
+  },
+  {
+    "id": "java-null-empty-defect",
+    "path": "Names.java",
+    "patch": "@@ -1,10 +1,10 @@\n class Names {\n     /** Display name. An empty string is intentional and returned unchanged;\n      * only null uses the fallback. */\n     static String display(String name, String fallback) {\n-        if (name == null) {\n+        if (name == null || name.isEmpty()) {\n             return fallback;\n         }\n         return name;\n     }\n }",
+    "expected_locations": [
+      [
+        5,
+        5
+      ]
+    ],
+    "expected_lines": [],
+    "contract": "An empty string is returned unchanged; only null uses the fallback.",
+    "kind": "synthetic-value-semantics",
+    "split": "dev",
+    "category": "NONE_VS_FALSY",
+    "polarity": "defect",
+    "pair_id": "java-null-empty",
+    "language": "java",
+    "oracle": {
+      "line": 5,
+      "probes": [
+        {
+          "inputs": {
+            "name": "",
+            "fallback": "guest"
+          },
+          "actual": "STR:guest",
+          "expected": "EMPTY_STR"
+        }
+      ]
+    },
+    "label_review": "agent-oracle; independent-human-review-pending",
+    "rubric": {
+      "required_behavior": "An empty string is returned unchanged; only null uses the fallback.",
+      "reject": "wrong value or exception stated for the trigger, invented contract, unreachable trigger, duplicate or generic question"
+    },
+    "provenance": {
+      "transformation": "handwritten synthetic reproduction; not derived from a real PR",
+      "authored": "2026-10-05"
+    },
+    "semantic": {
+      "trigger_any": [
+        "빈 문자열",
+        "\"\"",
+        "isEmpty",
+        "빈 이름",
+        "empty string"
+      ],
+      "effect_any": [
+        "fallback",
+        "대체",
+        "기본",
+        "덮어",
+        "대신"
+      ],
+      "reject_any": []
+    }
+  },
+  {
+    "id": "java-null-empty-clean",
+    "path": "Names.java",
+    "patch": "@@ -1,10 +1,7 @@\n class Names {\n     /** Display name. An empty string is intentional and returned unchanged;\n      * only null uses the fallback. */\n     static String display(String name, String fallback) {\n-        if (name == null) {\n-            return fallback;\n-        }\n-        return name;\n+        return name == null ? fallback : name;\n     }\n }",
+    "expected_locations": [],
+    "expected_lines": [],
+    "contract": "An empty string is returned unchanged; only null uses the fallback.",
+    "kind": "synthetic-value-semantics",
+    "split": "dev",
+    "category": "NONE_VS_FALSY",
+    "polarity": "clean",
+    "pair_id": "java-null-empty",
+    "language": "java",
+    "oracle": {
+      "line": 5,
+      "probes": [
+        {
+          "inputs": {
+            "name": "",
+            "fallback": "guest"
+          },
+          "actual": "EMPTY_STR",
+          "expected": "EMPTY_STR"
+        }
+      ]
+    },
+    "label_review": "agent-oracle; independent-human-review-pending",
+    "rubric": {
+      "required_behavior": "An empty string is returned unchanged; only null uses the fallback.",
+      "reject": "wrong value or exception stated for the trigger, invented contract, unreachable trigger, duplicate or generic question"
+    },
+    "provenance": {
+      "transformation": "handwritten synthetic reproduction; not derived from a real PR",
+      "authored": "2026-10-05"
+    }
+  },
+  {
+    "id": "java-pages-defect",
+    "path": "Pages.java",
+    "patch": "@@ -1,7 +1,7 @@\n class Pages {\n     /** Pages needed for count items at pageSize items per page, rounded up.\n      * count >= 0 and pageSize >= 1. */\n     static int pages(int count, int pageSize) {\n-        return (count + pageSize - 1) / pageSize;\n+        return count / pageSize;\n     }\n }",
+    "expected_locations": [
+      [
+        5,
+        5
+      ]
+    ],
+    "expected_lines": [],
+    "contract": "pages(count, pageSize) rounds up: 11 items with page size 10 need 2 pages.",
+    "kind": "synthetic-value-semantics",
+    "split": "dev",
+    "category": "ARITH_BOUNDARY",
+    "polarity": "defect",
+    "pair_id": "java-pages",
+    "language": "java",
+    "oracle": {
+      "line": 5,
+      "probes": [
+        {
+          "inputs": {
+            "count": 11,
+            "pageSize": 10
+          },
+          "actual": "INT:1",
+          "expected": "INT:2"
+        }
+      ]
+    },
+    "label_review": "agent-oracle; independent-human-review-pending",
+    "rubric": {
+      "required_behavior": "pages(count, pageSize) rounds up: 11 items with page size 10 need 2 pages.",
+      "reject": "wrong value or exception stated for the trigger, invented contract, unreachable trigger, duplicate or generic question"
+    },
+    "provenance": {
+      "transformation": "handwritten synthetic reproduction; not derived from a real PR",
+      "authored": "2026-10-05"
+    },
+    "semantic": {
+      "trigger_any": [
+        "나누어 떨어지지",
+        "나머지",
+        "올림",
+        "11",
+        "남는",
+        "딱 나누어"
+      ],
+      "effect_any": [
+        "내림",
+        "잘려",
+        "1",
+        "부족",
+        "적게",
+        "버려"
+      ],
+      "reject_any": []
+    }
+  },
+  {
+    "id": "java-pages-clean",
+    "path": "Pages.java",
+    "patch": "@@ -1,7 +1,7 @@\n class Pages {\n     /** Pages needed for count items at pageSize items per page, rounded up.\n      * count >= 0 and pageSize >= 1. */\n     static int pages(int count, int pageSize) {\n-        return (count + pageSize - 1) / pageSize;\n+        return Math.floorDiv(count + pageSize - 1, pageSize);\n     }\n }",
+    "expected_locations": [],
+    "expected_lines": [],
+    "contract": "pages(count, pageSize) rounds up: 11 items with page size 10 need 2 pages.",
+    "kind": "synthetic-value-semantics",
+    "split": "dev",
+    "category": "ARITH_BOUNDARY",
+    "polarity": "clean",
+    "pair_id": "java-pages",
+    "language": "java",
+    "oracle": {
+      "line": 5,
+      "probes": [
+        {
+          "inputs": {
+            "count": 11,
+            "pageSize": 10
+          },
+          "actual": "INT:2",
+          "expected": "INT:2"
+        }
+      ]
+    },
+    "label_review": "agent-oracle; independent-human-review-pending",
+    "rubric": {
+      "required_behavior": "pages(count, pageSize) rounds up: 11 items with page size 10 need 2 pages.",
+      "reject": "wrong value or exception stated for the trigger, invented contract, unreachable trigger, duplicate or generic question"
+    },
+    "provenance": {
+      "transformation": "handwritten synthetic reproduction; not derived from a real PR",
+      "authored": "2026-10-05"
+    }
+  }
+]
