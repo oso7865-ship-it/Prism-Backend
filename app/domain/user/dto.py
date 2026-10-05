@@ -17,3 +17,4 @@ class UserSnapshot:
     login: str
     display_name: str | None
     avatar_url: str | None
+    review_mode: str = "SENIOR"

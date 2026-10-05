@@ -6,10 +6,12 @@ from fnmatch import fnmatchcase
 from typing import cast
 
 from app.domain.review.harness import version
+from app.domain.review.model_output import strip_api_metadata
 from app.domain.review.output_schema import Issue as Issue
 from app.domain.review.output_schema import ReviewOutput as ReviewOutput
 from app.domain.review.semantics import suggestion_check
 from app.shared.content_safety import SECRET as SECRET
+from app.shared.review_mode import parse_review_mode
 
 POLICY = "BOUNDED_CODE_V5"
 MAX_FILE = 16384
@@ -70,7 +72,12 @@ def prepare(
     *,
     per_file: int = MAX_FILE,
     max_input: int = MAX_INPUT,
+    review_mode: str | None = None,
 ) -> InputBundle:
+    # The server-owned mode travels in the prepared payload so every size check counts it.
+    extra: dict[str, object] = (
+        {"review_mode": parse_review_mode(review_mode)} if review_mode else {}
+    )
     files: list[dict[str, object]] = []
     anchors: dict[str, tuple[str, set[int]]] = {}
     excluded: list[dict[str, object]] = []
@@ -107,7 +114,7 @@ def prepare(
             "lines": lines,
         }
         trial = json.dumps(
-            {"files": [*files, item], "static_findings": findings}, ensure_ascii=False
+            {"files": [*files, item], "static_findings": findings, **extra}, ensure_ascii=False
         )
         if len(json.dumps(item, ensure_ascii=False).encode()) > per_file:
             excluded.append({"file_path": path, "reason": "PATCH_TOO_LARGE"})
@@ -119,7 +126,7 @@ def prepare(
         anchors[fid] = (path, {cast(int, line["line"]) for line in lines})
     if not files:
         raise ValueError("NO_SAFE_CONTEXT")
-    payload = json.dumps({"files": files, "static_findings": findings}, ensure_ascii=False)
+    payload = json.dumps({"files": files, "static_findings": findings, **extra}, ensure_ascii=False)
     if SECRET.search(payload) or len(payload.encode()) > max_input:
         raise ValueError("UNSAFE_CONTEXT")
     coverage: dict[str, object] = {
@@ -184,7 +191,7 @@ def quote_supported(quote: str, texts: list[str], blocks: list[list[str]]) -> bo
 def validate_result(raw: str, bundle: InputBundle) -> dict[str, object]:
     if len(raw.encode()) > 24000 or SECRET.search(raw):
         raise ValueError("INVALID_OUTPUT")
-    output = ReviewOutput.model_validate_json(raw)
+    output = ReviewOutput.model_validate_json(strip_api_metadata(raw))
     context = json.loads(bundle.payload)
     files = {f["file_id"]: f for f in context["files"]}
     sections = {str(s["id"]): s for s in context.get("untrusted_standards", [])}

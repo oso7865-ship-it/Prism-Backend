@@ -57,7 +57,7 @@ def test_digest_tracks_documents_schema_and_selected_system(monkeypatch):
     assert harness.version({**SCHEMA, "description": "changed"}) != before
     docs = dict(harness.documents())
     docs["core"] += "Changed instructions."
-    monkeypatch.setattr(harness, "documents", lambda: docs)
+    monkeypatch.setattr(harness, "documents", lambda mode="SENIOR": docs)
     assert harness.version(SCHEMA) != before
     docs["core"] = "x" * harness.MAX_SYSTEM_BYTES
     with pytest.raises(ValueError, match="HARNESS_TOO_LARGE"):

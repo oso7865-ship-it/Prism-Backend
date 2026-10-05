@@ -6,6 +6,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.domain.review.empty_schema import FileCheck
+from app.domain.review.model_output import strip_api_metadata
 from app.domain.review.output_schema import Issue, ReviewOutput
 
 
@@ -37,6 +38,7 @@ def verification_payload(payload: str, raw: str) -> str:
     # Called only after the draft passes validate_result. Payload has no repository paths.
     from app.domain.review.semantics import suggestion_check
 
+    raw = strip_api_metadata(raw)
     context, draft = json.loads(payload), json.loads(raw)
     files = {f["file_id"]: f for f in context["files"]}
     checks = []
@@ -60,9 +62,9 @@ def apply_verification(raw: str, draft: str) -> tuple[str, dict[str, object]]:
 
     if len(raw.encode()) > 24000 or SECRET.search(raw):
         raise ValueError("INVALID_VERIFICATION")
-    output = VerificationOutput.model_validate_json(raw)
+    output = VerificationOutput.model_validate_json(strip_api_metadata(raw))
     decisions = output.decisions
-    original = ReviewOutput.model_validate_json(draft)
+    original = ReviewOutput.model_validate_json(strip_api_metadata(draft))
     if len(decisions) != len(original.issues) or {d.index for d in decisions} != set(
         range(len(original.issues))
     ):

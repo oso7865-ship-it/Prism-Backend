@@ -125,7 +125,7 @@ def create_app(
     app.include_router(health_router(readiness_check or check))
     app.include_router(webhook_router(engine, settings))
     app.include_router(auth_router(auth, settings))
-    app.include_router(user_router(AuthAPI(auth)))
+    app.include_router(user_router(AuthAPI(auth), engine))
     app.include_router(workspace_router(WorkspaceService(engine), AuthAPI(auth)))
     app.include_router(repository_router(engine, AuthAPI(auth)))
     app.include_router(pr_router(engine, AuthAPI(auth), github_app))

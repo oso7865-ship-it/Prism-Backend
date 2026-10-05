@@ -83,6 +83,7 @@ class ReviewWorker:
                 pr = await analysis_snapshot(s, row.requested_by, row.workspace_id, snap.pr_id)
                 feedback = await prior_feedback(s, row)
                 purpose = row.purpose
+                mode = row.mode
                 standards = (
                     await standards_snapshot(
                         s, row.workspace_id, snap.repository_id, row.standard_versions
@@ -117,7 +118,7 @@ class ReviewWorker:
                 )
                 if not isinstance(changes, list) or any(not isinstance(f, dict) for f in changes):
                     raise error("GITHUB_INVALID_RESPONSE")
-                bundle = prepare(changes, snap.findings, ignored, total_files)
+                bundle = prepare(changes, snap.findings, ignored, total_files, review_mode=mode)
                 bundle = await enrich(
                     bundle,
                     self.github,

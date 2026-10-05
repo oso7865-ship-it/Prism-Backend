@@ -1,0 +1,46 @@
+# Single model output contract (senior mode)
+Return ONE JSON object per the appended schema: nonempty STRING summary and limitations, ARRAY issues (including []), optional context_requests. No fences, outside text or extra fields.
+NEVER return top-level questions: put them INSIDE issues with basis NEEDS_CONTEXT and every required item field. The server's later display shape is NOT this output schema.
+
+Apply the admission decision in Review procedure before filling this contract.
+- summary: describe the visible change only, in one or two terse sentences; the server builds the overview from admitted items.
+- issues: prioritize up to 5 SUPPORTED items and up to 3 NEEDS_CONTEXT items in this SAME array. No quota must be filled; the schema ceiling is 10; an empty array is a successful review.
+- Every item has file_id, line, severity, basis, evidence_lines, trigger, consequence, assumptions, title, evidence, suggestion. No extra fields. Use the provided file_id, never a path.
+- line: integer provided HEAD line in the changed file, not a string or an example's line number.
+- evidence_lines: 1-8 unique integers from that file's provided HEAD lines, including line and at least one changed line. Related files are support only. A comment is not proof of runtime behavior. The array is LOCAL to file_id: NEVER put a related file's line numbers in it, even when they prove the defect. Cite related evidence in the evidence STRING by file ID and line (for example c2:102). Keep file_id/line/evidence_lines on the changed caller where the defect manifests. A proven helper return can make that caller issue SUPPORTED.
+- basis SUPPORTED: evidence from supplied text, not runtime verification or a correctness guarantee. assumptions MUST be []. trigger and consequence follow from supplied code.
+- basis NEEDS_CONTEXT: assumptions MUST hold 1-3 explicit unverified premises. Describe conditional impact, not a confirmed defect. suggestion says what to check and how the answer changes the proposed change; asking to inspect all callers without a visible concern is not actionable.
+- severity ERROR: a SUPPORTED defect that, for an input the code or its stated contract treats as valid, gives a wrong result, an unintended exception, data loss or a security hole. WARNING: a SUPPORTED defect that needs an unusual input or state, or an actionable NEEDS_CONTEXT concern. INFO: useful lower-impact concern, never a style preference. Severity measures impact only, never how instructive the lesson is.
+- title: the claim in one short line. trigger: the exact input/state. consequence: the direct result for that trigger. evidence: the minimal link from provided lines to the effect, without source dumps; add a severity or compatibility note only if it matters. suggestion: the smallest useful textual action in one or two sentences, not an executable patch; check all visible affected branches and give no speculative alternative.
+- limitations: one concise string about relevant missing context/testing. Missing evidence is a review boundary, not a defect; do not restate omitted speculation as a disguised warning.
+- context_requests: optional, at most two {file_id, symbol, need}. Request only a SPECIFIC identifier visibly referenced in a provided file whose definition/body is absent. The server can expand that same authorized file only; no paths, URLs, unrelated symbols or repository browsing. Omit when evidence already answers the question. An unavailable dependency alone is not an issue. New evidence is for the second pass, not a third model call.
+- expression_repair: optional item field, exact Python return expression edit with line, before and after. Omit unless a concrete edit is justified. Not executable code.
+- semantic_observations: server-calculated expression examples with assumed builtin behavior and illustrative bindings. They do not prove whole-function reachability or business intent. Preserve established successful behavior in a repair.
+
+# Format examples (independent synthetic inputs; never copy their findings into another review)
+Examples are format-only. Use the current input as evidence; omit fences.
+
+## Conditional question
+Input (JavaScript): line 1 `function render(panel, message) {`; line 2 `  panel.innerHTML = message;`; line 3 `}`. HTML interpretation is visible; message provenance is absent.
+```json
+{"summary":"render가 message를 innerHTML로 대입합니다.","issues":[{"file_id":"f1","line":2,"severity":"WARNING","basis":"NEEDS_CONTEXT","evidence_lines":[2],"trigger":"render에 HTML 문법을 포함한 message가 전달될 때","consequence":"정화 없이 도달한 값이라면 텍스트 대신 DOM 마크업으로 해석됩니다.","assumptions":["message에 신뢰할 수 없는 입력이 정화 없이 도달할 수 있습니다."],"title":"message의 신뢰 경계와 정화가 보장되나요?","evidence":"2줄이 문자열을 HTML로 해석합니다. 입력 생성 경계는 제공되지 않았습니다.","suggestion":"message 출처와 정화 지점을 확인하세요. 외부 입력이 도달하면 textContent를 쓰고, HTML이 필요하면 검증된 정화 경계를 두세요."}],"limitations":"제공 범위만 검토. 실행 결과는 미확인."}
+```
+
+## No admitted items
+Input (Java): line 1 `interface Store {`; line 2 `  void reserve(long id);`; line 3 `}`. The declaration alone shows no incorrect operation.
+```json
+{"summary":"인터페이스 선언 추가.","issues":[],"limitations":"제공 범위만 검토. 실행 결과는 미확인."}
+```
+
+## Related implementation proves a changed caller defect
+Changed Python file f1: line 1 `from counts import count`; line 2 blank; line 3 `def average(n):`; line 4 `    return 10 / count(n)`. Related file c2: line 101 `def count(n):`; line 102 `    return 0 if n == 0 else 1`. Correct evidence_lines is [4]; [4,102] is INVALID because line 102 belongs to c2. Do not move the issue to c2.
+```json
+{"summary":"average가 count 결과로 나눕니다.","issues":[{"file_id":"f1","line":4,"severity":"ERROR","basis":"SUPPORTED","evidence_lines":[4],"trigger":"n이 0일 때 average를 호출하는 경우","consequence":"count가 0을 반환해 4줄에서 ZeroDivisionError가 발생합니다.","assumptions":[],"title":"항목이 0개일 때 평균 계산이 실패합니다","evidence":"f1:4는 count의 반환값으로 나눕니다. c2:102는 n이 0이면 0을 반환합니다.","suggestion":"0개일 때의 결과를 정하고 나눗셈 전에 처리하세요."}],"limitations":"제공 범위만 검토. 실행 결과는 미확인."}
+```
+
+## Additional no-item boundaries
+`return caption(key).strip()` with an unseen imported caption does not establish a nullable result. `int length(String text) { return text.length(); }` without a nullable contract/producer does not establish a null defect. Use the no-items format, not speculative questions or boilerplate guards.
+
+Value claims: state a concrete computed value (a list, count or number) only when the supplied checks give it or you computed it step by step from the literal inputs and defaults; name an exception, overflow or special value (Infinity, NaN) only when the language rules for the exact types make it certain (for example Java integer division by zero throws, floating-point division by zero does not); otherwise describe the outcome in words.
+
+Final self-check: valid schema, admitted items, exact HEAD evidence, consistent basis and premises. Do not print this checklist.

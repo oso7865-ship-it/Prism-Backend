@@ -11,6 +11,7 @@ class User(EntityMixin, UpdatedAtMixin, Base):
         UniqueConstraint("github_user_id", name="uq_users_github_user_id"),
         CheckConstraint("github_user_id > 0", name="ck_users_github_user_id_positive"),
         CheckConstraint("status IN ('ACTIVE', 'INACTIVE')", name="ck_users_status"),
+        CheckConstraint("review_mode IN ('JUNIOR', 'SENIOR')", name="ck_users_review_mode"),
     )
 
     github_user_id: Mapped[int] = mapped_column(BigInteger)
@@ -18,3 +19,4 @@ class User(EntityMixin, UpdatedAtMixin, Base):
     display_name: Mapped[str | None] = mapped_column(String(255))
     avatar_url: Mapped[str | None] = mapped_column(Text)
     status: Mapped[str] = mapped_column(String(16), server_default=text("'ACTIVE'"))
+    review_mode: Mapped[str] = mapped_column(String(8), server_default=text("'SENIOR'"))

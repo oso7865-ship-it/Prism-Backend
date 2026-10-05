@@ -34,8 +34,10 @@ class ReviewRun(EntityMixin, UpdatedAtMixin, Base):
         ),
         CheckConstraint("status<>'COMPLETED' OR result IS NOT NULL", name="ck_review_result"),
         CheckConstraint("purpose IN ('CODE','SECURITY','STANDARDS')", name="ck_review_purpose"),
+        CheckConstraint("mode IN ('JUNIOR','SENIOR')", name="ck_review_mode"),
     )
     purpose: Mapped[str] = mapped_column(String(16), server_default=text("'CODE'"))
+    mode: Mapped[str] = mapped_column(String(8), server_default=text("'SENIOR'"))
     standard_versions: Mapped[list[str]] = mapped_column(JSONB, server_default=text("'[]'::jsonb"))
     workspace_id: Mapped[UUID]
     analysis_id: Mapped[UUID]

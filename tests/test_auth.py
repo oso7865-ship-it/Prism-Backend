@@ -191,7 +191,14 @@ def test_login_profile_rotation_logout(client, db):
     access = response.json()["access_token"]
     me = client.get("/api/v1/users/me", headers={"Authorization": "Bearer " + access})
     assert me.status_code == 200 and me.json()["login"] == "octocat"
-    assert set(me.json()) == {"id", "github_user_id", "login", "display_name", "avatar_url"}
+    assert set(me.json()) == {
+        "id",
+        "github_user_id",
+        "login",
+        "display_name",
+        "avatar_url",
+        "review_mode",
+    }
     with Session(db) as session:
         rows = session.scalars(select(RefreshSession)).all()
         assert len(rows) == 2 and rows[0].expires_at == rows[1].expires_at
