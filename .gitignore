@@ -24,6 +24,7 @@ coverage/
 *.docx
 /docs/
 /reports/
-/GENERAL_HARNESS/
+/CLAUDE_HARNESS/
+/.claude/
 /PROJECT_HARNESS/
 /app/domain/review/harness/system.txt

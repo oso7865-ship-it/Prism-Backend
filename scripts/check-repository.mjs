@@ -15,7 +15,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 
 function findRepoRoot() {
-  // GENERAL_HARNESS 안에서 실행돼도 저장소 전체(.git 있는 곳)를 검사한다.
+  // CLAUDE_HARNESS 안에서 실행돼도 저장소 전체(.git 있는 곳)를 검사한다.
   let dir = process.cwd();
   for (let i = 0; i < 5; i++) {
     if (fs.existsSync(path.join(dir, '.git'))) return dir;
@@ -43,7 +43,7 @@ try {
 
 let failed = false;
 for (const name of trackedFiles) {
-  if (/\.(md|mdx|rst|adoc|pdf|docx)$/i.test(name) || /^(docs|reports|GENERAL_HARNESS|PROJECT_HARNESS)\//.test(name)) {
+  if (/\.(md|mdx|rst|adoc|pdf|docx)$/i.test(name) || /^(docs|reports|CLAUDE_HARNESS|PROJECT_HARNESS)\//.test(name)) {
     console.error(`FAIL documentation belongs in Prism-Architecture: ${name}`);
     failed = true;
   }
