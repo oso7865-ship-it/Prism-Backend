@@ -35,7 +35,7 @@ def view(row: ReviewRun) -> dict[str, object]:
             "id analysis_id head_sha model prompt_version policy_version generation status "
             "requested_by created_at started_at finished_at call_attempts"
             " input_tokens output_tokens "
-            "usage_uncertain error_code result purpose standard_versions"
+            "usage_uncertain error_code result purpose mode standard_versions"
         ).split()
     }
     if row.result:

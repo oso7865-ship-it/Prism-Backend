@@ -10,6 +10,7 @@ from app.domain.repository.api import RepositoryAccess
 from app.domain.review.models import ReviewRun
 from app.domain.review.policy import POLICY, PROMPT
 from app.domain.standards.api import snapshot as standards_snapshot
+from app.domain.user.api import UserAPI
 from app.domain.workspace.api import WorkspaceAccess
 from app.shared.config.settings import Settings
 from app.shared.database.engine import transaction
@@ -76,6 +77,9 @@ class ReviewService:
         async with transaction(self.ready()) as s:
             await WorkspaceAccess(s).require_permission(uid, wid, "owner")
             snap = await review_snapshot(s, uid, wid, aid)
+            # The requester's profile mode is fixed on the run; a later profile change does not
+            # alter a queued or running review.
+            mode = (await UserAPI(s).get_active_user(uid)).review_mode
             versions = (
                 [str(d.id) for d in await standards_snapshot(s, wid, snap.repository_id)]
                 if purpose == "STANDARDS"
@@ -83,6 +87,7 @@ class ReviewService:
             )
             conditions = (
                 ReviewRun.purpose == purpose,
+                ReviewRun.mode == mode,
                 ReviewRun.workspace_id == wid,
                 ReviewRun.analysis_id == aid,
                 ReviewRun.model == self.settings.deepseek_model,
@@ -102,7 +107,7 @@ class ReviewService:
                     await s.scalar(select(func.max(ReviewRun.generation)).where(*conditions)) or 0
                 ) + 1
             key = hashlib.sha256(
-                f"{wid}:{aid}:{snap.connection_generation}:{self.settings.deepseek_model}:{PROMPT}:{POLICY}:{generation}:{purpose}:{','.join(versions)}".encode()
+                f"{wid}:{aid}:{snap.connection_generation}:{self.settings.deepseek_model}:{PROMPT}:{POLICY}:{generation}:{purpose}:{mode}:{','.join(versions)}".encode()
             ).hexdigest()
             existing = await s.scalar(select(ReviewRun).where(ReviewRun.execution_key == key))
             if existing:
@@ -126,6 +131,7 @@ class ReviewService:
                 raise error("AI_DAILY_LIMIT")
             row = ReviewRun(
                 purpose=purpose,
+                mode=mode,
                 standard_versions=versions,
                 workspace_id=wid,
                 analysis_id=aid,

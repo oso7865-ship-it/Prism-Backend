@@ -1,0 +1,24 @@
+{
+  "frozen_at": "2026-10-05",
+  "source": "app/domain/review/harness/*.prompt at dev 7209c42 + working tree",
+  "prompt_version": "rh1-ee9b9e100eba9cad",
+  "files": {
+    "checks.prompt": "c1bd574499b041c878e6fc7f8150faa47fb13f7eda3169aed91ab2e0590c7cc5",
+    "core.prompt": "8c6960536e6a2b7f8b1310e99c52be2fef9cfe52d0ba9b267a9593f0e123c4bb",
+    "empty_review.prompt": "26a410f900aacdf26b590387a33b44776958bef8dadd2d6355881a5dd743d9f2",
+    "java.prompt": "8d51bbb0c63e97ae04a75db5a54beaaa787ec5551fb1521d3a456f91ea1471c5",
+    "javascript.prompt": "a38cb14b841eee440ef4c5e9fbb3bac59e85d0edf5d00267afeeb753da0911fa",
+    "output.prompt": "5a9a0cfd36accde462489bd3ede6802447489707244b4d74029d81f6ccea0463",
+    "python.prompt": "9e5d2117c91fc476e4c36d3f0325c2837754304d61821786f801441fe8cdfe45",
+    "security.prompt": "b568f6b8a8a1a429d7d4ab68750482e9ca128760cd555b1d1b9b2072b60889a3",
+    "standards.prompt": "ab5a2d68e44ed2d2d432ae6cb6313cc041f422587b738401fff962c49ccdc3e6",
+    "typescript.prompt": "e702e1a722a2143250a96b19af156df0c394aad5c3a208d6fa2bf0296755a7c8",
+    "verification.prompt": "fb29055ccf4044f1cb7046a608a81517b921e864b2a0bda77671fc1827719fb9"
+  },
+  "composed_max_bytes": {
+    "draft": 24453,
+    "verify": 23182,
+    "empty": 20098
+  },
+  "limit": 24576
+}

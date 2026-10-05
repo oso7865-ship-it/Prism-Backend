@@ -42,4 +42,4 @@ pythonpath = ["."]
 markers = ["integration: requires a real PostgreSQL database"]
 
 [tool.setuptools.package-data]
-"app.domain.review.harness" = ["*.prompt"]
+"app.domain.review.harness" = ["senior/*.prompt", "junior/*.prompt"]

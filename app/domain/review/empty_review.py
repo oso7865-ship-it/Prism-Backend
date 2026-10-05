@@ -4,6 +4,7 @@ from pydantic import Field
 
 from app.domain.review.empty_schema import FileCheck
 from app.domain.review.grounded_claims import ground_assertions
+from app.domain.review.model_output import strip_api_metadata
 from app.domain.review.policy import SECRET, InputBundle, ReviewOutput, validate_result
 
 
@@ -14,7 +15,7 @@ class EmptyReviewOutput(ReviewOutput):
 def validate_empty_review(raw: str, bundle: InputBundle) -> dict[str, object]:
     if len(raw.encode()) > 24000 or SECRET.search(raw):
         raise ValueError("INVALID_OUTPUT")
-    output = EmptyReviewOutput.model_validate_json(raw)
+    output = EmptyReviewOutput.model_validate_json(strip_api_metadata(raw))
     result = validate_result(output.model_dump_json(exclude={"file_checks"}), bundle)
     result["verification"] = {
         "status": "EMPTY_RECHECKED",
