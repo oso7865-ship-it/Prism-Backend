@@ -158,6 +158,29 @@ def result_summary(issues: list[dict[str, object]], questions: list[dict[str, ob
     return "\n".join(parts)
 
 
+_LEADING_MARK = re.compile(r"^\s*(?:/\*\*?|\*/|\*|//+|#+|\"\"\"|''')\s?")
+_TRAILING_MARK = re.compile(r"\s*(?:\*/|\"\"\"|''')\s*$")
+
+
+def quote_supported(quote: str, texts: list[str], blocks: list[list[str]]) -> bool:
+    """A quote must appear verbatim in supplied text; wrapped comments are matched per file.
+
+    Adjacent supplied lines are joined after removing only comment/docstring markers and
+    collapsing whitespace, so a sentence wrapped over several lines is still the same words in
+    the same order. Invented or reworded text is never supported.
+    """
+    wanted = " ".join(quote.split())
+    if not wanted:
+        return False
+    if any(quote in text for text in texts):
+        return True
+    for lines in blocks:
+        cleaned = [_TRAILING_MARK.sub("", _LEADING_MARK.sub("", line)).strip() for line in lines]
+        if wanted in " ".join(" ".join(row.split()) for row in cleaned if row):
+            return True
+    return False
+
+
 def validate_result(raw: str, bundle: InputBundle) -> dict[str, object]:
     if len(raw.encode()) > 24000 or SECRET.search(raw):
         raise ValueError("INVALID_OUTPUT")
@@ -202,7 +225,11 @@ def validate_result(raw: str, bundle: InputBundle) -> dict[str, object]:
             supplied = [str(context.get("behavior_contract", ""))]
             supplied += [r["code"] for f in files.values() for r in f["lines"]]
             supplied += [str(s.get("text", "")) for s in sections.values()]
-            if not any(issue.contract_quote in text for text in supplied):
+            if not quote_supported(
+                issue.contract_quote,
+                supplied,
+                [[r["code"] for r in f["lines"]] for f in files.values()],
+            ):
                 raise ValueError("INVALID_CONTRACT_QUOTE")
         check = suggestion_check(issue, files[issue.file_id])
         entry = {

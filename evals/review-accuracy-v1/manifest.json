@@ -1,0 +1,53 @@
+{
+  "scope": "Labels, oracle and semantic phrases are never sent to the model.",
+  "independent_human_review": false,
+  "frozen_at": "2026-10-05",
+  "corpora": {
+    "dev": {
+      "sha256": "178d8311b435d3641e471e57a25ab8eefdebd35434c49447e43c7e07347f2332",
+      "cases": 20,
+      "defects": 10,
+      "case_ids": [
+        "or-default-name-defect",
+        "or-default-name-clean",
+        "default-arg-notify-defect",
+        "default-arg-notify-clean",
+        "default-arg-retries-defect",
+        "default-arg-retries-clean",
+        "range-step-offsets-defect",
+        "range-step-offsets-clean",
+        "dict-get-timeout-defect",
+        "dict-get-timeout-clean",
+        "none-vs-falsy-items-defect",
+        "none-vs-falsy-items-clean",
+        "none-vs-falsy-text-defect",
+        "none-vs-falsy-text-clean",
+        "length-fits-defect",
+        "length-fits-clean",
+        "java-null-empty-defect",
+        "java-null-empty-clean",
+        "java-pages-defect",
+        "java-pages-clean"
+      ]
+    },
+    "holdout": {
+      "sha256": "af9599ca2391994d6481f8636333088074d3e60b83bb4cde341ea857d10a2af2",
+      "cases": 12,
+      "defects": 6,
+      "case_ids": [
+        "or-default-pagesize-defect",
+        "or-default-pagesize-clean",
+        "range-step-last-defect",
+        "range-step-last-clean",
+        "dict-get-flag-defect",
+        "dict-get-flag-clean",
+        "length-last-defect",
+        "length-last-clean",
+        "java-length-tag-defect",
+        "java-length-tag-clean",
+        "java-access-defect",
+        "java-access-clean"
+      ]
+    }
+  }
+}

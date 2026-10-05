@@ -1,0 +1,22 @@
+{
+  "note": "Review notes only. cases-*.json and manifest.json stay frozen; they are not edited.",
+  "reviewer": "agent (Claude); independent human review pending",
+  "reviewed_at": "2026-10-05",
+  "items": [
+    {
+      "case": "java-pages-clean",
+      "observation": "The model reported int overflow of count + pageSize - 1 near Integer.MAX_VALUE (for example count = Integer.MAX_VALUE, pageSize = 2 gives a negative page count). The contract only says count >= 0 and pageSize >= 1, so the statement is factually correct and the base version has the same weakness.",
+      "judgement": "Questionable 'clean' label. Count it as a label issue, not as a model hallucination. A follow-up corpus version should state an upper bound for count."
+    },
+    {
+      "case": "default-arg-retries-defect",
+      "observation": "The defect is on the def line (changed default used=1). 2 of 3 baseline runs and the later run explained it correctly; two of them cited the return line where the effect appears.",
+      "judgement": "Strict location (changed line only) undercounts. Report strict and relaxed (evidence line) counts."
+    },
+    {
+      "case": "range-step-last-defect",
+      "observation": "No run (0/6) states the real defect: for every valid input range(size-1, size-count, 1) is empty. Runs either call it correct or report inputs the docstring excludes (count > size, count = 0), which the verifier correctly drops as MISSING_CONTRACT.",
+      "judgement": "Genuine reasoning miss. Product sampling for semantic_observations used only count = -1/0 probes, so no probe showed the empty result for a valid input."
+    }
+  ]
+}
