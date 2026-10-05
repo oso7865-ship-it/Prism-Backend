@@ -12,3 +12,6 @@ evals/recall-repair/baseline-system.txt -text whitespace=cr-at-eol
 evals/recall-repair/core-v2.json -text whitespace=cr-at-eol
 evals/recall-repair/holdout-v1.json -text whitespace=cr-at-eol
 evals/recall-repair/holdout-v2.json -text whitespace=cr-at-eol
+
+evals/review-accuracy-v1/cases-dev.json -text whitespace=cr-at-eol
+evals/review-accuracy-v1/cases-holdout.json -text whitespace=cr-at-eol
