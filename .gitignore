@@ -20,6 +20,8 @@ coverage/
 *.mdx
 *.rst
 *.adoc
+# The repository README is the public entry point (ADR-ARCH-004).
+!/README.md
 *.pdf
 *.docx
 /docs/

@@ -43,6 +43,7 @@ try {
 
 let failed = false;
 for (const name of trackedFiles) {
+  if (name === 'README.md') continue; // 저장소 첫 화면용 README만 예외(ADR-ARCH-004)
   if (/\.(md|mdx|rst|adoc|pdf|docx)$/i.test(name) || /^(docs|reports|CLAUDE_HARNESS|PROJECT_HARNESS)\//.test(name)) {
     console.error(`FAIL documentation belongs in Prism-Architecture: ${name}`);
     failed = true;
